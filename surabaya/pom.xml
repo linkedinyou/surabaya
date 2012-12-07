@@ -9,7 +9,6 @@
     <name>surabaya application</name>
 
     <modules>
-        <module>surabaya-ejb</module>
         <module>surabaya-web</module>
         <module>surabaya-ear</module>
     </modules>
@@ -79,6 +78,11 @@
             	<groupId>org.slf4j</groupId>
             	<artifactId>slf4j-api</artifactId>
             	<version>1.6.1</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.apache.httpcomponents</groupId>
+            	<artifactId>httpclient</artifactId>
+            	<version>4.2.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

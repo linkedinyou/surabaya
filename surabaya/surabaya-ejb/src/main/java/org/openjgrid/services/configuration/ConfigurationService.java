@@ -24,17 +24,26 @@ import java.util.Map;
 import javax.ejb.LocalBean;
 import javax.ejb.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Singleton implementation class ConfigurationService
  * 
+ * Author: Akira Sonoda
  * TODO Add Database/Properties/xml storage of the values
  */
 @Singleton
 @LocalBean
 public class ConfigurationService {
-
+	
+	private static final Logger log = LoggerFactory.getLogger(ConfigurationService.class);
+	
     private Map<String, Map<String, String> > props = new HashMap<String, Map<String, String> >();
     
+    /**
+     * 
+     */
     public ConfigurationService() {
     
     	Map<String, String> sim_props = new HashMap<String, String>();
@@ -43,6 +52,10 @@ public class ConfigurationService {
     
     }
  
+    /**
+     * @param aPropertyGroup
+     * @return
+     */
     public Map<String, String> getPropertyGroup(String aPropertyGroup) {
         if (props.containsKey(aPropertyGroup)) {
             return (props.get(aPropertyGroup));
@@ -51,6 +64,11 @@ public class ConfigurationService {
         }
     }
 
+    /**
+     * @param aPropertyGroup
+     * @param property
+     * @return
+     */
     public String getProperty(String aPropertyGroup, String property) {
         if(props.containsKey(aPropertyGroup)) {
             if(props.get(aPropertyGroup).containsKey(property)) {
@@ -63,6 +81,11 @@ public class ConfigurationService {
         }
     }
 
+    /**
+     * @param aPropertyGroup
+     * @param property
+     * @param value
+     */
     public void setProperty(String aPropertyGroup, String property, String value ) {
         if(props.containsKey(aPropertyGroup)) {
            props.get(aPropertyGroup).put(property, value);
