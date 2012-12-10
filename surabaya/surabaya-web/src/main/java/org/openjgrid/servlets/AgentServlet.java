@@ -35,6 +35,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.openjgrid.agents.Agent;
 import org.openjgrid.services.configuration.ConfigurationService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -77,8 +78,14 @@ public class AgentServlet extends HttpServlet {
         			request.getRequestURI());
         	
         	if (request.getContentType().equalsIgnoreCase("application/json")) {
+        		String jsonString = Util.requestContent2String(request);
         		// TODO Decide and implement if we are going to keep the Agent Data.
-        		StringEntity stringEntity = new StringEntity(Util.requestContent2String(request),request.getContentType());
+        		Agent agent = new Agent(jsonString);
+        		log.debug("Agent-Name: {} {} ", agent.getFirst_name(), agent.getLast_name() );
+        		log.debug("Agent-UUID: {}", agent.getAgent_id().toString());
+        		log.debug("Agent-CAPS: {}", agent.getCaps_path());
+        		// -----
+        		StringEntity stringEntity = new StringEntity(jsonString,request.getContentType());
         		httppost.setEntity(stringEntity);
         	} else if (request.getContentType().equalsIgnoreCase("application/x-gzip")) {
         		ByteArrayEntity byteArrayEntity = new ByteArrayEntity(Util.requestContent2ByteArray(request));
