@@ -19,20 +19,26 @@
 package org.openjgrid.servlets;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 
+import javax.ejb.EJB;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.openjgrid.services.configuration.ConfigurationService;
+import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.openjgrid.util.Util;
 
 /**
  * Servlet implementation class AgentServlet.
@@ -46,8 +52,10 @@ import org.openjgrid.util.Util;
 @WebServlet(name = "AgentServlet", urlPatterns = {"/agent/*"})
 public class AgentServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-
 	private static final Logger log = LoggerFactory.getLogger(AgentServlet.class);
+
+	@EJB
+	private ConfigurationService configuration;
 	
 	/**
 	 * The main processing routine is called from doGet() and doPost()
@@ -60,12 +68,36 @@ public class AgentServlet extends HttpServlet {
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException {
         response.setContentType("text/xml;charset=UTF-8");
-        PrintWriter out = response.getWriter();
+        OutputStream out = response.getOutputStream();
         
-        Util.dumpHttpRequest(request);
-        		
-        HttpClient httpclient = new DefaultHttpClient();
-        
+        try {
+        	HttpClient httpclient = new DefaultHttpClient();
+        	HttpPost httppost = new HttpPost("http://localhost:"+
+        			configuration.getProperty("OpenSim", "sim_http_port") + 
+        			request.getRequestURI());
+        	
+        	if (request.getContentType().equalsIgnoreCase("application/json")) {
+        		// TODO Decide and implement if we are going to keep the Agent Data.
+        		StringEntity stringEntity = new StringEntity(Util.requestContent2String(request),request.getContentType());
+        		httppost.setEntity(stringEntity);
+        	} else if (request.getContentType().equalsIgnoreCase("application/x-gzip")) {
+        		ByteArrayEntity byteArrayEntity = new ByteArrayEntity(Util.requestContent2ByteArray(request));
+        		byteArrayEntity.setContentType(request.getContentType());
+        		httppost.setEntity(byteArrayEntity);
+        	} else {
+                Util.dumpHttpRequest(request);        		
+        	}
+        	
+        	HttpResponse httpResponse = httpclient.execute(httppost);
+        	HttpEntity entity = httpResponse.getEntity();
+        	if (entity != null) {
+       	    	entity.writeTo(out);
+       	        out.close();
+        	}
+        	
+        } catch (Exception ex) {
+        	log.debug("Exception occurred in AgentServlet.processRequest():",ex);
+        }
 	}
 	
 	/**

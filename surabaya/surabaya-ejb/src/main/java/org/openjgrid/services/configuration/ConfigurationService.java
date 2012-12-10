@@ -45,7 +45,8 @@ public class ConfigurationService {
      * 
      */
     public ConfigurationService() {
-    
+    	
+    	log.debug("CongirurationService() starting");
     	Map<String, String> sim_props = new HashMap<String, String>();
     	sim_props.put("sim_http_port", "9000");
     	props.put("OpenSim", sim_props);
