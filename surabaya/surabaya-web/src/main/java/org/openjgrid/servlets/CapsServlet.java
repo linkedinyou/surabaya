@@ -37,7 +37,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Servlet implementation class CapsServlet
+ * CAPS Servlet
+ * 
+ * This Servlet will handle various caps like:
+ * 
+ * - seed
+ * - FetchInventory2
+ * - FetchInventoryDescendants2
+ * - getMesh
+ * - getTexture
+ * 
+ * In order to provide some security all CAPS URL contain a random UUID for each
+ * Capability. The UUID of an incoming request will be checked against the UUID 
+ * stored in the logged in Agent which itself is managed in the AgentManagementService
+ * 
+ * If the given UUID fits the corresponding CAPS funcion is called. This security however
+ * is only secure as long as the Transport is encrypted
+ * 
+ * TODO implement encrypted Transport
  * 
  * Author: Akira Sonoda
  */

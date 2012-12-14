@@ -77,8 +77,6 @@ public class AgentServlet extends HttpServlet {
         OutputStream out = response.getOutputStream();
         
         try {
-//            Util.dumpHttpRequest(request);        		
-            
         	HttpClient httpclient = new DefaultHttpClient();
         	HttpPost httppost = new HttpPost("http://localhost:"+
         			configuration.getProperty("OpenSim", "sim_http_port") + 
@@ -90,7 +88,6 @@ public class AgentServlet extends HttpServlet {
         		log.debug("Agent-Name: {} {} ", agent.getFirst_name(), agent.getLast_name() );
         		log.debug("Agent-UUID: {}", agent.getAgent_id().toString());
         		log.debug("Agent-CAPS: {}", agent.getCaps_path());
-        		// -----
         		StringEntity stringEntity = new StringEntity(jsonString,request.getCharacterEncoding());
         		stringEntity.setContentType(request.getContentType());
         		httppost.setEntity(stringEntity);
@@ -98,7 +95,7 @@ public class AgentServlet extends HttpServlet {
         		ByteArrayEntity byteArrayEntity = new ByteArrayEntity(Util.requestContent2ByteArray(request));
         		httppost.setEntity(byteArrayEntity);
         	} else {
-//                Util.dumpHttpRequest(request);        		
+                Util.dumpHttpRequest(request);        		
         	}
         	
     		httppost.setHeader("expect", "100-continue");
