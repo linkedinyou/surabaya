@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * Author: Akira Sonoda
  * TODO Add Database/Properties/xml storage of the values
  */
-@Singleton
+@Singleton(name="ConfigurationService", mappedName="configurationService")
 @LocalBean
 public class ConfigurationService {
 	

@@ -115,6 +115,11 @@
       	<artifactId>jackson-core-lgpl</artifactId>
       	<scope>runtime</scope>
       </dependency>
+      <dependency>
+      	<groupId>joda-time</groupId>
+      	<artifactId>joda-time</artifactId>
+      	<scope>runtime</scope>
+      </dependency>
    </dependencies>
 
    <build>

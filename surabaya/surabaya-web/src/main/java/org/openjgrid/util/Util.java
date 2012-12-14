@@ -47,16 +47,18 @@ public final class Util {
 			String headerName = headerNames.nextElement();
 			log.debug("Header: {} - {}", headerName, request.getHeader(headerName));
 		}
-		try {
-			if (request.getContentType().equalsIgnoreCase("application/json")) {
-				log.debug("Content : {}", requestContent2String(request));
-			} else if (request.getContentType().equalsIgnoreCase("application/x-gzip")) {
-				log.debug("Content : {}", requestContent2ByteArray(request));
-			}
-		} catch (Exception ex) {
-			log.debug("Exception occurred during reading of the content");
-			log.debug("Exception: {}", ex.getMessage());
-		}
+//		try {
+//			if (request.getContentType().equalsIgnoreCase("application/json")) {
+//				log.debug("Content : {}", requestContent2String(request));
+//			} else if (request.getContentType().equalsIgnoreCase("application/llsd+xml")) {
+//				log.debug("Content : {}", requestContent2String(request));
+//			} else if (request.getContentType().equalsIgnoreCase("application/x-gzip")) {
+//				log.debug("Content : {}", requestContent2ByteArray(request));
+//			}
+//		} catch (Exception ex) {
+//			log.debug("Exception occurred during reading of the content");
+//			log.debug("Exception: {}", ex.getMessage());
+//		}
 		log.debug("---- End HTTP ServletRequest Dump ----");
 
 	}

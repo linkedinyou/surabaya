@@ -20,6 +20,7 @@ package org.openjgrid.servlets;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.UUID;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -36,6 +37,7 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.agents.Agent;
+import org.openjgrid.agents.AgentManagementService;
 import org.openjgrid.services.configuration.ConfigurationService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -57,6 +59,9 @@ public class AgentServlet extends HttpServlet {
 
 	@EJB
 	private ConfigurationService configuration;
+
+	@EJB(mappedName="java:module/AgentManagementService")
+	private AgentManagementService agentManagementService;
 	
 	/**
 	 * The main processing routine is called from doGet() and doPost()
@@ -72,34 +77,51 @@ public class AgentServlet extends HttpServlet {
         OutputStream out = response.getOutputStream();
         
         try {
+//            Util.dumpHttpRequest(request);        		
+            
         	HttpClient httpclient = new DefaultHttpClient();
         	HttpPost httppost = new HttpPost("http://localhost:"+
         			configuration.getProperty("OpenSim", "sim_http_port") + 
         			request.getRequestURI());
-        	
+        	Agent agent = null;      	        	        	
         	if (request.getContentType().equalsIgnoreCase("application/json")) {
         		String jsonString = Util.requestContent2String(request);
-        		// TODO Decide and implement if we are going to keep the Agent Data.
-        		Agent agent = new Agent(jsonString);
+        		agent = new Agent(jsonString);
         		log.debug("Agent-Name: {} {} ", agent.getFirst_name(), agent.getLast_name() );
         		log.debug("Agent-UUID: {}", agent.getAgent_id().toString());
         		log.debug("Agent-CAPS: {}", agent.getCaps_path());
         		// -----
-        		StringEntity stringEntity = new StringEntity(jsonString,request.getContentType());
+        		StringEntity stringEntity = new StringEntity(jsonString,request.getCharacterEncoding());
+        		stringEntity.setContentType(request.getContentType());
         		httppost.setEntity(stringEntity);
         	} else if (request.getContentType().equalsIgnoreCase("application/x-gzip")) {
         		ByteArrayEntity byteArrayEntity = new ByteArrayEntity(Util.requestContent2ByteArray(request));
-        		byteArrayEntity.setContentType(request.getContentType());
         		httppost.setEntity(byteArrayEntity);
         	} else {
-                Util.dumpHttpRequest(request);        		
+//                Util.dumpHttpRequest(request);        		
         	}
+        	
+    		httppost.setHeader("expect", "100-continue");
+    		httppost.setHeader("connection", "close");
         	
         	HttpResponse httpResponse = httpclient.execute(httppost);
         	HttpEntity entity = httpResponse.getEntity();
+        	log.debug("HttpResponse-ContentType: {}",entity.getContentType());
         	if (entity != null) {
        	    	entity.writeTo(out);
        	        out.close();
+        	}
+        	if(agent != null) {
+        		agent.setFetchinventory2_caps(UUID.randomUUID());
+        		agent.setFetchinventorydescendants2_caps(UUID.randomUUID());
+        		agent.setGetmesh_caps(UUID.randomUUID());
+        		agent.setGettexture_caps(UUID.randomUUID());
+        		agentManagementService.setAgent(agent.getAgent_id().toString(), agent);
+        		agentManagementService.setAgent(agent.getFetchinventory2_caps().toString(),agent);
+        		agentManagementService.setAgent(agent.getFetchinventorydescendants2_caps().toString(), agent);
+        		agentManagementService.setAgent(agent.getGetmesh_caps().toString(), agent);
+        		agentManagementService.setAgent(agent.getGettexture_caps().toString(), agent);
+        		agentManagementService.setAgent(agent.getCaps_path(), agent);
         	}
         	
         } catch (Exception ex) {

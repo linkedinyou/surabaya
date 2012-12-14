@@ -22,6 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.joda.time.DateTime;
+
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
@@ -38,6 +40,7 @@ public final class Agent {
 
 	private static final Logger log = LoggerFactory.getLogger(Agent.class);
 
+	private DateTime creationTime;
 	private UUID agent_id = null;
 	private String caps_path = null;
 	private String circuit_code = null;
@@ -58,6 +61,10 @@ public final class Agent {
 	private String destination_name = null;
 	private UUID destination_uuid = null;
 	private String teleport_flags = null;
+	private UUID fetchinventory2_caps = null;
+	private UUID fetchinventorydescendants2_caps = null;
+	private UUID gettexture_caps = null;
+	private UUID getmesh_caps = null;
 
 	/**
 	 * Constructs an Agent from a given JSON String
@@ -120,12 +127,21 @@ public final class Agent {
 	            		String value = jp.getText();
 	            		this.service_urls.put(key, value);
 	            	}
-	            } 
+	            }
+	            creationTime = DateTime.now();
 	        }
 		} catch (Exception ex) {
 			log.debug("Exception during Agent creation from JSON String: {}", ex.getCause());
 		}
 	}
+
+	/**
+	 * @return the creationTime
+	 */
+	public DateTime getCreationTime() {
+		return creationTime;
+	}
+
 
 	/**
 	 * @return the agent_id
@@ -258,6 +274,63 @@ public final class Agent {
 	 */
 	public String getTeleport_flags() {
 		return teleport_flags;
+	}
+
+	/**
+	 * @return the fetchinventory2_caps
+	 */
+	public UUID getFetchinventory2_caps() {
+		return fetchinventory2_caps;
+	}
+
+	/**
+	 * @param fetchinventory2_caps the fetchinventory2_caps to set
+	 */
+	public void setFetchinventory2_caps(UUID fetchinventory2_caps) {
+		this.fetchinventory2_caps = fetchinventory2_caps;
+	}
+
+	/**
+	 * @return the fetchinventorydescendants2_caps
+	 */
+	public UUID getFetchinventorydescendants2_caps() {
+		return fetchinventorydescendants2_caps;
+	}
+
+	/**
+	 * @param fetchinventorydescendants2_caps the fetchinventorydescendants2_caps to set
+	 */
+	public void setFetchinventorydescendants2_caps(
+			UUID fetchinventorydescendants2_caps) {
+		this.fetchinventorydescendants2_caps = fetchinventorydescendants2_caps;
+	}
+
+	/**
+	 * @return the gettexture_caps
+	 */
+	public UUID getGettexture_caps() {
+		return gettexture_caps;
+	}
+
+	/**
+	 * @param gettexture_caps the gettexture_caps to set
+	 */
+	public void setGettexture_caps(UUID gettexture_caps) {
+		this.gettexture_caps = gettexture_caps;
+	}
+
+	/**
+	 * @return the getmesh_caps
+	 */
+	public UUID getGetmesh_caps() {
+		return getmesh_caps;
+	}
+
+	/**
+	 * @param getmesh_caps the getmesh_caps to set
+	 */
+	public void setGetmesh_caps(UUID getmesh_caps) {
+		this.getmesh_caps = getmesh_caps;
 	}
 
 }
