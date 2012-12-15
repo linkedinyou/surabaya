@@ -18,11 +18,13 @@
  */
 package org.openjgrid.services.configuration;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-import javax.ejb.LocalBean;
+import javax.ejb.ConcurrencyManagement;
+import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Singleton;
+import javax.ejb.Startup;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,13 +35,14 @@ import org.slf4j.LoggerFactory;
  * Author: Akira Sonoda
  * TODO Add Database/Properties/xml storage of the values
  */
-@Singleton(name="ConfigurationService", mappedName="configurationService")
-@LocalBean
+@Singleton
+@Startup
+@ConcurrencyManagement(ConcurrencyManagementType.BEAN)
 public class ConfigurationService {
 	
 	private static final Logger log = LoggerFactory.getLogger(ConfigurationService.class);
 	
-    private Map<String, Map<String, String> > props = new HashMap<String, Map<String, String> >();
+    private ConcurrentMap<String, ConcurrentMap<String, String> > props = new ConcurrentHashMap<String, ConcurrentMap<String, String> >();
     
     /**
      * 
@@ -47,9 +50,14 @@ public class ConfigurationService {
     public ConfigurationService() {
     	
     	log.debug("CongirurationService() starting");
-    	Map<String, String> sim_props = new HashMap<String, String>();
+    	ConcurrentMap<String, String> sim_props = new ConcurrentHashMap<String, String>();
     	sim_props.put("sim_http_port", "9000");
     	props.put("OpenSim", sim_props);
+    	ConcurrentMap<String, String> surabaya_props = new ConcurrentHashMap<String, String>();
+    	surabaya_props.put("hostname", "localhost");
+    	surabaya_props.put("http_port", "8080");
+    	props.put("Surabaya", surabaya_props);
+    	
     
     }
  
@@ -57,7 +65,7 @@ public class ConfigurationService {
      * @param aPropertyGroup
      * @return
      */
-    public Map<String, String> getPropertyGroup(String aPropertyGroup) {
+    public ConcurrentMap<String, String> getPropertyGroup(String aPropertyGroup) {
         if (props.containsKey(aPropertyGroup)) {
             return (props.get(aPropertyGroup));
         } else {

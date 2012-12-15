@@ -57,7 +57,7 @@ public class AgentServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(AgentServlet.class);
 
-	@EJB
+	@EJB(mappedName="java:module/ConfigurationService")
 	private ConfigurationService configuration;
 
 	@EJB(mappedName="java:module/AgentManagementService")

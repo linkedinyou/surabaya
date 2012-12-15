@@ -30,8 +30,17 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.agents.Agent;
 import org.openjgrid.agents.AgentManagementService;
+import org.openjgrid.services.configuration.ConfigurationService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * 
  * - seed
  * - FetchInventory2
- * - FetchInventoryDescendants2
+ * - FetchInventoryDescendents2
  * - getMesh
  * - getTexture
  * 
@@ -63,6 +72,9 @@ public class CapsServlet extends HttpServlet {
 	private static final long serialVersionUID = -8627204223385024589L;
 	private static final Logger log = LoggerFactory.getLogger(CapsServlet.class);
 
+	@EJB(mappedName="java:module/ConfigurationService")
+	private ConfigurationService configuration;
+	
 	@EJB(mappedName="java:module/AgentManagementService")
 	AgentManagementService agentManagementService;
 	
@@ -70,8 +82,8 @@ public class CapsServlet extends HttpServlet {
 	        throws ServletException, IOException {
 		
 		try {
-	        response.setContentType("text/xml;charset=UTF-8");
 	        OutputStream out = response.getOutputStream();
+        	HttpClient httpclient = new DefaultHttpClient();
 
 	        Util.dumpHttpRequest(request);
 	        
@@ -88,19 +100,22 @@ public class CapsServlet extends HttpServlet {
 	        Agent agent = agentManagementService.getAgent(capsPath);
     		// Now let's find out, what Caps actually is requested and do the corresponding processing
     		if(capsPath.equals(agent.getCaps_path())) {
-    			String reply = getSEED(request);
+    	        response.setContentType("application/xml;charset=UTF-8");
+    			StringEntity reply = getSeed(request, httpclient, agent);
+    			reply.writeTo(out);
+    			out.close();
     		}
     		if(capsPath.equals(agent.getFetchinventory2_caps().toString())) {
-    			String reply = fetchInventory2(request); 
+    			String reply = fetchInventory2(request, httpclient); 
     		}
     		if(capsPath.equals(agent.getFetchinventorydescendants2_caps().toString())) {
-    			String reply = fetchInventoryDescentdants2(request);
+    			String reply = fetchInventoryDescentdents2(request, httpclient);
     		}
     		if(capsPath.equals(agent.getGetmesh_caps().toString())) {
-    			String reply = getMesh(request);
+    			String reply = getMesh(request, httpclient);
     		}
     		if(capsPath.equals(agent.getGettexture_caps().toString())) {
-    			String reply = getTexture(request);
+    			String reply = getTexture(request, httpclient);
     		}
     		
 	        log.debug("end of processRequest"); 
@@ -109,30 +124,74 @@ public class CapsServlet extends HttpServlet {
 		}
 	}
 	
-	private String getSEED(HttpServletRequest request) {
-		// TODO call seedCAPS
-		return(null);
+	private StringEntity getSeed(HttpServletRequest request, HttpClient httpclient, Agent agent) throws IOException {
+		log.debug("getSeed() called");
+    	HttpPost httppost = new HttpPost("http://localhost:"+
+    			configuration.getProperty("OpenSim", "sim_http_port") + 
+    			request.getRequestURI());
+		String jsonString = Util.requestContent2String(request);
+		StringEntity stringEntity = new StringEntity(jsonString,request.getCharacterEncoding());
+		stringEntity.setContentType(request.getContentType());
+		httppost.setEntity(stringEntity);
+		httppost.setHeader("expect", "100-continue");
+		httppost.setHeader("connection", "close");
+    	
+    	HttpResponse httpResponse = httpclient.execute(httppost);
+    	HttpEntity entity = httpResponse.getEntity();
+
+    	long contentLength = entity.getContentLength();
+    	Header contentType = entity.getContentType();
+    	String content = IOUtils.toString(entity.getContent(), "UTF-8");
+    	log.debug("ContentLength: {}", contentLength);
+    	log.debug("ContentType: {}", contentType);
+    	log.debug("Content: {}", content);
+    	String capsFromSim = null;
+    	Pattern p = Pattern.compile("^<llsd><map>(.*)</map></llsd>");
+        Matcher m = p.matcher(content);
+        if(m.find()) {
+        	capsFromSim = m.group(1);
+        }
+        log.debug("CAPS from OpenSim: {}", capsFromSim);
+        StringBuilder sb = new StringBuilder("<llsd><map>");
+        sb.append(capsFromSim);
+        sb.append("<key>FetchInventoryDescendents2</key><string>http://");
+        sb.append(configuration.getProperty("Surabaya", "hostname"));
+        sb.append(":");
+        sb.append(configuration.getProperty("Surabaya", "http_port"));
+        sb.append("/CAPS/").append(agent.getFetchinventory2_caps()).append("0000/</string>");
+		// TODO add the CAPS URLs for FetchInventory2 served by this Server, to the List.
+		// TODO add the CAPS URLs for GetTexture served by this Server, to the List.
+		// TODO add the CAPS URLs for GetMesh served by this Server, to the List.
+        sb.append("</map></llsd>");
+        log.debug("CAPS after Injection {}", sb.toString());
+    	StringEntity result = new StringEntity(sb.toString());    	
+		return(result);
 	}
 
-	private String fetchInventory2(HttpServletRequest request) {
+	private String fetchInventory2(HttpServletRequest request, HttpClient httpclient) {
 		// TODO call fetchInvntory2 
+		log.debug("fetchInventory2() called");
 		return(null);
 	}
 	
-	private String fetchInventoryDescentdants2(HttpServletRequest request) {
+	private String fetchInventoryDescentdents2(HttpServletRequest request, HttpClient httpclient) {
 		// TODO call fetchInvntoryDescendants2
+		log.debug("fetchInventoryDescentdents2() called");
 		return(null);
 	}
 	
-	private String getMesh(HttpServletRequest request) {
+	private String getMesh(HttpServletRequest request, HttpClient httpclient) {
 		// TODO call getMesh
+		log.debug("getMesh() called");
 		return(null);
 	}
 
-	private String getTexture(HttpServletRequest request) {
+	private String getTexture(HttpServletRequest request, HttpClient httpclient) {
 		// TODO call getTexture 
+		log.debug("getTexture() called");
 		return(null);		
 	}
+	
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
