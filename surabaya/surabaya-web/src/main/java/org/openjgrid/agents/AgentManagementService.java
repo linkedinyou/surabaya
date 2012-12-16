@@ -112,14 +112,23 @@ public class AgentManagementService {
 			throw(new AgentNotFoundException());
 		}		
 	}
+
+	public boolean hasAgent(UUID capsID) {
+		log.debug("hasAgent() called: agentMap.size: {}", agentMap.size());
+		if(agentMap.containsKey(capsID.toString())) {
+			return(true);
+		} else {
+			return(false);
+		}		
+	}
 	
 	private void removeAllAgentEntries(Agent anAgent) {
 		// First remove all CAPS entries
 		if(anAgent.getFetchinventory2_caps() != null) {
 			agentMap.remove(anAgent.getFetchinventory2_caps().toString());
 		}
-		if(anAgent.getFetchinventorydescendants2_caps() != null) {
-			agentMap.remove(anAgent.getFetchinventorydescendants2_caps().toString());
+		if(anAgent.getFetchinventorydescendents2_caps() != null) {
+			agentMap.remove(anAgent.getFetchinventorydescendents2_caps().toString());
 		}
 		if(anAgent.getGetmesh_caps() != null) {
 			agentMap.remove(anAgent.getGetmesh_caps().toString());

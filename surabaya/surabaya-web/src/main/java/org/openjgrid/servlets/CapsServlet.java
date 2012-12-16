@@ -108,7 +108,7 @@ public class CapsServlet extends HttpServlet {
     		if(capsPath.equals(agent.getFetchinventory2_caps().toString())) {
     			String reply = fetchInventory2(request, httpclient); 
     		}
-    		if(capsPath.equals(agent.getFetchinventorydescendants2_caps().toString())) {
+    		if(capsPath.equals(agent.getFetchinventorydescendents2_caps().toString())) {
     			String reply = fetchInventoryDescentdents2(request, httpclient);
     		}
     		if(capsPath.equals(agent.getGetmesh_caps().toString())) {
@@ -158,7 +158,7 @@ public class CapsServlet extends HttpServlet {
         sb.append(configuration.getProperty("Surabaya", "hostname"));
         sb.append(":");
         sb.append(configuration.getProperty("Surabaya", "http_port"));
-        sb.append("/CAPS/").append(agent.getFetchinventory2_caps()).append("0000/</string>");
+        sb.append("/CAPS/").append(agent.getFetchinventorydescendents2_caps()).append("0000/</string>");
 		// TODO add the CAPS URLs for FetchInventory2 served by this Server, to the List.
 		// TODO add the CAPS URLs for GetTexture served by this Server, to the List.
 		// TODO add the CAPS URLs for GetMesh served by this Server, to the List.
@@ -168,15 +168,20 @@ public class CapsServlet extends HttpServlet {
 		return(result);
 	}
 
-	private String fetchInventory2(HttpServletRequest request, HttpClient httpclient) {
+	private String fetchInventory2(HttpServletRequest request, HttpClient httpclient) throws IOException {
 		// TODO call fetchInvntory2 
 		log.debug("fetchInventory2() called");
+		String requestString = Util.requestContent2String(request);
+		log.debug("Content: {}", requestString );
 		return(null);
 	}
 	
-	private String fetchInventoryDescentdents2(HttpServletRequest request, HttpClient httpclient) {
+	private String fetchInventoryDescentdents2(HttpServletRequest request, HttpClient httpclient) throws IOException {
 		// TODO call fetchInvntoryDescendants2
 		log.debug("fetchInventoryDescentdents2() called");
+		String requestString = Util.requestContent2String(request);
+		log.debug("Content: {}", requestString );
+
 		return(null);
 	}
 	

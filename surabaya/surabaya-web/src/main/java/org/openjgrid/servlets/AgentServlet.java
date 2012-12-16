@@ -109,13 +109,18 @@ public class AgentServlet extends HttpServlet {
        	        out.close();
         	}
         	if(agent != null) {
+        		// if there is already an agent remove with the given id
+        		// remove it first (Housekeeping)
+        		if(agentManagementService.hasAgent(agent.getAgent_id())) {
+        			agentManagementService.removeAgent(agent.getAgent_id());
+        		}
         		agent.setFetchinventory2_caps(UUID.randomUUID());
-        		agent.setFetchinventorydescendants2_caps(UUID.randomUUID());
+        		agent.setFetchinventorydescendents2_caps(UUID.randomUUID());
         		agent.setGetmesh_caps(UUID.randomUUID());
         		agent.setGettexture_caps(UUID.randomUUID());
         		agentManagementService.setAgent(agent.getAgent_id().toString(), agent);
         		agentManagementService.setAgent(agent.getFetchinventory2_caps().toString(),agent);
-        		agentManagementService.setAgent(agent.getFetchinventorydescendants2_caps().toString(), agent);
+        		agentManagementService.setAgent(agent.getFetchinventorydescendents2_caps().toString(), agent);
         		agentManagementService.setAgent(agent.getGetmesh_caps().toString(), agent);
         		agentManagementService.setAgent(agent.getGettexture_caps().toString(), agent);
         		agentManagementService.setAgent(agent.getCaps_path(), agent);

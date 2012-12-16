@@ -62,7 +62,7 @@ public final class Agent {
 	private UUID destination_uuid = null;
 	private String teleport_flags = null;
 	private UUID fetchinventory2_caps = null;
-	private UUID fetchinventorydescendants2_caps = null;
+	private UUID fetchinventorydescendents2_caps = null;
 	private UUID gettexture_caps = null;
 	private UUID getmesh_caps = null;
 
@@ -291,18 +291,18 @@ public final class Agent {
 	}
 
 	/**
-	 * @return the fetchinventorydescendants2_caps
+	 * @return the fetchinventorydescendents2_caps
 	 */
-	public UUID getFetchinventorydescendants2_caps() {
-		return fetchinventorydescendants2_caps;
+	public UUID getFetchinventorydescendents2_caps() {
+		return fetchinventorydescendents2_caps;
 	}
 
 	/**
-	 * @param fetchinventorydescendants2_caps the fetchinventorydescendants2_caps to set
+	 * @param fetchinventorydescendents2_caps the fetchinventorydescendants2_caps to set
 	 */
-	public void setFetchinventorydescendants2_caps(
-			UUID fetchinventorydescendants2_caps) {
-		this.fetchinventorydescendants2_caps = fetchinventorydescendants2_caps;
+	public void setFetchinventorydescendents2_caps(
+			UUID fetchinventorydescendents2_caps) {
+		this.fetchinventorydescendents2_caps = fetchinventorydescendents2_caps;
 	}
 
 	/**
