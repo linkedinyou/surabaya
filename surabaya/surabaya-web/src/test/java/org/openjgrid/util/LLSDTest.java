@@ -18,10 +18,9 @@
  */
 package org.openjgrid.util;
 
-import static org.junit.Assert.*;
-
 import org.junit.Before;
 import org.junit.Test;
+import org.openjgrid.datatypes.llsd.LLSD;
 
 /**
  * @author markusgasser
@@ -37,12 +36,12 @@ public class LLSDTest {
 	}
 
 	/**
-	 * Test method for {@link org.openjgrid.util.LLSD#LLSDDeserialize(java.lang.String)}.
+	 * Test method for {@link org.openjgrid.util.LLSD#llsdDeserialize(java.lang.String)}.
 	 */
 	@Test
 	public void testLLSDDeserializeString() throws Exception {
 		String llsdString = "<llsd><map><key>folders</key><array><map><key>fetch_folders</key><integer>1</integer><key>fetch_items</key><boolean>1</boolean><key>folder_id</key><uuid>4ba2cf15-8178-293d-fccb-645e7d148d45</uuid><key>owner_id</key><uuid>3dcad562-c070-4d58-b735-2f04f790a76c</uuid><key>sort_order</key><integer>1</integer></map></array></map></llsd>";
-		LLSD.LLSDDeserialize(llsdString);
+		LLSD.llsdDeserialize(llsdString);
 	}
 
 }

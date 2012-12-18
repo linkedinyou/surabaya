@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openjgrid.agents;
+package org.openjgrid.services.agent;
 
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,6 +28,7 @@ import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
+import org.openjgrid.agents.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,6 @@ import org.slf4j.LoggerFactory;
 @Startup
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)
 public class AgentManagementService {
-
 	
 	private static final Logger log = LoggerFactory.getLogger(AgentManagementService.class);
 	private ConcurrentMap<String, Agent> agentMap = null;

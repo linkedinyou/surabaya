@@ -17,7 +17,7 @@
  *
  */
 
-package org.openjgrid.util;
+package org.openjgrid.datatypes.llsd;
 
 import org.apache.commons.io.IOUtils;
 
@@ -33,13 +33,13 @@ import javax.xml.stream.XMLStreamReader;
 
 public class LLSD {
 
-	public static Object LLSDDeserialize(String llsdString)
+	public static Object llsdDeserialize(String llsdString)
 			throws XMLStreamException, LLSDParseException {
-		return LLSDDeserialize(new InputStreamReader(
+		return llsdDeserialize(new InputStreamReader(
 				IOUtils.toInputStream(llsdString)));
 	}
 
-	public static Object LLSDDeserialize(InputStreamReader llsdReader)
+	public static Object llsdDeserialize(InputStreamReader llsdReader)
 			throws XMLStreamException, LLSDParseException {
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader llsdStream = xmlInputFactory
@@ -51,7 +51,7 @@ public class LLSD {
 		}
 
 		llsdStream.next();
-		Object ret = LLSDParseOne(llsdStream);
+		Object ret = llsdParseDatatype(llsdStream);
 
 		if (llsdStream.getEventType() != XMLStreamConstants.END_ELEMENT
 				|| !llsdStream.getLocalName().equalsIgnoreCase("llsd")) {
@@ -175,7 +175,7 @@ public class LLSD {
 	// }
 	// }
 
-	private static Object LLSDParseOne(XMLStreamReader llsdStream)
+	private static Object llsdParseDatatype(XMLStreamReader llsdStream)
 			throws LLSDParseException, XMLStreamException {
 		if (llsdStream.getEventType() != XMLStreamConstants.START_ELEMENT) {
 			throw new LLSDParseException("Expected an element");
@@ -278,9 +278,9 @@ public class LLSD {
 			// throw new Exception("LLSD TODO: date");
 			// }
 		} else if (datatype.equalsIgnoreCase("map")) {
-			return LLSDParseMap(llsdStream);
+			return llsdParseMap(llsdStream);
 		} else if (datatype.equalsIgnoreCase("array")) {
-			return LLSDParseArray(llsdStream);
+			return llsdParseArray(llsdStream);
 		} else {
 			throw new LLSDParseException("Unknown element <" + datatype + ">");
 		}
@@ -294,7 +294,7 @@ public class LLSD {
 		return ret;
 	}
 
-	public static HashMap<String, Object> LLSDParseMap(
+	public static HashMap<String, Object> llsdParseMap(
 			XMLStreamReader llsdStream) throws LLSDParseException,
 			XMLStreamException {
 		HashMap<String, Object> ret = new HashMap<String, Object>();
@@ -332,7 +332,7 @@ public class LLSD {
 			}
 
 			llsdStream.next();
-			Object val = LLSDParseOne(llsdStream);
+			Object val = llsdParseDatatype(llsdStream);
 			ret.put(key, val);
 		}
 
@@ -340,7 +340,7 @@ public class LLSD {
 		// TODO
 	}
 
-	public static ArrayList<Object> LLSDParseArray(XMLStreamReader llsdStream)
+	public static ArrayList<Object> llsdParseArray(XMLStreamReader llsdStream)
 			throws LLSDParseException, XMLStreamException {
 		ArrayList<Object> ret = new ArrayList<Object>();
 
@@ -364,7 +364,7 @@ public class LLSD {
 				break;
 			}
 
-			ret.add(LLSDParseOne(llsdStream));
+			ret.add(llsdParseDatatype(llsdStream));
 		}
 
 		return ret;

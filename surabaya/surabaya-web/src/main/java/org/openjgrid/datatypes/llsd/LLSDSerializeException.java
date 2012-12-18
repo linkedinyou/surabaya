@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openjgrid.util;
+package org.openjgrid.datatypes.llsd;
 
 /**
  * @author Akira Sonoda

@@ -16,16 +16,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openjgrid.util;
+package org.openjgrid.datatypes.llsd;
+
+import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * @author Akira Sonoda
- * 
+ *
  */
-public class LLSDParseException extends Exception {
-	private static final long serialVersionUID = 929058423589458887L;
+public class LLSDInventoryFolderContents {
+	
+    public UUID agent_id; 
+    public int descendents;
+    public UUID folder_id; 
+    public ArrayList<Object> categories = new ArrayList<Object>();
+    public ArrayList<Object> items = new ArrayList<Object>();
+    public UUID owner_id; 
+    public int version;
 
-	public LLSDParseException(String message) {
-		super(message);
-	}
+
 }

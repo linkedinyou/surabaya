@@ -16,16 +16,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openjgrid.agents;
+package org.openjgrid.datatypes.llsd;
 
 /**
  * @author Akira Sonoda
- *
+ * 
  */
-public class AgentNotFoundException extends Exception {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 7046083127202397644L;
+public class LLSDParseException extends Exception {
+	private static final long serialVersionUID = 929058423589458887L;
 
+	public LLSDParseException(String message) {
+		super(message);
+	}
 }
