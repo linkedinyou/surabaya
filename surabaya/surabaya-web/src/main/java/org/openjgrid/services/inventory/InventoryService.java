@@ -49,8 +49,10 @@ public class InventoryService {
 			StringBuilder sb = new StringBuilder("PRINCIPAL=").append(userID.toString());
 			sb.append("&FOLDER=").append(folderID.toString());
 			sb.append("&METHOD=GETFOLDERCONTENT");
+			log.debug("SynchronousRestForms "+ httppost.getMethod() +" "+ httppost.getURI() +" "+ sb.toString());
     		StringEntity stringEntity = new StringEntity(sb.toString());
     		stringEntity.setContentType("application/x-www-form-urlencoded");
+    		httppost.setEntity(stringEntity);
 
     		HttpResponse httpResponse = httpclient.execute(httppost);
         	HttpEntity entity = httpResponse.getEntity();
@@ -60,7 +62,7 @@ public class InventoryService {
         	String content = IOUtils.toString(entity.getContent(), "UTF-8");
         	log.debug("ContentLength: {}", contentLength);
         	log.debug("ContentType: {}", contentType);
-        	log.debug("Content: {}", content);
+        	log.debug("respstring: {}", content);
     		
 		} catch (Exception ex) {
 			log.debug("Exception occurred in getFolderContent()", ex);

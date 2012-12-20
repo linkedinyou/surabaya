@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * @author Akira Sonoda
  *
  */
+@LLSDMapping(mapTo="struct", mappedName = "")
 public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 
 	private static final Logger log = LoggerFactory.getLogger(InventoryItemBase.class);
@@ -38,110 +39,129 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 	/**
 	 * The inventory type of the item.  This is slightly different from the asset type in some situations.
 	 */
-	private int type;
+	@LLSDMapping(mapTo="integer", mappedName = "InvType")
+	private int invType;
 	
 	/**
 	 * The folder this item is contained in
 	 */
+	@LLSDMapping(mapTo="uuid", mappedName = "Folder")
 	private UUID parentFolderId;
 	
 	/**
 	 * The creator of this item
 	 */
+	@LLSDMapping(mapTo="string", mappedName = "CreatorId")
 	private String creator;
 	
 	/**
 	 * The CreatorId expressed as a UUID
 	 */
+	@LLSDMapping(mapTo="uuid", mappedName = "CreatorIdAsUuid")
 	private UUID creatorId;
 
 	/**
 	 * Extended creator information of the form <profile url>;<name>
 	 */
+	@LLSDMapping(mapTo="string", mappedName = "CreatorData")
 	private String creatorData;
 	
 	/**
 	 * The description of the inventory item (must be less than 64 characters)
 	 */
+	@LLSDMapping(mapTo="string", mappedName = "Description")
 	private String description;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "CurrentPermissions")
 	private long currentPermissions;
 
 	/**
 	 * A mask containing permissions for the current owner (cannot be enforced)
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "NextPermissions")
 	private long nextPermissions;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "BasePermissions")
 	private long basePermissions;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "EveryOnePermissions")
 	private long everyOnePermissions;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "GroupPermissions")
 	private long groupPermissions;
 
 	/**
 	 * This is an enumerated value determining the type of asset (eg Notecard, Sound, Object, etc)
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "AssetType")
 	private int assetType;
 	
 	/**
 	 * The UUID of the associated asset on the asset server
 	 */
+	@LLSDMapping(mapTo="uuid", mappedName = "AssetID")
 	private UUID assetId;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "GroupID")
 	private UUID groupId;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="boolean", mappedName = "GroupOwned")
 	private boolean isGroupOwned;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "SalePrice")
 	private int salePrice;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "SaleType")
 	private byte saleType;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "Flags")
 	private long flags;
 	
 	/**
 	 * 
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "CreationDate")
 	private long creationDate;
 
 	/**
 	 * @return the type
 	 */
-	public int getType() {
-		return type;
+	public int getInvType() {
+		return invType;
 	}
 
 	/**
 	 * @param type the type to set
 	 */
-	public void setType(int type) {
-		this.type = type;
+	public void setInvType(int invType) {
+		this.invType = invType;
 	}
 
 	/**
@@ -499,7 +519,7 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 		clone.setParentFolderId(this.getParentFolderId());
 		clone.setSalePrice(this.getSalePrice());
 		clone.setSaleType(this.getSaleType());
-		clone.setType(this.getType());
+		clone.setInvType(this.getInvType());
 		} catch ( InventoryException ex ) {
 			log.error("InventoryException in clone() - this really should not happpen here" );  
 		}

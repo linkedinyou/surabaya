@@ -25,21 +25,26 @@ import java.util.UUID;
  * 
  * @author Akira Sonoda
  */
+@LLSDMapping(mapTo="struct", mappedName = "")
 public class InventoryFolderBase extends InventoryNodeBase {
 
 	/**
 	 * The folder this folder is contained in
 	 */
+	
+	@LLSDMapping(mapTo="uuid", mappedName = "ParentID")
 	private UUID parentFolderId;
 	/**
 	 * Type of items normally stored in this folder
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "Type")	
 	private int type;
 	/**
 	 * This is used to denote the version of the client, needed
      * because of the changes clients have with inventory from
      * time to time (1.19.1 caused us some fits there).
 	 */
+	@LLSDMapping(mapTo="integer", mappedName = "Version")
 	private int version;
 	
 	

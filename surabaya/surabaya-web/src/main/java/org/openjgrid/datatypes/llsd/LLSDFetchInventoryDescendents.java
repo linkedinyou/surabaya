@@ -18,13 +18,20 @@
  */
 package org.openjgrid.datatypes.llsd;
 
+import java.util.HashMap;
 import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Akira Sonoda
  *
  */
+@LLSDMapping(mapTo="map", mappedName = "")
 public class LLSDFetchInventoryDescendents {
+	
+	private static final Logger log = LoggerFactory.getLogger(LLSDFetchInventoryDescendents.class);
 
 	public UUID folder_id;
     public UUID owner_id;
@@ -32,4 +39,27 @@ public class LLSDFetchInventoryDescendents {
     public boolean fetch_folders;
     public boolean fetch_items;
 
+    
+    /**
+	 * @param inventoryHashMap
+	 */
+	public LLSDFetchInventoryDescendents( HashMap<String, Object> inventoryHashMap) {
+		fromLLSDMap(inventoryHashMap);	
+	}
+
+
+	private void fromLLSDMap(HashMap<String, Object> map) {
+		try {
+			
+			this.fetch_folders = (Boolean) map.get("fetch_folders");
+			this.fetch_items = (Boolean) map.get("fetch_items");
+			this.folder_id = (UUID) map.get("folder_id");
+			this.owner_id = (UUID) map.get("owner_id");
+			this.sort_order = (Integer) map.get("sort_order");
+			
+		} catch (Exception ex) {
+			log.error("Exception during conversion from LLSDMap: {}", ex.getMessage());
+		}
+    }
 }
+

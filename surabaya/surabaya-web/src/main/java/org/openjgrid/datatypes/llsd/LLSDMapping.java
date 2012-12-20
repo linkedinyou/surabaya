@@ -18,16 +18,19 @@
  */
 package org.openjgrid.datatypes.llsd;
 
-import java.util.ArrayList;
+import java.lang.annotation.*;
 
 /**
  * @author Akira Sonoda
  *
  */
-@LLSDMapping(mapTo="struct", mappedName = "")
-public class LLSDInventoryDescendents {
-	
-	@LLSDMapping(mapTo="array", mappedName = "folders")
-	public ArrayList<Object> folders = new ArrayList<Object>();
-
+@Retention(RetentionPolicy.RUNTIME) 
+@Target({
+	ElementType.TYPE,
+	ElementType.PARAMETER,
+	ElementType.FIELD
+})
+public @interface LLSDMapping {
+	String mapTo();
+	String mappedName();
 }

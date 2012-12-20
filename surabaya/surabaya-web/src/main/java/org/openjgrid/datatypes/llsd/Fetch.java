@@ -21,13 +21,23 @@ package org.openjgrid.datatypes.llsd;
 import java.util.ArrayList;
 
 /**
+ * Workaround class in order to keep the original OpenSim logic working
+ * because Java supports no out arguments.
+ * 
  * @author Akira Sonoda
- *
  */
-@LLSDMapping(mapTo="struct", mappedName = "")
-public class LLSDInventoryDescendents {
-	
-	@LLSDMapping(mapTo="array", mappedName = "folders")
-	public ArrayList<Object> folders = new ArrayList<Object>();
+public class Fetch {
 
+    public InventoryCollection inventoryCollection = null;
+    public int version = 0;
+    public int descendents = 0;
+
+    public Fetch() {
+    	inventoryCollection = new InventoryCollection();
+        inventoryCollection.folderList = new ArrayList<InventoryFolderBase>();
+        inventoryCollection.itemList = new ArrayList<InventoryItemBase>();
+    	version = 0;
+    	descendents = 0;
+    }
+	
 }

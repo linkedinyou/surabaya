@@ -25,14 +25,24 @@ import java.util.UUID;
  * @author Akira Sonoda
  *
  */
+@LLSDMapping(mapTo="struct", mappedName = "")
 public class LLSDInventoryFolderContents {
 	
+	@LLSDMapping(mapTo="uuid", mappedName = "agent_id")
     public UUID agent_id; 
+	@LLSDMapping(mapTo="integer", mappedName = "descendents")
     public int descendents;
+	@LLSDMapping(mapTo="uuid", mappedName = "folder_id")
     public UUID folder_id; 
+	
+	@LLSDMapping(mapTo="array", mappedName = "categories")
     public ArrayList<Object> categories = new ArrayList<Object>();
+	@LLSDMapping(mapTo="array", mappedName = "items")
     public ArrayList<Object> items = new ArrayList<Object>();
-    public UUID owner_id; 
+
+	@LLSDMapping(mapTo="uuid", mappedName = "owner_id")
+	public UUID owner_id; 
+	@LLSDMapping(mapTo="integer", mappedName = "version")
     public int version;
 
 

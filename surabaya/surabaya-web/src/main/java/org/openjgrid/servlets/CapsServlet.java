@@ -42,12 +42,12 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.agents.Agent;
+import org.openjgrid.datatypes.llsd.Fetch;
 import org.openjgrid.datatypes.llsd.InventoryCollection;
 import org.openjgrid.datatypes.llsd.InventoryFolderBase;
 import org.openjgrid.datatypes.llsd.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.LLSD;
 import org.openjgrid.datatypes.llsd.LLSDFetchInventoryDescendents;
-import org.openjgrid.datatypes.llsd.LLSDHelpers;
 import org.openjgrid.datatypes.llsd.LLSDInventoryDescendents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;
 import org.openjgrid.services.agent.AgentManagementService;
@@ -197,6 +197,7 @@ public class CapsServlet extends HttpServlet {
 		return(null);
 	}
 
+	@SuppressWarnings("unchecked")
 	private String fetchInventoryDescentdents2(HttpServletRequest request, HttpClient httpclient) throws IOException {
 		log.debug("fetchInventoryDescentdents2() called");
 		String requestString = Util.requestContent2String(request);
@@ -217,7 +218,7 @@ public class CapsServlet extends HttpServlet {
         requestString = requestString.replace("<key>fetch_folders</key><integer>0</integer>", "<key>fetch_folders</key><boolean>0</boolean>");
         requestString = requestString.replace("<key>fetch_folders</key><integer>1</integer>", "<key>fetch_folders</key><boolean>1</boolean>");
         
-        log.debug("request: {}", requestString);
+        log.debug("incomingrequest: {}", requestString);
         
         HashMap<String, Object> llsdRequestMap = null;
         try {
@@ -227,37 +228,50 @@ public class CapsServlet extends HttpServlet {
             log.error("Request {}: ", request);
         }
         
-        ArrayList<Object> foldersrequested = (ArrayList<Object>) llsdRequestMap.get("folders");
-        String response = new String();
+		ArrayList<Object> foldersrequested = (ArrayList<Object>) llsdRequestMap.get("folders");
+        StringBuilder response = new StringBuilder();
         
         for (int i = 0; i < foldersrequested.size(); i++) {
             String inventoryItemstr = "";
-            HashMap<String, Object> inventoryHashMap = (HashMap<String, Object>) foldersrequested.get(i);
-        	LLSDFetchInventoryDescendents inventoryRequest = LLSDHelpers.fromLLSDMap(inventoryHashMap);
+			HashMap<String, Object> inventoryHashMap = (HashMap<String, Object>) foldersrequested.get(i);
+        	LLSDFetchInventoryDescendents inventoryRequest = new LLSDFetchInventoryDescendents(inventoryHashMap);
         	
         	LLSDInventoryDescendents inventoryReply = fetchInventory(inventoryRequest);
+        	try {
+        		inventoryItemstr = LLSD.LLSDSerialize(inventoryReply);
+        	} catch (Exception ex) {
+    			log.error("LLSD serialize error: {} {}" + ex.getMessage(), ex.getStackTrace());
+                log.error("Request {}: ", request);        		
+        	}
         	
-            inventoryItemstr = LLSDHelpers.toLLSDString(inventoryReply);
+        	log.debug("Result of fetchInventor: {}",inventoryItemstr);
+        	
             inventoryItemstr = inventoryItemstr.replace("<llsd><map><key>folders</key><array>", "");
             inventoryItemstr = inventoryItemstr.replace("</array></map></llsd>", "");
 
-            response.concat(inventoryItemstr);
+        	log.debug("fetchinventory after replace: {}",inventoryItemstr);
+            
+            response.append(inventoryItemstr);
         	
         }
+        
+        StringBuilder result = new StringBuilder();
         
         if (response.length() == 0) {
             // Ter-guess: If requests fail a lot, the client seems to stop requesting descendants.
             // Therefore, I'm concluding that the client only has so many threads available to do requests
             // and when a thread stalls..   is stays stalled.
             // Therefore we need to return something valid
-            response = "<llsd><map><key>folders</key><array /></map></llsd>";
+            result.append("<llsd><map><key>folders</key><array /></map></llsd>");
         } else {
-            response = "<llsd><map><key>folders</key><array>" + response + "</array></map></llsd>";
+            result.append("<llsd><map><key>folders</key><array>");
+            result.append(response);
+            result.append("</array></map></llsd>");
         }
 
-        log.debug("Replying to CAPS fetch inventory request: {}", response);
+        log.debug("outgoingreply: {}", result.toString());
 
-		return(response);
+		return(result.toString());
 	}
 	
 	private String getMesh(HttpServletRequest request, HttpClient httpclient) {
@@ -286,19 +300,22 @@ public class CapsServlet extends HttpServlet {
         contents.folder_id = inventoryRequest.folder_id;
 
         reply.folders.add(contents);
-        InventoryCollection invCollection = new InventoryCollection();
-        invCollection.folderList = new ArrayList<InventoryFolderBase>();
-        invCollection.itemList = new ArrayList<InventoryItemBase>();
-        Integer version = 0;
-        Integer descendents = 0;
+        // InventoryCollection invCollection = new InventoryCollection();
+        // invCollection.folderList = new ArrayList<InventoryFolderBase>();
+        // invCollection.itemList = new ArrayList<InventoryItemBase>();
+        // Integer version = 0;
+        // Integer descendents = 0;
+        Fetch fetchresult = new Fetch();
         
-        invCollection = fetch(
+        // invCollection = fetch(
+        fetchresult = fetch(
         		inventoryRequest.owner_id, inventoryRequest.folder_id, inventoryRequest.owner_id,
-        		inventoryRequest.fetch_folders, inventoryRequest.fetch_items, inventoryRequest.sort_order, version, descendents);
+//        		inventoryRequest.fetch_folders, inventoryRequest.fetch_items, inventoryRequest.sort_order, version, descendents);
+        		inventoryRequest.fetch_folders, inventoryRequest.fetch_items, inventoryRequest.sort_order);
         
-		log.debug("result of fetch: version: {} - descendents: {}", version, descendents);
+		log.debug("result of fetch: version: {} - descendents: {}", fetchresult.version, fetchresult.descendents);
 
-		if (invCollection != null && invCollection.folderList != null) {
+		if (fetchresult.inventoryCollection != null && fetchresult.inventoryCollection.folderList != null) {
 // TODO           foreach (InventoryFolderBase invFolder in inv.Folders)
 //            {
 //                contents.categories.Array.Add(ConvertInventoryFolder(invFolder));
@@ -307,15 +324,15 @@ public class CapsServlet extends HttpServlet {
 //            descendents += inv.Folders.Count;
         }
 
-        if (invCollection != null && invCollection.itemList != null) {
+        if (fetchresult.inventoryCollection != null && fetchresult.inventoryCollection.itemList != null) {
 // TODO           foreach (InventoryItemBase invItem in inv.Items)
 //            {
 //                contents.items.Array.Add(ConvertInventoryItem(invItem));
 //            }
         }
 
-        contents.descendents = descendents;
-        contents.version = version;
+        contents.descendents = fetchresult.descendents;
+        contents.version = fetchresult.version;
         
         log.debug(
 			"Replying to request for folder: " +   
@@ -346,24 +363,23 @@ public class CapsServlet extends HttpServlet {
 	 * @param descendents
 	 * @return
 	 */
-	private InventoryCollection fetch(UUID agent_id, UUID folder_id,
+	private Fetch fetch(UUID agent_id, UUID folder_id,
 			UUID owner_id, boolean fetch_folders, boolean fetch_items,
-			int sort_order, Integer version, Integer descendents) {
+			int sort_order) {
         log.debug(
                 "Fetching folders (" + fetch_folders + "), items"+ fetch_items +" from "+ folder_id +" for agent "+ owner_id 
                 );
         
+        Fetch result = new Fetch();
         // I'll leave out the processing of the Library because I guess it is not needed
         
-        InventoryCollection contents = new InventoryCollection();
-       
 		if (!folder_id.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
-            contents = inventoryService.getFolderContent(agent_id, folder_id);
+            result.inventoryCollection = inventoryService.getFolderContent(agent_id, folder_id);
 			
 		} else {
-			version = 1;
+			result.version = 1;
 		}
-		return(contents);
+		return(result);
 	}
 
 	

@@ -20,18 +20,28 @@
 package org.openjgrid.datatypes.llsd;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.stream.XMLStreamWriter;
 
 public class LLSD {
+	private static final Logger log = LoggerFactory.getLogger(LLSD.class);
 
 	public static Object llsdDeserialize(String llsdString)
 			throws XMLStreamException, LLSDParseException {
@@ -61,119 +71,166 @@ public class LLSD {
 		return ret;
 	}
 
-	// public static byte[] LLSDSerialize(Object obj)
-	// {
-	// StringWriter sw = new StringWriter();
-	// XmlTextWriter writer = new XmlTextWriter(sw);
-	// writer.Formatting = Formatting.None;
-	//
-	// writer.WriteStartElement(String.Empty, "llsd", String.Empty);
-	// LLSDWriteOne(writer, obj);
-	// writer.WriteEndElement();
-	//
-	// writer.Close();
-	//
-	// return Util.UTF8.GetBytes(sw.ToString());
-	// }
+	public static String LLSDSerialize(Object obj) throws XMLStreamException,
+			LLSDSerializeException {
 
-	// public static void LLSDWriteOne(XmlTextWriter writer, object obj)
-	// {
-	// if (obj == null)
-	// {
-	// writer.WriteStartElement(String.Empty, "undef", String.Empty);
-	// writer.WriteEndElement();
-	// return;
-	// }
-	//
-	// if (obj is string)
-	// {
-	// writer.WriteStartElement(String.Empty, "string", String.Empty);
-	// writer.WriteString((string) obj);
-	// writer.WriteEndElement();
-	// }
-	// else if (obj is int)
-	// {
-	// writer.WriteStartElement(String.Empty, "integer", String.Empty);
-	// writer.WriteString(obj.ToString());
-	// writer.WriteEndElement();
-	// }
-	// else if (obj is double)
-	// {
-	// writer.WriteStartElement(String.Empty, "real", String.Empty);
-	// writer.WriteString(obj.ToString());
-	// writer.WriteEndElement();
-	// }
-	// else if (obj is bool)
-	// {
-	// bool b = (bool) obj;
-	// writer.WriteStartElement(String.Empty, "boolean", String.Empty);
-	// writer.WriteString(b ? "1" : "0");
-	// writer.WriteEndElement();
-	// }
-	// else if (obj is ulong)
-	// {
-	// throw new
-	// Exception("ulong in LLSD is currently not implemented, fix me!");
-	// }
-	// else if (obj is UUID)
-	// {
-	// UUID u = (UUID) obj;
-	// writer.WriteStartElement(String.Empty, "uuid", String.Empty);
-	// writer.WriteString(u.ToString());
-	// writer.WriteEndElement();
-	// }
-	// else if (obj is Hashtable)
-	// {
-	// Hashtable h = (java.util.Hashtable)((obj instanceof java.util.Hashtable)
-	// ? obj : null);
-	// writer.WriteStartElement(String.Empty, "map", String.Empty);
-	// foreach (string key in h.Keys)
-	// {
-	// writer.WriteStartElement(String.Empty, "key", String.Empty);
-	// writer.WriteString(key);
-	// writer.WriteEndElement();
-	// LLSDWriteOne(writer, h[key]);
-	// }
-	// writer.WriteEndElement();
-	// }
-	// else if (obj is ArrayList)
-	// {
-	// ArrayList a = (java.util.ArrayList)((obj instanceof java.util.ArrayList)
-	// ? obj : null);
-	// writer.WriteStartElement(String.Empty, "array", String.Empty);
-	// foreach (object item in a)
-	// {
-	// LLSDWriteOne(writer, item);
-	// }
-	// writer.WriteEndElement();
-	// }
-	// else if (obj is byte[])
-	// {
-	// byte[] b = (byte[])((obj instanceof byte[]) ? obj : null);
-	// writer.WriteStartElement(String.Empty, "binary", String.Empty);
-	//
-	// writer.WriteStartAttribute(String.Empty, "encoding", String.Empty);
-	// writer.WriteString("base64");
-	// writer.WriteEndAttribute();
-	//
-	// //// Calculate the length of the base64 output
-	// //long length = (long)(4.0d * b.Length / 3.0d);
-	// //if (length % 4 != 0) length += 4 - (length % 4);
-	//
-	// //// Create the char[] for base64 output and fill it
-	// //char[] tmp = new char[length];
-	// //int i = Convert.ToBase64CharArray(b, 0, b.Length, tmp, 0);
-	//
-	// //writer.WriteString(new String(tmp));
-	//
-	// writer.WriteString(Convert.ToBase64String(b));
-	// writer.WriteEndElement();
-	// }
-	// else
-	// {
-	// throw new LLSDSerializeException("Unknown type " + obj.GetType().Name);
-	// }
-	// }
+		StringWriter llsdWriter = new StringWriter();
+		XMLOutputFactory xmlOutputFactory = XMLOutputFactory.newInstance();
+		XMLStreamWriter llsdStream = xmlOutputFactory
+				.createXMLStreamWriter(llsdWriter);
+
+		llsdStream.writeStartElement("llsd");
+
+		LLSDWriteOne(llsdStream, obj);
+		
+		llsdStream.writeEndElement();
+
+		llsdStream.flush();
+		
+		String result = llsdWriter.getBuffer().toString();
+		log.debug("result of LLSDSerialize: {}", result);
+
+		return (result);
+	}
+
+	public static void LLSDWriteOne(XMLStreamWriter llsdStream, Object obj)
+			throws XMLStreamException, LLSDSerializeException {
+		if (obj == null) {
+			llsdStream.writeStartElement("undef");
+			llsdStream.writeEndElement();
+			return;
+		}
+		
+		String llsdMetadata = "";
+		if(obj.getClass().isAnnotationPresent(LLSDMapping.class)) {
+			llsdMetadata = obj.getClass().getAnnotation(LLSDMapping.class).mapTo();
+		} else {
+			llsdMetadata = obj.getClass().getName();
+		}
+		log.debug("Metadata: {}", llsdMetadata );
+		
+		if (llsdMetadata.equalsIgnoreCase("string") || llsdMetadata.equalsIgnoreCase("java.lang.String")) {
+			llsdStream.writeStartElement("string");
+			llsdStream.writeCharacters((String) obj);
+			llsdStream.writeEndElement();
+		} else if (llsdMetadata.equalsIgnoreCase("integer") || llsdMetadata.equalsIgnoreCase("java.lang.Integer")) {
+			llsdStream.writeStartElement("integer");
+			llsdStream.writeCharacters(obj.toString());
+			llsdStream.writeEndElement();
+		} else if (llsdMetadata.equalsIgnoreCase("real")) {
+			Double doubleData = (Double) obj;
+			llsdStream.writeStartElement("real");
+			llsdStream.writeCharacters(doubleData.toString());
+			llsdStream.writeEndElement();
+		} else if (llsdMetadata.equalsIgnoreCase("boolean")) {
+			boolean boolData = (Boolean) obj;
+			llsdStream.writeStartElement("boolean");
+			llsdStream.writeCharacters(boolData ? "1" : "0");
+			llsdStream.writeEndElement();
+			// else if (obj is ulong)
+			// {
+			// throw new
+			// Exception("ulong in LLSD is currently not implemented, fix me!");
+			// }
+		} else if (llsdMetadata.equalsIgnoreCase("uuid") || llsdMetadata.equalsIgnoreCase("java.util.UUID")) {
+			UUID u = (UUID) obj;
+			llsdStream.writeStartElement("uuid");
+			llsdStream.writeCharacters(u.toString());
+			llsdStream.writeEndElement();
+		} else if (llsdMetadata.equalsIgnoreCase("map")) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = (Map<String, Object>) obj;
+			llsdStream.writeStartElement("map");
+			Set<String> keys = map.keySet();
+			Iterator<String> keysIter = keys.iterator();
+			while (keysIter.hasNext()) {
+				llsdStream.writeStartElement("key");
+				String key = (String) keysIter.next();
+				llsdStream.writeCharacters(key);
+				llsdStream.writeEndElement();
+				LLSDWriteOne(llsdStream, map.get(key));
+			}
+			llsdStream.writeEndElement();
+		} else if (llsdMetadata.equalsIgnoreCase("array") || llsdMetadata.equalsIgnoreCase("java.util.ArrayList")) {
+			@SuppressWarnings("unchecked")
+			ArrayList<Object> array = (ArrayList<Object>) obj;
+			llsdStream.writeStartElement("array");
+			Iterator<Object> arrayIter = array.iterator();
+			while (arrayIter.hasNext()) {
+				LLSDWriteOne(llsdStream, arrayIter.next());
+			}
+			llsdStream.writeEndElement();
+		} else if (llsdMetadata.equalsIgnoreCase("struct")) {
+			llsdStream.writeStartElement("map");
+			Field[] fields = obj.getClass().getFields();
+			log.debug("Number of Fields: {}", fields.length);
+			for (int i = 0; i < fields.length; i++) {
+				Field field = fields[i];
+				try {
+					if (!field.isAccessible()) {
+						field.setAccessible(true);
+						processField(llsdStream,obj,field);
+						field.setAccessible(false);
+					} else {
+						processField(llsdStream,obj,field);
+					}
+				} catch (IllegalArgumentException ex) {
+					log.debug("IllegalArgumentException in LLSDWriteOne(struct) field: {}", field.getName() );
+				} catch (IllegalAccessException ex) {
+					log.debug("IllegalAccessException in LLSDWriteOne(struct) field: {}", field.getName() );
+				}
+			}
+			llsdStream.writeEndElement();
+			// }
+			// else if (obj is byte[])
+			// {
+			// byte[] b = (byte[])((obj instanceof byte[]) ? obj : null);
+			// llsdStream.WriteStartElement(String.Empty, "binary",
+			// String.Empty);
+			//
+			// llsdStream.WriteStartAttribute(String.Empty, "encoding",
+			// String.Empty);
+			// llsdStream.WriteString("base64");
+			// llsdStream.WriteEndAttribute();
+			//
+			// //// Calculate the length of the base64 output
+			// //long length = (long)(4.0d * b.Length / 3.0d);
+			// //if (length % 4 != 0) length += 4 - (length % 4);
+			//
+			// //// Create the char[] for base64 output and fill it
+			// //char[] tmp = new char[length];
+			// //int i = Convert.ToBase64CharArray(b, 0, b.Length, tmp, 0);
+			//
+			// //llsdStream.WriteString(new String(tmp));
+			//
+			// llsdStream.WriteString(Convert.ToBase64String(b));
+			// llsdStream.WriteEndElement();
+			// }
+		} else {
+			throw new LLSDSerializeException("Unknown type "
+					+ obj.getClass().getName());
+		}
+	}
+	
+	private static void processField(XMLStreamWriter llsdStream, Object obj, Field field) throws XMLStreamException, IllegalArgumentException, LLSDSerializeException, IllegalAccessException {
+		String mappingName = "";
+		if( field.isAnnotationPresent(LLSDMapping.class)) {
+//			Annotation annotation = field.getAnnotation(LLSDMapping.class);
+//			if (annotation instanceof LLSDMapping) {
+//				LLSDMapping myAnnotation = (LLSDMapping) annotation;
+//				mapTo = myAnnotation.mapTo();
+//				mappingName = myAnnotation.mappedName();
+//			}
+//				
+//			log.debug("maps To field: ", mapTo);
+			mappingName = field.getAnnotation(LLSDMapping.class).mappedName();
+			log.debug("mapping field: {}", mappingName);
+		}
+		llsdStream.writeStartElement("key");
+		llsdStream.writeCharacters(mappingName);
+		llsdStream.writeEndElement();
+		LLSDWriteOne(llsdStream, field.get(obj));		
+	}
 
 	private static Object llsdParseDatatype(XMLStreamReader llsdStream)
 			throws LLSDParseException, XMLStreamException {
@@ -231,7 +288,7 @@ public class LLSD {
 			// ret = Convert.ToDouble(reader.ReadString().Trim());
 			// break;
 			// }
-		} else if (datatype.equalsIgnoreCase("uuid") ) {
+		} else if (datatype.equalsIgnoreCase("uuid")) {
 			// if (reader.IsEmptyElement)
 			// {
 			// reader.Read();
