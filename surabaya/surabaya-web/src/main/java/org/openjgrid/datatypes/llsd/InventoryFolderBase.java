@@ -18,33 +18,36 @@
  */
 package org.openjgrid.datatypes.llsd;
 
+import java.io.InputStreamReader;
 import java.util.UUID;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import org.apache.commons.io.IOUtils;
 
 /**
  * User inventory folder
  * 
  * @author Akira Sonoda
  */
-@LLSDMapping(mapTo="struct", mappedName = "")
 public class InventoryFolderBase extends InventoryNodeBase {
 
 	/**
 	 * The folder this folder is contained in
 	 */
-	
-	@LLSDMapping(mapTo="uuid", mappedName = "ParentID")
 	private UUID parentFolderId;
+
 	/**
 	 * Type of items normally stored in this folder
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "Type")	
 	private int type;
 	/**
 	 * This is used to denote the version of the client, needed
      * because of the changes clients have with inventory from
      * time to time (1.19.1 caused us some fits there).
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "Version")
 	private int version;
 	
 	
@@ -87,6 +90,10 @@ public class InventoryFolderBase extends InventoryNodeBase {
 		this.version = version;
 	}
 	
+	public InventoryFolderBase() {
+		
+	}
+	
     public InventoryFolderBase(UUID id) {
         super.setId(id);
     }
@@ -112,5 +119,34 @@ public class InventoryFolderBase extends InventoryNodeBase {
     	this.version = version;
     }
 	
-	
+    public void fromXml(String xmlString) throws XMLStreamException, InventoryException {
+		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
+		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
+		xmlStream.next();
+		if (!xmlStream.isStartElement() || !xmlStream.getLocalName().equalsIgnoreCase("ServerResponse")) {
+			throw new XMLStreamException("Expected <ServerResponse>");
+		}
+		xmlStream.next();
+		xmlStream.next();
+		while(!xmlStream.getLocalName().equalsIgnoreCase("folder") || !xmlStream.isEndElement()) {
+			String itemName = xmlStream.getLocalName();
+			if( itemName.equalsIgnoreCase("ParentID")) {
+				this.setParentFolderId(UUID.fromString(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("Type")) {
+				this.setType(Integer.parseInt(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("Version")) {
+				this.setVersion(Integer.parseInt(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("Name")) {
+				this.setName(xmlStream.getElementText().trim());
+			} else if( itemName.equalsIgnoreCase("Owner")) {
+				this.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("ID")) {
+				this.setId(UUID.fromString(xmlStream.getElementText().trim()));
+			} else {
+				throw new XMLStreamException("Unable to assign item with name: " + itemName);				
+			}
+			xmlStream.next();
+		}
+    }
 }

@@ -25,25 +25,21 @@ import java.util.UUID;
  * 
  * @author Akira Sonoda
  */
-@LLSDMapping(mapTo="struct", mappedName = "")
 public class InventoryNodeBase {
 
 	/**
 	 * The name of the node (64 characters or less)
 	 */
-	@LLSDMapping(mapTo="string", mappedName = "Name")
 	private String name;
 	
 	/**
 	 * A UUID containing the ID for the inventory node itself
 	 */
-	@LLSDMapping(mapTo="uuid", mappedName = "ID")
 	private UUID id;
 	
 	/**
 	 * The agent who's inventory this is contained by 
 	 */
-	@LLSDMapping(mapTo="uuid", mappedName = "Owner")
 	private UUID ownerId;
 	
 	/**

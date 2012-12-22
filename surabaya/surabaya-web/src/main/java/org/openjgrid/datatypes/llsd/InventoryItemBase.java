@@ -18,7 +18,14 @@
  */
 package org.openjgrid.datatypes.llsd;
 
+import java.io.InputStreamReader;
 import java.util.UUID;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.joda.time.MutableDateTime;
 import org.joda.time.Seconds;
@@ -31,7 +38,6 @@ import org.slf4j.LoggerFactory;
  * @author Akira Sonoda
  *
  */
-@LLSDMapping(mapTo="struct", mappedName = "")
 public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 
 	private static final Logger log = LoggerFactory.getLogger(InventoryItemBase.class);
@@ -39,115 +45,92 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 	/**
 	 * The inventory type of the item.  This is slightly different from the asset type in some situations.
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "InvType")
 	private int invType;
 	
 	/**
 	 * The folder this item is contained in
 	 */
-	@LLSDMapping(mapTo="uuid", mappedName = "Folder")
 	private UUID parentFolderId;
 	
 	/**
 	 * The creator of this item
 	 */
-	@LLSDMapping(mapTo="string", mappedName = "CreatorId")
-	private String creator;
+	private String creatorId;
 	
-	/**
-	 * The CreatorId expressed as a UUID
-	 */
-	@LLSDMapping(mapTo="uuid", mappedName = "CreatorIdAsUuid")
-	private UUID creatorId;
 
 	/**
 	 * Extended creator information of the form <profile url>;<name>
 	 */
-	@LLSDMapping(mapTo="string", mappedName = "CreatorData")
 	private String creatorData;
 	
 	/**
 	 * The description of the inventory item (must be less than 64 characters)
 	 */
-	@LLSDMapping(mapTo="string", mappedName = "Description")
 	private String description;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "CurrentPermissions")
 	private long currentPermissions;
 
 	/**
 	 * A mask containing permissions for the current owner (cannot be enforced)
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "NextPermissions")
 	private long nextPermissions;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "BasePermissions")
 	private long basePermissions;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "EveryOnePermissions")
 	private long everyOnePermissions;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "GroupPermissions")
 	private long groupPermissions;
 
 	/**
 	 * This is an enumerated value determining the type of asset (eg Notecard, Sound, Object, etc)
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "AssetType")
 	private int assetType;
 	
 	/**
 	 * The UUID of the associated asset on the asset server
 	 */
-	@LLSDMapping(mapTo="uuid", mappedName = "AssetID")
 	private UUID assetId;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "GroupID")
 	private UUID groupId;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="boolean", mappedName = "GroupOwned")
 	private boolean isGroupOwned;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "SalePrice")
 	private int salePrice;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "SaleType")
 	private byte saleType;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "Flags")
 	private long flags;
 	
 	/**
 	 * 
 	 */
-	@LLSDMapping(mapTo="integer", mappedName = "CreationDate")
 	private long creationDate;
 
 	/**
@@ -181,30 +164,24 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 	/**
 	 * @return the creator
 	 */
-	public String getCreator() {
-		return creator;
+	public String getCreatorId() {
+		return creatorId;
 	}
 
 	/**
 	 * @param creator the creator to set
 	 */
-	public void setCreator(String creator) {
-		this.creator = creator;
+	public void setCreatorId(String creatorId) {
+		this.creatorId = creatorId;
 	}
 
 	/**
 	 * @return the creatorId
 	 */
-	public UUID getCreatorId() {
-		return creatorId;
+	public UUID getCreatorIdAsUUID() {
+		return UUID.fromString(creatorId);
 	}
 
-	/**
-	 * @param creatorId the creatorId to set
-	 */
-	public void setCreatorId(UUID creatorId) {
-		this.creatorId = creatorId;
-	}
 
 	/**
 	 * @return the creatorData
@@ -250,13 +227,13 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 
         if (!creatorIdentification.contains(";")) {
             // plain UUID
-            creatorId = UUID.fromString(creatorIdentification);
+            creatorId = creatorIdentification;
         }  else {
         	// <uuid>[;<endpoint>[;name]]
             String  name = "Unknown User";
             String[] parts = creatorIdentification.split(";");
             if (parts.length >= 1)
-                creatorId = UUID.fromString(parts[0]);
+                creatorId = parts[0];
             if (parts.length >= 2)
                 creatorData = parts[1];
             if (parts.length >= 3)
@@ -501,7 +478,6 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 		clone.setAssetType(this.getAssetType());
 		clone.setBasePermissions(this.getBasePermissions());
 		clone.setCreationDate(this.getCreationDate());
-		clone.setCreator(this.getCreator());
 		clone.setCreatorData(this.getCreatorData());
 		clone.setCreatorId(this.getCreatorId());
 		clone.setCreatorIdentification(this.getCreatorIdentification());
@@ -526,6 +502,68 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 		return(clone);
 	}
     
+	public void fromXml(String xmlString) throws XMLStreamException, InventoryException {
+		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
+		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
+		xmlStream.next();
+		if (!xmlStream.isStartElement() || !xmlStream.getLocalName().equalsIgnoreCase("ServerResponse")) {
+			throw new XMLStreamException("Expected <ServerResponse>");
+		}
+		xmlStream.next();
+		xmlStream.next();
+		while(!xmlStream.getLocalName().equalsIgnoreCase("item") || !xmlStream.isEndElement()) {
+			String itemName = xmlStream.getLocalName();
+			log.debug("w1::Item xml: " + itemName);
+			if( itemName.equalsIgnoreCase("AssetID")) {
+				this.setAssetId(UUID.fromString(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("AssetType")) {
+				this.setAssetType(Integer.parseInt(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("BasePermissions")) {
+				this.setBasePermissions(Long.parseLong(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("CreationDate")) {
+				this.setCreationDate(Long.parseLong(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("CreatorId")) {
+				this.setCreatorId(xmlStream.getElementText().trim());
+			} else if( itemName.equalsIgnoreCase("CreatorData")) {
+				this.setCreatorData(xmlStream.getElementText().trim());
+			} else if (itemName.equalsIgnoreCase("CurrentPermissions")) {
+				this.setCurrentPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("Description")) {
+				this.setDescription(xmlStream.getElementText().trim());
+			} else if (itemName.equalsIgnoreCase("EveryOnePermissions")) {
+				this.setEveryOnePermissions(Long.parseLong(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("Flags")) {
+				this.setFlags(Long.parseLong(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("Folder")) {
+				this.setParentFolderId(UUID.fromString(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("GroupID")) {
+				this.setGroupId(UUID.fromString(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("GroupOwned")) {
+				this.isGroupOwned(Boolean.parseBoolean(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("GroupPermissions")) {
+				this.setGroupPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("ID")) {
+				this.setId(UUID.fromString(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("InvType")) {
+				this.setInvType(Integer.parseInt(xmlStream.getElementText().trim()));
+			} else if( itemName.equalsIgnoreCase("Name")) {
+				this.setName(xmlStream.getElementText().trim());
+			} else if (itemName.equalsIgnoreCase("NextPermissions")) {
+				this.setNextPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("Owner")) {
+				this.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("SalePrice")) {
+				this.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
+			} else if (itemName.equalsIgnoreCase("SaleType")) {
+				this.setSaleType(Byte.parseByte(xmlStream.getElementText().trim()));
+			} else {
+				throw new XMLStreamException("Unable to assign item with name: " + itemName);				
+			}
+			xmlStream.next();
+		}
+		
+	}
     
 
 }

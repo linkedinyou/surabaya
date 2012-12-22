@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author markusgasser
+ * @author Akria Sonoda
  *
  */
 public class InventoryCollectionTest {

@@ -24,11 +24,12 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Used to serialize a whole inventory for transfer over the network.
@@ -37,7 +38,9 @@ import org.apache.commons.io.IOUtils;
  */
 @LLSDMapping(mapTo="struct", mappedName = "")
 public class InventoryCollection {
-
+	
+	private static final Logger log = LoggerFactory.getLogger(InventoryCollection.class);
+	
 	@LLSDMapping(mapTo="array", mappedName = "Folders")
     public List<InventoryFolderBase> folderList;
 	@LLSDMapping(mapTo="array", mappedName = "Items")
@@ -47,6 +50,10 @@ public class InventoryCollection {
 
 	public InventoryCollection() {
 		
+	}
+	
+	public InventoryCollection(String xmlString) throws XMLStreamException, InventoryException {
+		fromXml(xmlString);
 	}
 	
 	public void fromXml(String xmlString) throws XMLStreamException, InventoryException {
@@ -59,8 +66,12 @@ public class InventoryCollection {
 		}
 		// First the Folders
 		xmlStream.next(); // Brings the Start of folder
+		if (xmlStream.isEndElement() && xmlStream.getLocalName().equalsIgnoreCase("ServerResponse")) {
+			return;
+		}
+		
 		if(xmlStream.isStartElement()) {
-			System.out.println("xml: " +xmlStream.getLocalName());
+			log.debug("xml: " +xmlStream.getLocalName());
 		}
 		xmlStream.next();
 		if(!xmlStream.isEndElement()) { // Folder End Element is reported
@@ -72,23 +83,22 @@ public class InventoryCollection {
 
 	}
 	
-	private void createFolderList(XMLStreamReader xmlStream) {
-		System.out.println("Folder xml: " +xmlStream.getLocalName());
+	private void createFolderList(XMLStreamReader xmlStream) throws XMLStreamException {
+		log.debug("Folder xml: " +xmlStream.getLocalName());
+		throw new XMLStreamException("InventoryCollection.createFolderList() not implemented");
 		
 		
 	}
 	
 	private void createItemsList(XMLStreamReader xmlStream) throws XMLStreamException, InventoryException {
-		System.out.println("f::Item xml: " +xmlStream.getLocalName());
+		log.debug("f::Item xml: " +xmlStream.getLocalName());
 		this.itemList = new ArrayList<InventoryItemBase>();
 		xmlStream.next();
 		while(!xmlStream.getLocalName().equalsIgnoreCase("items") || !xmlStream.isEndElement()) {
-			System.out.println("w1::Item xml: " +xmlStream.getLocalName());
 			InventoryItemBase inventoryItemBase = new InventoryItemBase();
 			xmlStream.next();
 			while(!xmlStream.getLocalName().startsWith("item_") || !xmlStream.isEndElement()) {
 				String itemName = xmlStream.getLocalName();
-				System.out.println("w2::Item xml: " + itemName);
 				if( itemName.equalsIgnoreCase("AssetID")) {
 					inventoryItemBase.setAssetId(UUID.fromString(xmlStream.getElementText().trim()));
 				} else if (itemName.equalsIgnoreCase("AssetType")) {
@@ -98,7 +108,7 @@ public class InventoryCollection {
 				} else if (itemName.equalsIgnoreCase("CreationDate")) {
 					inventoryItemBase.setCreationDate(Long.parseLong(xmlStream.getElementText().trim()));
 				} else if (itemName.equalsIgnoreCase("CreatorId")) {
-					inventoryItemBase.setCreatorId(UUID.fromString(xmlStream.getElementText().trim()));
+					inventoryItemBase.setCreatorId(xmlStream.getElementText().trim());
 				} else if (itemName.equalsIgnoreCase("CreatorData")) {
 					inventoryItemBase.setCreatorData(xmlStream.getElementText().trim());
 				} else if (itemName.equalsIgnoreCase("CurrentPermissions")) {
@@ -135,8 +145,6 @@ public class InventoryCollection {
 					throw new XMLStreamException("Unable to assign item with name: " + itemName);
 				} 				
 				xmlStream.next();
-				System.out.println("w3::Item xml: " + xmlStream.getLocalName());
-
 			}
 			this.itemList.add(inventoryItemBase);
 			xmlStream.next();

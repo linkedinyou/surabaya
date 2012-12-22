@@ -18,9 +18,20 @@
  */
 package org.openjgrid.util;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.UUID;
+
 import org.junit.Before;
 import org.junit.Test;
+import org.openjgrid.datatypes.llsd.InventoryFolderBase;
+import org.openjgrid.datatypes.llsd.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.LLSD;
+import org.openjgrid.datatypes.llsd.LLSDInventoryFolder;
+import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;
+import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
 
 /**
  * @author markusgasser
@@ -44,4 +55,51 @@ public class LLSDTest {
 		LLSD.llsdDeserialize(llsdString);
 	}
 
+	@Test
+	public void testLLSDSerializeStructure() throws Exception {
+		LLSDInventoryFolderContents contents = new LLSDInventoryFolderContents();
+		contents.agent_id = UUID.randomUUID();
+		contents.descendents = 5;
+		contents.folder_id = UUID.randomUUID();
+		contents.owner_id = UUID.randomUUID();
+		contents.version = 1;
+	
+		ArrayList<InventoryFolderBase> categories = new ArrayList<InventoryFolderBase>();
+		InventoryFolderBase base = new InventoryFolderBase();
+		String inventoryFolderString = "<?xml version=\"1.0\"?><ServerResponse><folder type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>46</Type><Version>30</Version><Name>Current Outfit</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>4ba2cf15-8178-293d-fccb-645e7d148d45</ID></folder></ServerResponse>";
+		base.fromXml(inventoryFolderString);
+		categories.add(base);
+		categories.add(base);
+		Iterator<InventoryFolderBase> categoriesIter = categories.iterator();
+		while( categoriesIter.hasNext() ) {
+			contents.categories.add(new LLSDInventoryFolder(categoriesIter.next()) );
+		}
+		
+		ArrayList<InventoryItemBase> items = new ArrayList<InventoryItemBase>();
+		InventoryItemBase itembase = new InventoryItemBase();
+		String itemString = "<?xml version=\"1.0\"?><ServerResponse><item type=\"List\"><AssetID>c75b5707-a07b-4dfd-b195-6a9a51b59fee</AssetID><AssetType>6</AssetType><BasePermissions>581633</BasePermissions><CreationDate>1350721185</CreationDate><CreatorId>3dcad562-c070-4d58-b735-2f04f790a76c</CreatorId><CreatorData></CreatorData><CurrentPermissions>581641</CurrentPermissions><Description>(No Description)</Description><EveryOnePermissions>32768</EveryOnePermissions><Flags>524544</Flags><Folder>477f085e-1fcd-4044-aa1c-7c151ba9391c</Folder><GroupID>00000000-0000-0000-0000-000000000000</GroupID><GroupOwned>False</GroupOwned><GroupPermissions>0</GroupPermissions><ID>64889d18-9e79-46d2-962c-83fa89dae2df</ID><InvType>6</InvType><Name>Akra Necklace</Name><NextPermissions>581632</NextPermissions><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><SalePrice>0</SalePrice><SaleType>0</SaleType></item></ServerResponse>";
+		itembase.fromXml(itemString);
+		items.add(itembase);
+		items.add(itembase);
+		Iterator<InventoryItemBase> itemsIter = items.iterator();
+		while( itemsIter.hasNext() ) {
+			contents.items.add(new LLSDInventoryItem(itemsIter.next()) );
+		}
+		
+		String result = LLSD.LLSDSerialize(contents);
+		System.out.println(result);
+	}
+	
+	@Test
+	public void testInheritedFields() throws Exception {
+		InventoryItemBase itembase = new InventoryItemBase();
+		String itemString = "<?xml version=\"1.0\"?><ServerResponse><item type=\"List\"><AssetID>c75b5707-a07b-4dfd-b195-6a9a51b59fee</AssetID><AssetType>6</AssetType><BasePermissions>581633</BasePermissions><CreationDate>1350721185</CreationDate><CreatorId>3dcad562-c070-4d58-b735-2f04f790a76c</CreatorId><CreatorData></CreatorData><CurrentPermissions>581641</CurrentPermissions><Description>(No Description)</Description><EveryOnePermissions>32768</EveryOnePermissions><Flags>524544</Flags><Folder>477f085e-1fcd-4044-aa1c-7c151ba9391c</Folder><GroupID>00000000-0000-0000-0000-000000000000</GroupID><GroupOwned>False</GroupOwned><GroupPermissions>0</GroupPermissions><ID>64889d18-9e79-46d2-962c-83fa89dae2df</ID><InvType>6</InvType><Name>Akra Necklace</Name><NextPermissions>581632</NextPermissions><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><SalePrice>0</SalePrice><SaleType>0</SaleType></item></ServerResponse>";
+		itembase.fromXml(itemString);
+		List<Field> fields = LLSD.getInheritedPrivateFields(itembase.getClass());
+		Iterator<Field> fieldsIter = fields.iterator();
+		while(fieldsIter.hasNext()) {
+			Field aField = fieldsIter.next();
+			System.out.println("Fieldname:" + aField.getName());
+		}
+	}
 }

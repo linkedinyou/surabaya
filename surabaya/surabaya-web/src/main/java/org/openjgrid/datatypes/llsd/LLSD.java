@@ -29,6 +29,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -104,8 +105,10 @@ public class LLSD {
 		String llsdMetadata = "";
 		if(obj.getClass().isAnnotationPresent(LLSDMapping.class)) {
 			llsdMetadata = obj.getClass().getAnnotation(LLSDMapping.class).mapTo();
+			log.debug("Found annotation: {}", llsdMetadata );
 		} else {
 			llsdMetadata = obj.getClass().getName();
+			log.debug("Found class: {}", llsdMetadata );
 		}
 		log.debug("Metadata: {}", llsdMetadata );
 		
@@ -113,7 +116,7 @@ public class LLSD {
 			llsdStream.writeStartElement("string");
 			llsdStream.writeCharacters((String) obj);
 			llsdStream.writeEndElement();
-		} else if (llsdMetadata.equalsIgnoreCase("integer") || llsdMetadata.equalsIgnoreCase("java.lang.Integer")) {
+		} else if (llsdMetadata.equalsIgnoreCase("integer") || llsdMetadata.equalsIgnoreCase("java.lang.Integer") || llsdMetadata.equalsIgnoreCase("java.lang.Long") || llsdMetadata.equalsIgnoreCase("java.lang.Byte")) {
 			llsdStream.writeStartElement("integer");
 			llsdStream.writeCharacters(obj.toString());
 			llsdStream.writeEndElement();
@@ -122,7 +125,7 @@ public class LLSD {
 			llsdStream.writeStartElement("real");
 			llsdStream.writeCharacters(doubleData.toString());
 			llsdStream.writeEndElement();
-		} else if (llsdMetadata.equalsIgnoreCase("boolean")) {
+		} else if (llsdMetadata.equalsIgnoreCase("boolean") || llsdMetadata.equalsIgnoreCase("java.lang.Boolean") ) {
 			boolean boolData = (Boolean) obj;
 			llsdStream.writeStartElement("boolean");
 			llsdStream.writeCharacters(boolData ? "1" : "0");
@@ -162,10 +165,11 @@ public class LLSD {
 			llsdStream.writeEndElement();
 		} else if (llsdMetadata.equalsIgnoreCase("struct")) {
 			llsdStream.writeStartElement("map");
-			Field[] fields = obj.getClass().getFields();
-			log.debug("Number of Fields: {}", fields.length);
-			for (int i = 0; i < fields.length; i++) {
-				Field field = fields[i];
+			List<Field> fields = getInheritedPrivateFields(obj.getClass());
+			log.debug("Number of Fields: {}", fields.size());
+			Iterator<Field> fieldIter = fields.iterator();
+			while ( fieldIter.hasNext() ) {
+				Field field = fieldIter.next();
 				try {
 					if (!field.isAccessible()) {
 						field.setAccessible(true);
@@ -215,21 +219,14 @@ public class LLSD {
 	private static void processField(XMLStreamWriter llsdStream, Object obj, Field field) throws XMLStreamException, IllegalArgumentException, LLSDSerializeException, IllegalAccessException {
 		String mappingName = "";
 		if( field.isAnnotationPresent(LLSDMapping.class)) {
-//			Annotation annotation = field.getAnnotation(LLSDMapping.class);
-//			if (annotation instanceof LLSDMapping) {
-//				LLSDMapping myAnnotation = (LLSDMapping) annotation;
-//				mapTo = myAnnotation.mapTo();
-//				mappingName = myAnnotation.mappedName();
-//			}
-//				
-//			log.debug("maps To field: ", mapTo);
+			// We only process annotated Fields
 			mappingName = field.getAnnotation(LLSDMapping.class).mappedName();
 			log.debug("mapping field: {}", mappingName);
+			llsdStream.writeStartElement("key");
+			llsdStream.writeCharacters(mappingName);
+			llsdStream.writeEndElement();
+			LLSDWriteOne(llsdStream, field.get(obj));		
 		}
-		llsdStream.writeStartElement("key");
-		llsdStream.writeCharacters(mappingName);
-		llsdStream.writeEndElement();
-		LLSDWriteOne(llsdStream, field.get(obj));		
 	}
 
 	private static Object llsdParseDatatype(XMLStreamReader llsdStream)
@@ -607,4 +604,19 @@ public class LLSD {
 	// reader.NodeType == XmlNodeType.SignificantWhitespace || reader.NodeType
 	// == XmlNodeType.XmlDeclaration)
 	// { reader.Read(); } } }
+	public static List<Field> getInheritedPrivateFields(Class<?> type) {
+	    List<Field> result = new ArrayList<Field>();
+
+	    Class<?> i = type;
+	    while (i != null && i != Object.class) {
+	        for (Field field : i.getDeclaredFields()) {
+	            if (!field.isSynthetic()) {
+	                result.add(field);
+	            }
+	        }
+	        i = i.getSuperclass();
+	    }
+
+	    return result;
+	}
 }
