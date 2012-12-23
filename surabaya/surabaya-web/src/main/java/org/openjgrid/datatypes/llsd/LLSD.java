@@ -140,7 +140,7 @@ public class LLSD {
 			llsdStream.writeStartElement("uuid");
 			llsdStream.writeCharacters(u.toString());
 			llsdStream.writeEndElement();
-		} else if (llsdMetadata.equalsIgnoreCase("map")) {
+		} else if (llsdMetadata.equalsIgnoreCase("map") || llsdMetadata.equalsIgnoreCase("java.util.Map")) {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) obj;
 			llsdStream.writeStartElement("map");

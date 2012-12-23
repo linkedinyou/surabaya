@@ -36,18 +36,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.agents.Agent;
 import org.openjgrid.datatypes.AssetType;
-import org.openjgrid.datatypes.exceptions.NotImplementedException;
 import org.openjgrid.datatypes.llsd.Fetch;
 import org.openjgrid.datatypes.llsd.InventoryCollection;
 import org.openjgrid.datatypes.llsd.InventoryException;
@@ -59,25 +52,15 @@ import org.openjgrid.datatypes.llsd.LLSDInventoryDescendents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolder;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
-import org.openjgrid.datatypes.llsd.LLSDPermissions;
-import org.openjgrid.datatypes.llsd.LLSDSaleInfo;
-import org.openjgrid.services.agent.AgentManagementService;
-import org.openjgrid.services.configuration.ConfigurationService;
 import org.openjgrid.services.inventory.InventoryService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * CAPS Servlet
+ * InventoryDescendentsServlet Servlet
  * 
- * This Servlet will handle various caps like:
- * 
- * - seed
- * - FetchInventory2
- * - FetchInventoryDescendents2
- * - getMesh
- * - getTexture
+ * This Servlet will handle the OpenSim CAPS: FetchInventoryDescendents2
  * 
  * In order to provide some security all CAPS URL contain a random UUID for each
  * Capability. The UUID of an incoming request will be checked against the UUID 
@@ -90,17 +73,13 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "CapsServlet", urlPatterns = { "/CAPS/*" })
-public class CapsServlet extends HttpServlet {
+@WebServlet(name = "InventoryDescendentsServlet", urlPatterns = { "/CAPS/FID/*" })
+public class InventoryDescendentsServlet extends HttpServlet {
 	private static final long serialVersionUID = -8627204223385024589L;
-	private static final Logger log = LoggerFactory
-			.getLogger(CapsServlet.class);
+	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet.class);
 
-	@EJB(mappedName = "java:module/ConfigurationService")
-	private ConfigurationService configuration;
-
-	@EJB(mappedName = "java:module/AgentManagementService")
-	AgentManagementService agentManagementService;
+	// @EJB(mappedName = "java:module/AgentManagementService")
+	// AgentManagementService agentManagementService;
 
 	@EJB
 	private InventoryService inventoryService;
@@ -119,33 +98,19 @@ public class CapsServlet extends HttpServlet {
 			// the last 4 char of the CAPS Path are omitted otherwise a match to
 			// the CAPS Path
 			// given with the agent would not fit
-			Pattern p = Pattern.compile("^/CAPS/(.*)..../");
+			Pattern p = Pattern.compile("^/CAPS/FID/(.*)..../");
 			Matcher m = p.matcher(uri);
 			if (m.find()) {
 				capsPath = m.group(1);
 			}
 			log.debug("CAPS Path: {}", capsPath);
-			Agent agent = agentManagementService.getAgent(capsPath);
-			// Now let's find out, what Caps actually is requested and do the
-			// corresponding processing
-			if (capsPath.equals(agent.getCaps_path())) {
-				response.setContentType("application/xml;charset=UTF-8");
-				StringEntity reply = getSeed(request, httpclient, agent);
-				reply.writeTo(out);
-				out.close();
-			} else if (capsPath.equals(agent.getFetchinventory2_caps().toString())) {
+//			if (capsPath.equals(agent.getFetchinventorydescendents2_caps().toString())) {
+			if (capsPath.equalsIgnoreCase("8a4ebd90-4c35-11e2-bcfd-0800200c9a66")) {
 				response.setContentType(request.getContentType());
-				String reply = fetchInventory2(request, httpclient);
+				String reply = fetchInventoryDescentdents(request, httpclient);
 				StringEntity entity = new StringEntity(reply);
 				entity.writeTo(out);
 				out.close();
-			} else if (capsPath.equals(agent.getFetchinventorydescendents2_caps()
-					.toString())) {
-				String reply = fetchInventoryDescentdents2(request, httpclient);
-			} else if (capsPath.equals(agent.getGetmesh_caps().toString())) {
-				String reply = getMesh(request, httpclient);
-			} else if (capsPath.equals(agent.getGettexture_caps().toString())) {
-				String reply = getTexture(request, httpclient);
 			} else {
 				log.error("Unknow Request received");
 			}
@@ -156,67 +121,58 @@ public class CapsServlet extends HttpServlet {
 		}
 	}
 
-	private StringEntity getSeed(HttpServletRequest request,
-			HttpClient httpclient, Agent agent) throws IOException {
-		log.debug("getSeed() called");
-		HttpPost httppost = new HttpPost("http://localhost:"
-				+ configuration.getProperty("OpenSim", "sim_http_port")
-				+ request.getRequestURI());
-		String jsonString = Util.requestContent2String(request);
-		StringEntity stringEntity = new StringEntity(jsonString,
-				request.getCharacterEncoding());
-		stringEntity.setContentType(request.getContentType());
-		httppost.setEntity(stringEntity);
-		httppost.setHeader("expect", "100-continue");
-		httppost.setHeader("connection", "close");
+//	private StringEntity getSeed(HttpServletRequest request,
+//			HttpClient httpclient, Agent agent) throws IOException {
+//		log.debug("getSeed() called");
+//		HttpPost httppost = new HttpPost("http://localhost:"
+//				+ configuration.getProperty("OpenSim", "sim_http_port")
+//				+ request.getRequestURI());
+//		String jsonString = Util.requestContent2String(request);
+//		StringEntity stringEntity = new StringEntity(jsonString,
+//				request.getCharacterEncoding());
+//		stringEntity.setContentType(request.getContentType());
+//		httppost.setEntity(stringEntity);
+//		httppost.setHeader("expect", "100-continue");
+//		httppost.setHeader("connection", "close");
+//
+//		HttpResponse httpResponse = httpclient.execute(httppost);
+//		HttpEntity entity = httpResponse.getEntity();
+//
+//		long contentLength = entity.getContentLength();
+//		Header contentType = entity.getContentType();
+//		String content = IOUtils.toString(entity.getContent(), "UTF-8");
+//		log.debug("ContentLength: {}", contentLength);
+//		log.debug("ContentType: {}", contentType);
+//		log.debug("Content: {}", content);
+//		String capsFromSim = null;
+//		Pattern p = Pattern.compile("^<llsd><map>(.*)</map></llsd>");
+//		Matcher m = p.matcher(content);
+//		if (m.find()) {
+//			capsFromSim = m.group(1);
+//		}
+//		log.debug("CAPS from OpenSim: {}", capsFromSim);
+//		StringBuilder sb = new StringBuilder("<llsd><map>");
+//		sb.append(capsFromSim);
+//		sb.append("<key>FetchInventoryDescendents2</key><string>http://");
+//		sb.append(configuration.getProperty("Surabaya", "hostname"));
+//		sb.append(":");
+//		sb.append(configuration.getProperty("Surabaya", "http_port"));
+//		sb.append("/CAPS/").append(agent.getFetchinventorydescendents2_caps()).append("0000/</string>");
+//		// TODO add the CAPS URLs for FetchInventory2 served by this Server, to
+//		// the List.
+//		// TODO add the CAPS URLs for GetTexture served by this Server, to the
+//		// List.
+//		// TODO add the CAPS URLs for GetMesh served by this Server, to the
+//		// List.
+//		sb.append("</map></llsd>");
+//		log.debug("CAPS after Injection {}", sb.toString());
+//		StringEntity result = new StringEntity(sb.toString());
+//		return (result);
+//	}
 
-		HttpResponse httpResponse = httpclient.execute(httppost);
-		HttpEntity entity = httpResponse.getEntity();
-
-		long contentLength = entity.getContentLength();
-		Header contentType = entity.getContentType();
-		String content = IOUtils.toString(entity.getContent(), "UTF-8");
-		log.debug("ContentLength: {}", contentLength);
-		log.debug("ContentType: {}", contentType);
-		log.debug("Content: {}", content);
-		String capsFromSim = null;
-		Pattern p = Pattern.compile("^<llsd><map>(.*)</map></llsd>");
-		Matcher m = p.matcher(content);
-		if (m.find()) {
-			capsFromSim = m.group(1);
-		}
-		log.debug("CAPS from OpenSim: {}", capsFromSim);
-		StringBuilder sb = new StringBuilder("<llsd><map>");
-		sb.append(capsFromSim);
-		sb.append("<key>FetchInventoryDescendents2</key><string>http://");
-		sb.append(configuration.getProperty("Surabaya", "hostname"));
-		sb.append(":");
-		sb.append(configuration.getProperty("Surabaya", "http_port"));
-		sb.append("/CAPS/").append(agent.getFetchinventorydescendents2_caps()).append("0000/</string>");
-		// TODO add the CAPS URLs for FetchInventory2 served by this Server, to
-		// the List.
-		// TODO add the CAPS URLs for GetTexture served by this Server, to the
-		// List.
-		// TODO add the CAPS URLs for GetMesh served by this Server, to the
-		// List.
-		sb.append("</map></llsd>");
-		log.debug("CAPS after Injection {}", sb.toString());
-		StringEntity result = new StringEntity(sb.toString());
-		return (result);
-	}
-
-	private String fetchInventory2(HttpServletRequest request,
-		HttpClient httpclient) throws IOException {
-		// TODO call fetchInvntory2
-		log.debug("fetchInventory2() called");
-		String requestString = Util.requestContent2String(request);
-		log.debug("Content: {}", requestString);
-
-		return (null);
-	}
 
 	@SuppressWarnings("unchecked")
-	private String fetchInventoryDescentdents2(HttpServletRequest request,
+	private String fetchInventoryDescentdents(HttpServletRequest request,
 			HttpClient httpclient) throws IOException, XMLStreamException, InventoryException {
 		log.debug("fetchInventoryDescentdents2() called");
 		String requestString = Util.requestContent2String(request);
@@ -299,18 +255,6 @@ public class CapsServlet extends HttpServlet {
 		log.debug("outgoingreply: {}", result.toString());
 
 		return (result.toString());
-	}
-
-	private String getMesh(HttpServletRequest request, HttpClient httpclient) {
-		// TODO call getMesh
-		log.debug("getMesh() called");
-		return (null);
-	}
-
-	private String getTexture(HttpServletRequest request, HttpClient httpclient) {
-		// TODO call getTexture
-		log.debug("getTexture() called");
-		return (null);
 	}
 
 	/**
@@ -475,9 +419,7 @@ public class CapsServlet extends HttpServlet {
 		}
 		return(result);
 	}
-	
-	
-	
+		
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
 	 *      response)
