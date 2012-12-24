@@ -69,4 +69,12 @@ public class InventoryItemBaseTest {
 		result = inventoryItemBase.getAssetId();
 		assert(result == null);
 	}
+	
+	@Test
+	public void testEmptyXML() throws XMLStreamException, InventoryException {
+		String xmldata = "<?xml version=\"1.0\"?><ServerResponse />";
+		InventoryItemBase collection = new InventoryItemBase();
+		collection.fromXml(xmldata.toString());
+	}
+
 }

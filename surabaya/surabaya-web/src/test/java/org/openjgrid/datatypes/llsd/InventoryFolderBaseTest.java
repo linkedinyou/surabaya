@@ -50,5 +50,21 @@ public class InventoryFolderBaseTest {
 		invntoryFolderBase.fromXml(xmlString);
 		assert(invntoryFolderBase.getId().equals(UUID.fromString("4ba2cf15-8178-293d-fccb-645e7d148d45")));
 	}
+	
+	@Test
+	public void test2FromXml() throws XMLStreamException, InventoryException {
+		String xmlString = "<?xml version=\"1.0\"?><ServerResponse><folder type=\"List\"><ParentID>fb1cb1cd-c9fa-4cfc-86e3-42b9459424d0</ParentID><Type>-1</Type><Version>1</Version><Name>****</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>2ee9f743-6256-48b0-a5e1-bbd4ffe37d85</ID></folder></ServerResponse>";
+		InventoryFolderBase invntoryFolderBase = new InventoryFolderBase();
+		invntoryFolderBase.fromXml(xmlString);
+		assert(invntoryFolderBase.getId().equals(UUID.fromString("4ba2cf15-8178-293d-fccb-645e7d148d45")));
+	}
+	
+	@Test
+	public void testEmptyXML() throws XMLStreamException, InventoryException {
+		String xmldata = "<?xml version=\"1.0\"?><ServerResponse />";
+		InventoryFolderBase collection = new InventoryFolderBase();
+		collection.fromXml(xmldata.toString());
+	}
+
 
 }

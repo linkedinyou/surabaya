@@ -81,15 +81,10 @@ public class LLSD {
 				.createXMLStreamWriter(llsdWriter);
 
 		llsdStream.writeStartElement("llsd");
-
 		LLSDWriteOne(llsdStream, obj);
-		
 		llsdStream.writeEndElement();
-
 		llsdStream.flush();
-		
 		String result = llsdWriter.getBuffer().toString();
-		log.debug("result of LLSDSerialize: {}", result);
 
 		return (result);
 	}
@@ -105,12 +100,9 @@ public class LLSD {
 		String llsdMetadata = "";
 		if(obj.getClass().isAnnotationPresent(LLSDMapping.class)) {
 			llsdMetadata = obj.getClass().getAnnotation(LLSDMapping.class).mapTo();
-			log.debug("Found annotation: {}", llsdMetadata );
 		} else {
 			llsdMetadata = obj.getClass().getName();
-			log.debug("Found class: {}", llsdMetadata );
 		}
-		log.debug("Metadata: {}", llsdMetadata );
 		
 		if (llsdMetadata.equalsIgnoreCase("string") || llsdMetadata.equalsIgnoreCase("java.lang.String")) {
 			llsdStream.writeStartElement("string");
@@ -166,7 +158,6 @@ public class LLSD {
 		} else if (llsdMetadata.equalsIgnoreCase("struct")) {
 			llsdStream.writeStartElement("map");
 			List<Field> fields = getInheritedPrivateFields(obj.getClass());
-			log.debug("Number of Fields: {}", fields.size());
 			Iterator<Field> fieldIter = fields.iterator();
 			while ( fieldIter.hasNext() ) {
 				Field field = fieldIter.next();
@@ -221,7 +212,6 @@ public class LLSD {
 		if( field.isAnnotationPresent(LLSDMapping.class)) {
 			// We only process annotated Fields
 			mappingName = field.getAnnotation(LLSDMapping.class).mappedName();
-			log.debug("mapping field: {}", mappingName);
 			llsdStream.writeStartElement("key");
 			llsdStream.writeCharacters(mappingName);
 			llsdStream.writeEndElement();

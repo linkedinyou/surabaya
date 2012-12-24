@@ -128,6 +128,9 @@ public class InventoryFolderBase extends InventoryNodeBase {
 			throw new XMLStreamException("Expected <ServerResponse>");
 		}
 		xmlStream.next();
+		if (xmlStream.isEndElement() && xmlStream.getLocalName().equalsIgnoreCase("ServerResponse")) {
+			return;
+		}
 		xmlStream.next();
 		while(!xmlStream.getLocalName().equalsIgnoreCase("folder") || !xmlStream.isEndElement()) {
 			String itemName = xmlStream.getLocalName();

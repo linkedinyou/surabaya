@@ -265,7 +265,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */
-	private LLSDInventoryDescendents fetchInventory(
+	public LLSDInventoryDescendents fetchInventory(
 			LLSDFetchInventoryDescendents inventoryRequest) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
 		LLSDInventoryDescendents reply = new LLSDInventoryDescendents();
 		LLSDInventoryFolderContents contents = new LLSDInventoryFolderContents();
@@ -337,7 +337,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */
-	private Fetch fetch(UUID agent_id, UUID folder_id,
+	public Fetch fetch(UUID agent_id, UUID folder_id,
 			UUID owner_id, boolean fetch_folders, boolean fetch_items,
 			int sort_order) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
         log.debug(

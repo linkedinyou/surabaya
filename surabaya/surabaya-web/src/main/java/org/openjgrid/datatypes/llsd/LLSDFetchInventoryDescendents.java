@@ -39,6 +39,7 @@ public class LLSDFetchInventoryDescendents {
     public boolean fetch_folders;
     public boolean fetch_items;
 
+    public LLSDFetchInventoryDescendents() {}
     
     /**
 	 * @param inventoryHashMap

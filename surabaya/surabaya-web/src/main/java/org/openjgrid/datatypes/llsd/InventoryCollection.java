@@ -57,6 +57,10 @@ public class InventoryCollection {
 	}
 	
 	public void fromXml(String xmlString) throws XMLStreamException, InventoryException {
+		ArrayList<InventoryItemBase> tmpItemList = new ArrayList<InventoryItemBase>();
+		ArrayList<InventoryFolderBase> tmpFolderList = new ArrayList<InventoryFolderBase>();
+		String itemName = null;
+
 		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
@@ -70,84 +74,127 @@ public class InventoryCollection {
 			return;
 		}
 		
-		if(xmlStream.isStartElement()) {
-			log.debug("xml: " +xmlStream.getLocalName());
-		}
-		xmlStream.next();
-		if(!xmlStream.isEndElement()) { // Folder End Element is reported
-			createFolderList(xmlStream);
-		} else {
+		while(!xmlStream.getLocalName().equalsIgnoreCase("ServerResponse") || !xmlStream.isEndElement()) {
 			xmlStream.next();
-			createItemsList(xmlStream);
-		}
-
-	}
-	
-	private void createFolderList(XMLStreamReader xmlStream) throws XMLStreamException {
-		log.debug("Folder xml: " +xmlStream.getLocalName());
-		throw new XMLStreamException("InventoryCollection.createFolderList() not implemented");
-		
-		
-	}
-	
-	private void createItemsList(XMLStreamReader xmlStream) throws XMLStreamException, InventoryException {
-		log.debug("f::Item xml: " +xmlStream.getLocalName());
-		this.itemList = new ArrayList<InventoryItemBase>();
-		xmlStream.next();
-		while(!xmlStream.getLocalName().equalsIgnoreCase("items") || !xmlStream.isEndElement()) {
-			InventoryItemBase inventoryItemBase = new InventoryItemBase();
-			xmlStream.next();
-			while(!xmlStream.getLocalName().startsWith("item_") || !xmlStream.isEndElement()) {
-				String itemName = xmlStream.getLocalName();
-				if( itemName.equalsIgnoreCase("AssetID")) {
-					inventoryItemBase.setAssetId(UUID.fromString(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("AssetType")) {
-					inventoryItemBase.setAssetType(Integer.parseInt(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("BasePermissions")) {
-					inventoryItemBase.setBasePermissions(Long.parseLong(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("CreationDate")) {
-					inventoryItemBase.setCreationDate(Long.parseLong(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("CreatorId")) {
-					inventoryItemBase.setCreatorId(xmlStream.getElementText().trim());
-				} else if (itemName.equalsIgnoreCase("CreatorData")) {
-					inventoryItemBase.setCreatorData(xmlStream.getElementText().trim());
-				} else if (itemName.equalsIgnoreCase("CurrentPermissions")) {
-					inventoryItemBase.setCurrentPermissions(Long.parseLong(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("Description")) {
-					inventoryItemBase.setDescription(xmlStream.getElementText().trim());
-				} else if (itemName.equalsIgnoreCase("EveryOnePermissions")) {
-					inventoryItemBase.setEveryOnePermissions(Long.parseLong(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("Flags")) {
-					inventoryItemBase.setFlags(Long.parseLong(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("Folder")) {
-					inventoryItemBase.setParentFolderId(UUID.fromString(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("GroupID")) {
-					inventoryItemBase.setGroupId(UUID.fromString(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("GroupOwned")) {
-					inventoryItemBase.isGroupOwned(Boolean.parseBoolean(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("GroupPermissions")) {
-					inventoryItemBase.setGroupPermissions(Long.parseLong(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("ID")) {
-					inventoryItemBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("InvType")) {
-					inventoryItemBase.setInvType(Integer.parseInt(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("Name")) {
-					inventoryItemBase.setName(xmlStream.getElementText().trim());
-				} else if (itemName.equalsIgnoreCase("NextPermissions")) {
-					inventoryItemBase.setNextPermissions(Long.parseLong(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("Owner")) {
-					inventoryItemBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("SalePrice")) {
-					inventoryItemBase.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
-				} else if (itemName.equalsIgnoreCase("SaleType")) {
-					inventoryItemBase.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
-				} else {
-					throw new XMLStreamException("Unable to assign item with name: " + itemName);
-				} 				
+			while(!xmlStream.getLocalName().equalsIgnoreCase("folders") || !xmlStream.isEndElement()) {
+				InventoryFolderBase inventoryFolderBase = new InventoryFolderBase();
+				xmlStream.next();
+				while(!xmlStream.getLocalName().startsWith("folder_") || !xmlStream.isEndElement()) {
+					itemName = xmlStream.getLocalName();
+					switch (itemName) {
+					case "ParentID":
+						inventoryFolderBase.setParentFolderId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "Type":
+						inventoryFolderBase.setType(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "Name":
+						inventoryFolderBase.setName(xmlStream.getElementText().trim());
+						break;
+					case "Version":
+						inventoryFolderBase.setVersion(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "Owner":
+						inventoryFolderBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "ID":
+						inventoryFolderBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					default:
+						throw new XMLStreamException("Unable to assign item with name: " + itemName);
+					}
+					xmlStream.next();
+				}
+				tmpFolderList.add(inventoryFolderBase);
 				xmlStream.next();
 			}
-			this.itemList.add(inventoryItemBase);
+			if(xmlStream.getLocalName().equalsIgnoreCase("folders") && xmlStream.isEndElement()) {
+				this.folderList = tmpFolderList;
+				xmlStream.next();
+			}
 			xmlStream.next();
+
+			while(!xmlStream.getLocalName().equalsIgnoreCase("items") || !xmlStream.isEndElement()) {
+				InventoryItemBase inventoryItemBase = new InventoryItemBase();
+				xmlStream.next();
+				while(!xmlStream.getLocalName().startsWith("item_") || !xmlStream.isEndElement()) {
+					itemName = xmlStream.getLocalName();
+					switch(itemName) {
+					case "AssetID":
+						inventoryItemBase.setAssetId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "AssetType":
+						inventoryItemBase.setAssetType(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "BasePermissions":
+						inventoryItemBase.setBasePermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "CreationDate":
+						inventoryItemBase.setCreationDate(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "CreatorId":
+						inventoryItemBase.setCreatorId(xmlStream.getElementText().trim());
+						break;
+					case "CreatorData":
+						inventoryItemBase.setCreatorData(xmlStream.getElementText().trim());
+						break;
+					case "CurrentPermissions":
+						inventoryItemBase.setCurrentPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "Description":
+						inventoryItemBase.setDescription(xmlStream.getElementText().trim());
+						break;
+					case "EveryOnePermissions":
+						inventoryItemBase.setEveryOnePermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "Flags":
+						inventoryItemBase.setFlags(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "Folder":
+						inventoryItemBase.setParentFolderId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "GroupID":
+						inventoryItemBase.setGroupId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "GroupOwned":
+						inventoryItemBase.isGroupOwned(Boolean.parseBoolean(xmlStream.getElementText().trim()));
+						break;
+					case "GroupPermissions":
+						inventoryItemBase.setGroupPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "ID":
+						inventoryItemBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "InvType":
+						inventoryItemBase.setInvType(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "Name":
+						inventoryItemBase.setName(xmlStream.getElementText().trim());
+						break;
+					case "NextPermissions":
+						inventoryItemBase.setNextPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "Owner":
+						inventoryItemBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "SalePrice":
+						inventoryItemBase.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "SaleType":
+						inventoryItemBase.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					default:
+						throw new XMLStreamException("Unable to assign item with name: " + itemName);
+					} 				
+					xmlStream.next();
+				}
+				tmpItemList.add(inventoryItemBase);
+				xmlStream.next();
+			}
+			if(xmlStream.getLocalName().equalsIgnoreCase("items") && xmlStream.isEndElement()) {
+				this.itemList = tmpItemList;
+				xmlStream.next();
+			}
 		}
 	}
 }

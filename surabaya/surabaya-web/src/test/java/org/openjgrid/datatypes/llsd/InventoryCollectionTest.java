@@ -40,6 +40,7 @@ public class InventoryCollectionTest {
 	public void setUp() throws Exception {
 	}
 
+	
 	@Test
 	public void testItemsFromXML() throws XMLStreamException, InventoryException {
 		StringBuilder xmldata = new StringBuilder("<?xml version=\"1.0\"?><ServerResponse><FOLDERS type=\"List\" /><ITEMS type=\"List\">");
@@ -68,5 +69,20 @@ public class InventoryCollectionTest {
 		assert (collection.itemList.size() == 19);
 		assert (collection.itemList.get(18).getAssetId().equals(UUID.fromString("42293c89-43cd-4ed5-8174-67f0b28198b5")));
 	}
+
+	@Test
+	public void testFoldersFromXML() throws XMLStreamException, InventoryException {
+		StringBuilder xmldata = new StringBuilder("<?xml version=\"1.0\"?><ServerResponse><FOLDERS type=\"List\"><folder_0 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>20</Type><Version>1</Version><Name>Animations</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>0a2a9d1e-9b33-439c-a771-42e472291450</ID></folder_0><folder_1 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>5</Type><Version>9</Version><Name>Clothing</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>12025c7f-84bb-4e66-99d9-5f22251313a4</ID></folder_1><folder_2 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>15</Type><Version>1</Version><Name>Photo Album</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>1dc92ed4-f30c-442a-9fee-0b6fdc62d631</ID></folder_2><folder_3 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>2</Type><Version>1</Version><Name>Calling Cards</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>2a31586d-f7a3-41db-a40f-1bb3677e867c</ID></folder_3><folder_4 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>21</Type><Version>1</Version><Name>Gestures</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>33da2b67-763e-4b3f-8d6f-151e609a1486</ID></folder_4><folder_5 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>-1</Type><Version>2</Version><Name>#Firestorm</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>39b7ddfe-c796-6fc1-dd57-4ea57cce5f9f</ID></folder_5><folder_6 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>10</Type><Version>1</Version><Name>Scripts</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>4095f330-2d32-455b-b3e1-287461ddeba3</ID></folder_6><folder_7 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>13</Type><Version>5</Version><Name>Body Parts</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>432ca0b1-f0be-4191-b504-1aa8f873141e</ID></folder_7><folder_8 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>46</Type><Version>32</Version><Name>Current Outfit</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>4ba2cf15-8178-293d-fccb-645e7d148d45</ID></folder_8><folder_9 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>7</Type><Version>1</Version><Name>Notecards</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>4d246b2d-c6ed-400d-9916-22433731ac4f</ID></folder_9><folder_10 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>16</Type><Version>1</Version><Name>Lost And Found</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>8c61e33f-f705-4ad7-88dc-8bc6f1dc1023</ID></folder_10><folder_11 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>6</Type><Version>1</Version><Name>Objects</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>9406d1c4-e84d-462c-b11f-a0c258b51894</ID></folder_11><folder_12 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>0</Type><Version>1</Version><Name>Textures</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>bf6639d8-290d-4b2e-8b55-2c1a0b94dee2</ID></folder_12><folder_13 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>3</Type><Version>1</Version><Name>Landmarks</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>e9d0ae43-6a93-446c-a971-9a7ab279ccf7</ID></folder_13><folder_14 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>14</Type><Version>14</Version><Name>Trash</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>eb36f92f-de13-450c-b8a1-905a5708accb</ID></folder_14><folder_15 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>1</Type><Version>1</Version><Name>Sounds</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>efa4405b-457d-4269-8488-6607c1c72280</ID></folder_15><folder_16 type=\"List\"><ParentID>10a7b798-806e-4418-9816-eb75ad3ae9f7</ParentID><Type>23</Type><Version>1</Version><Name>Favorites</Name><Owner>3dcad562-c070-4d58-b735-2f04f790a76c</Owner><ID>ff1fa739-374a-037f-ddac-07c5d4631088</ID></folder_16></FOLDERS><ITEMS type=\"List\" /></ServerResponse>");
+		InventoryCollection collection = new InventoryCollection();
+		collection.fromXml(xmldata.toString());
+	}
+
+	@Test
+	public void testEmptyXML() throws XMLStreamException, InventoryException {
+		String xmldata = "<?xml version=\"1.0\"?><ServerResponse />";
+		InventoryCollection collection = new InventoryCollection();
+		collection.fromXml(xmldata.toString());
+	}
+	
 
 }

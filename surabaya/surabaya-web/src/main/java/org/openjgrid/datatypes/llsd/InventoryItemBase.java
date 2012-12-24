@@ -255,9 +255,6 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 	 * @throws InventoryException 
 	 */
 	public void setDescription(String description) throws InventoryException {
-		if (description.length() > 64) {
-			throw new InventoryException("InventoryItemBase: Description exceeds 64 chars"); 
-		}
 		this.description = description;
 	}
 
@@ -511,6 +508,9 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 			throw new XMLStreamException("Expected <ServerResponse>");
 		}
 		xmlStream.next();
+		if (xmlStream.isEndElement() && xmlStream.getLocalName().equalsIgnoreCase("ServerResponse")) {
+			return;
+		}
 		xmlStream.next();
 		while(!xmlStream.getLocalName().equalsIgnoreCase("item") || !xmlStream.isEndElement()) {
 			String itemName = xmlStream.getLocalName();
