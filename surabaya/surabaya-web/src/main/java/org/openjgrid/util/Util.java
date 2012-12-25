@@ -22,6 +22,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -80,5 +82,11 @@ public final class Util {
 		while (aStream.read(dataBuffer) != -1) { }
 		return (dataBuffer);
 		
+	}
+	
+	public static boolean parseUUID (String uuidString) {
+		Pattern p = Pattern.compile("[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}");
+		Matcher m = p.matcher(uuidString);
+		return(m.find());
 	}
 }
