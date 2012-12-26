@@ -89,4 +89,8 @@ public final class Util {
 		Matcher m = p.matcher(uuidString);
 		return(m.find());
 	}
+	
+	public static boolean isNullOrEmpty(String aString) {
+		return(aString==null || aString.isEmpty());
+	}
 }

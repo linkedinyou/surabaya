@@ -59,6 +59,7 @@ public class ConfigurationService {
     	props.put("Surabaya", surabaya_props);
     	ConcurrentMap<String, String> grid_props = new ConcurrentHashMap<String, String>();
     	grid_props.put("inventory_service", "http://localhost:8003");
+    	grid_props.put("asset_service", "http://localhost:8003");
     	props.put("grid", grid_props);
     	
     

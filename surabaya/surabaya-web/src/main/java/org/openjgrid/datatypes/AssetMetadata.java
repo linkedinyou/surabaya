@@ -21,12 +21,19 @@ package org.openjgrid.datatypes;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
+import org.openjgrid.services.asset.AssetServiceException;
+import org.openjgrid.util.Util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Akira Sonoda
  *
  */
 public class AssetMetadata {
+	
+	private static final Logger log = LoggerFactory.getLogger(AssetMetadata.class);
+	
 	private UUID fullid;
 	private String id;
 	private String name = "";
@@ -57,14 +64,13 @@ public class AssetMetadata {
 	}
 	
 	public void setID(String value) {
-//  TODO      UUID uuid = UUID.fromString("");
-//        if (UUID.TryParse(value, out uuid))
-//        {
-//            m_fullid = uuid;
-//            m_id = m_fullid.ToString();
-//        }
-//        else
-//            m_id = value;
+		UUID uuid = Constants.UUID_ZERO;
+		if (Util.parseUUID(value)) {
+            id = value;
+		} else {
+            fullid = uuid;
+            id = fullid.toString();
+        } 
 		
 	}
 	
@@ -100,11 +106,13 @@ public class AssetMetadata {
 		asset_type = value;
 	}
 
-	public String getContentType() {
-// TODO		if ( !(/* TODO [ String.IsNullOrEmpty(m_content_type) ] */) ) {
-//			return(m_content_type);
-//		}
-		return(content_type);
+	public String getContentType() throws AssetServiceException {
+		if ( !(content_type==null || content_type.isEmpty())  ) {
+			return(content_type);
+		} else {
+			log.error("SLUtil.SLAssetTypeToContentType(m_type) not implemented");
+			throw new AssetServiceException("SLUtil.SLAssetTypeToContentType(m_type) not implemented");
+		}
 	}
 
 	public byte[] getSHA1() {

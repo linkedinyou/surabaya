@@ -7,7 +7,13 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import org.openjgrid.datatypes.AssetBase;
@@ -38,6 +44,18 @@ public class AssetService {
 		log.debug("getAsset(assetID:{})", assetID);
 		AssetBase assetBase = new AssetBase();
 		try {
+			HttpGet httpget = new HttpGet(configuration.getProperty("grid",
+					"asset_service") + "/assets/" + assetID);
+    		HttpResponse httpResponse = httpclient.execute(httpget);
+        	HttpEntity entity = httpResponse.getEntity();
+
+        	long contentLength = entity.getContentLength();
+        	Header contentType = entity.getContentType();
+        	String content = IOUtils.toString(entity.getContent(), "UTF-8");
+        	log.debug("ContentLength: {}", contentLength);
+        	log.debug("ContentType: {}", contentType);
+        	log.debug("respstring: {}", content);
+			
 			
 		} catch (Exception ex) {
 			log.error("Exception in AssetService", ex);
