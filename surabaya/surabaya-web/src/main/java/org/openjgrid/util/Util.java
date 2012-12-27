@@ -93,4 +93,62 @@ public final class Util {
 	public static boolean isNullOrEmpty(String aString) {
 		return(aString==null || aString.isEmpty());
 	}
+	
+    /**
+     * Clamp a given value between a range
+     * @param value Value to clamp
+     * @param min Minimum allowable value
+     * @param max Maximum allowable value
+     * @return A value inclusively between lower and upper
+     */
+    public static float clamp(float value, float min, float max)
+    {
+        // First we check to see if we're greater than the max
+        value = (value > max) ? max : value;
+
+        // Then we check to see if we're less than the min.
+        value = (value < min) ? min : value;
+
+        // There's no check to see if min > max.
+        return value;
+    }
+
+    /**
+     * Clamp a given value between a range
+     * @param value Value to clamp
+     * @param min Minimum allowable value
+     * @param max Maximum allowable value
+     * @return A value inclusively between lower and upper
+     */
+    public static double clamp(double value, double min, double max)
+    {
+        // First we check to see if we're greater than the max
+        value = (value > max) ? max : value;
+
+        // Then we check to see if we're less than the min.
+        value = (value < min) ? min : value;
+
+        // There's no check to see if min > max.
+        return value;
+    }
+
+    /**
+     * Clamp a given value between a range
+     * @param value Value to clamp
+     * @param min Minimum allowable value
+     * @param max Maximum allowable value
+     * @return A value inclusively between lower and upper
+     */
+    public static int clamp(int value, int min, int max)
+    {
+        // First we check to see if we're greater than the max
+        value = (value > max) ? max : value;
+
+        // Then we check to see if we're less than the min.
+        value = (value < min) ? min : value;
+
+        // There's no check to see if min > max.
+        return value;
+    }
+
 }

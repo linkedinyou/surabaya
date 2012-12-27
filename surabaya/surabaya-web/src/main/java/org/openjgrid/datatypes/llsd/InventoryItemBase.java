@@ -514,7 +514,6 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 		xmlStream.next();
 		while(!xmlStream.getLocalName().equalsIgnoreCase("item") || !xmlStream.isEndElement()) {
 			String itemName = xmlStream.getLocalName();
-			log.debug("w1::Item xml: " + itemName);
 			if( itemName.equalsIgnoreCase("AssetID")) {
 				this.setAssetId(UUID.fromString(xmlStream.getElementText().trim()));
 			} else if (itemName.equalsIgnoreCase("AssetType")) {

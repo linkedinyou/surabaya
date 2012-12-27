@@ -18,8 +18,15 @@
  */
 package org.openjgrid.datatypes;
 
+import java.io.InputStreamReader;
 import java.util.UUID;
 
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import org.apache.commons.io.IOUtils;
+import org.openjgrid.services.asset.AssetServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,6 +108,71 @@ public class AssetBase {
 					.getAssetType());
 	}
 
+	
+	public void fromXml(String xmlString) throws XMLStreamException {
+		String itemName = null;
+
+		xmlString = xmlString.substring(1);
+		
+		log.debug("Clean XML String: {}", xmlString);
+		
+		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
+		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
+		xmlStream.next();
+		if (!xmlStream.isStartElement() || !xmlStream.getLocalName().equalsIgnoreCase("AssetBase")) {
+			throw new XMLStreamException("Expected <AssetBase>");
+		}
+		xmlStream.next();
+		while(!xmlStream.getLocalName().equalsIgnoreCase("AssetBase") || !xmlStream.isEndElement()) {
+			itemName = xmlStream.getLocalName();
+
+			switch(itemName) {
+			case "Data":
+				this.data = xmlStream.getElementText().getBytes();
+				break;
+			case "FullID":
+				xmlStream.next();
+				xmlStream.next();
+				this.metadata.setFullID(UUID.fromString(xmlStream.getText()));
+				xmlStream.next();
+				xmlStream.next();
+				break;
+			case "ID":
+				this.metadata.setID(xmlStream.getElementText());
+				break;
+			case "Name":
+				this.metadata.setName(xmlStream.getElementText());
+				break;
+			case "Description":
+				xmlStream.next();
+				if(!xmlStream.isEndElement()) {
+					this.metadata.setDescription(xmlStream.getText());
+					xmlStream.next();
+				}
+				break;
+			case "Type":
+				this.metadata.setType((byte) Integer.parseInt(xmlStream.getElementText()));
+				break;
+			case "Local":
+				this.metadata.isLocal(Boolean.parseBoolean(xmlStream.getElementText()));
+				break;
+			case "Temporary":
+				this.metadata.isTemporary(Boolean.parseBoolean(xmlStream.getElementText()));
+				break;
+			case "CreatorID":
+				this.metadata.setCreatorID(xmlStream.getElementText());
+				break;
+			case "Flags":
+				this.metadata.setFlags(AssetFlags.valueOf(xmlStream.getElementText()).getType());
+				break;
+			default:
+				throw new XMLStreamException("Unable to assign item with name: " + itemName);				
+			}
+			xmlStream.next();
+		}
+		xmlStream.close();
+	}
 	/**
 	 * @return the data
 	 */
@@ -184,8 +256,12 @@ public class AssetBase {
     	metadata.setFlags(value); 
     }
 
-    public AssetMetadata getMetadata() {
-        return (metadata); 
+    public int getDataLength() {
+    	return(data.length);
+    }
+    
+    public String getContentType() throws AssetServiceException {
+    	return(metadata.getContentType());
     }
     public void setMetadata(AssetMetadata value) { 
     	metadata = value; 

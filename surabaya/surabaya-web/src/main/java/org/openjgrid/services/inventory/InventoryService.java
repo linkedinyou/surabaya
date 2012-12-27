@@ -1,7 +1,6 @@
 package org.openjgrid.services.inventory;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
@@ -19,7 +18,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.exceptions.NotImplementedException;
 import org.openjgrid.datatypes.llsd.InventoryCollection;
 import org.openjgrid.datatypes.llsd.InventoryException;
 import org.openjgrid.datatypes.llsd.InventoryFolderBase;

@@ -32,13 +32,15 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.HttpResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.HttpClient;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.openjgrid.datatypes.AssetBase;
+import org.openjgrid.datatypes.AssetType;
 import org.openjgrid.datatypes.Constants;
 import org.openjgrid.services.asset.AssetService;
-import org.openjgrid.services.inventory.InventoryService;
+import org.openjgrid.services.asset.AssetServiceException;
+import org.openjgrid.util.IntRange;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,9 +106,9 @@ public class TextureServlet extends HttpServlet {
 	 * @param request
 	 * @param httpclient
 	 * @throws IOException
+	 * @throws AssetServiceException 
 	 */
-	private void getTexture(HttpServletRequest request, HttpServletResponse response, HttpClient httpclient) throws IOException {
-		StringBuilder responseS = new StringBuilder();
+	private void getTexture(HttpServletRequest request, HttpServletResponse response, HttpClient httpclient) throws IOException, AssetServiceException {
 		log.debug("getTexture() called");
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
@@ -143,23 +145,204 @@ public class TextureServlet extends HttpServlet {
 			}
 
 			for (int i = 0; i < formatArray.length; i++) {
-				if (fetchTexture(request, response, textureID, formatString)) {
+				if (fetchTexture(request, response, textureID, formatArray[i])) {
 					break;
 				}
 			}
 		} else {
-			log.error("Failed to parse texture ID"); 
+			log.error("Failed to parse texture ID");
 		}
 
 	}
 
-	private boolean fetchTexture(HttpServletRequest httpRequest, HttpServletResponse httpResponse, UUID textureID, String format) {
-		boolean result = false;
+	private boolean fetchTexture(HttpServletRequest httpRequest, HttpServletResponse httpResponse, UUID textureID, String format) throws AssetServiceException, IOException {
 		log.debug("fetchTexture() called");
+		AssetBase texture = null;
+		String fullID = textureID.toString();
+		if (!format.equals(DEFAULT_FORMAT)) {
+			fullID = fullID + "-" + format;
+		}
 
-		return (result);
+		// TODO implement caching: texture = m_assetService.GetCached(fullID);
+		if (texture == null) {
+
+			// Fetch locally or remotely. Misses return a 404
+			texture = assetService.getAsset(textureID.toString());
+
+			if (texture != null) {
+				if (texture.getType() != AssetType.Texture.getAssetType()) {
+					httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+					return(true);
+				}
+				if (format.equals(DEFAULT_FORMAT)) {
+					writeTextureData(httpRequest, httpResponse, texture, format);
+					return(true);
+				} else {
+					// TODO implement AssetBase newTexture = new
+					// AssetBase(texture.ID + "-" + format, texture.Name,
+					// (sbyte)AssetType.Texture, texture.Metadata.CreatorID);
+					// newTexture.Data = ConvertTextureData(texture, format);
+					// if (newTexture.Data.Length == 0)
+					// return false; // !!! Caller try another codec, please!
+					//
+					// newTexture.Flags = AssetFlags.Collectable;
+					// newTexture.Temporary = true;
+					// m_assetService.Store(newTexture);
+					// WriteTextureData(httpRequest, httpResponse, newTexture,
+					// format);
+					log.error("Format {} handling not yet implemented", format);
+					return(true);
+				}
+			}
+		} // else {
+			// m_log.DebugFormat("[GETTEXTURE]: texture was in the cache");
+			// WriteTextureData(httpRequest, httpResponse, texture, format);
+			// log.error("Caching not yet implemented");
+			// return (false);
+		// }
+
+		return (false);
 	}
 
+	/**
+	 * @param httpRequest
+	 * @param httpResponse
+	 * @param texture
+	 * @param format
+	 * @throws AssetServiceException 
+	 * @throws IOException 
+	 */
+	private void writeTextureData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, AssetBase texture, String format) throws AssetServiceException, IOException {
+		log.debug("() called");
+        String range = httpRequest.getHeader("Range");
+        log.debug("Range Header: {}", range);
+
+        // JP2's only
+        if (!Util.isNullOrEmpty(range)) {
+            // Range request
+            IntRange intRange = tryParseRange(range);
+            if (intRange.isValid) {
+                // Before clamping start make sure we can satisfy it in order to avoid
+                // sending back the last byte instead of an error status
+                if (intRange.start >= texture.getData().length) {
+                    log.debug(
+                        "Client requested range for texture "+texture.getID()+
+                        " starting at "+intRange.start+" but texture has end of"+texture.getDataLength());
+
+                    // Stricly speaking, as per http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html, we should be sending back
+                    // Requested Range Not Satisfiable (416) here.  However, it appears that at least recent implementations
+                    // of the Linden Lab viewer (3.2.1 and 3.3.4 and probably earlier), a viewer that has previously
+                    // received a very small texture  may attempt to fetch bytes from the server past the
+                    // range of data that it received originally.  Whether this happens appears to depend on whether
+                    // the viewer's estimation of how large a request it needs to make for certain discard levels
+                    // (http://wiki.secondlife.com/wiki/Image_System#Discard_Level_and_Mip_Mapping), chiefly discard
+                    // level 2.  If this estimate is greater than the total texture size, returning a RequestedRangeNotSatisfiable
+                    // here will cause the viewer to treat the texture as bad and never display the full resolution
+                    // However, if we return PartialContent (or OK) instead, the viewer will display that resolution.
+
+                    httpResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+                    httpResponse.setContentType(texture.getContentType());
+                } else {
+                    // Handle the case where no second range value was given.  This is equivalent to requesting
+                    // the rest of the entity.
+                    if (intRange.end == -1)
+                        intRange.end = Integer.MAX_VALUE;
+
+                    intRange.end = Util.clamp(intRange.end, 0, texture.getDataLength() - 1);
+                    intRange.start = Util.clamp(intRange.start, 0, intRange.end);
+                    int len = intRange.end - intRange.start + 1;
+
+                    log.debug("Serving " + intRange.start + " to " + intRange.end + " of " + texture.getDataLength() + " bytes for texture " + texture.getID());
+
+                    // Always return PartialContent, even if the range covered the entire data length
+                    // We were accidentally sending back 404 before in this situation
+                    // https://issues.apache.org/bugzilla/show_bug.cgi?id=51878 supports sending 206 even if the
+                    // entire range is requested, and viewer 3.2.2 (and very probably earlier) seems fine with this.
+                    //
+                    // We also do not want to send back OK even if the whole range was satisfiable since this causes
+                    // HTTP textures on at least Imprudence 1.4.0-beta2 to never display the final texture quality.
+
+                    httpResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+
+                    httpResponse.setContentLength(len);
+                    httpResponse.setContentType(texture.getContentType());
+                    httpResponse.addHeader("Content-Range", "bytes "+intRange.start+"-"+intRange.end+"/"+texture.getDataLength());
+
+                    OutputStream out = httpResponse.getOutputStream();
+
+                    out.write(texture.getData(), intRange.start, len);
+                    out.flush();
+                    out.close();
+                }
+            } else {
+                log.warn("Malformed Range header: " + range);
+                httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+        } else {
+            // Full content request
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            httpResponse.setContentLength(texture.getDataLength());
+            if (format.equals(DEFAULT_FORMAT)) {
+                httpResponse.setContentType(texture.getContentType());
+            } else {
+                httpResponse.setContentType("image/" + format);
+            }
+            OutputStream out = httpResponse.getOutputStream();
+
+            out.write(texture.getData());
+            out.flush();
+            out.close();
+        }
+	}
+
+    /// <summary>
+    /// Parse a range header.
+    /// </summary>
+    /// <remarks>
+    /// As per http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html,
+    /// this obeys range headers with two values (e.g. 533-4165) and no second value (e.g. 533-).
+    /// Where there is no value, -1 is returned.
+    /// FIXME: Need to cover the case where only a second value is specified (e.g. -4165), probably by returning -1
+    /// for start.</remarks>
+    /// <returns></returns>
+    /// <param name='header'></param>
+    /// <param name='start'>Start of the range.  Undefined if this was not a number.</param>
+    /// <param name='end'>End of the range.  Will be -1 if no end specified.  Undefined if there was a raw string but this was not a number.</param>
+    private IntRange tryParseRange(String header) {
+    	IntRange range = new IntRange();
+
+        if (header.startsWith("bytes=")) {
+            String[] rangeValues = header.substring(6).split("-");
+
+            if (rangeValues.length == 2) {
+            	if(StringUtils.isNumeric(rangeValues[0])) {
+            		range.isValid = false;
+            		return(range);
+            	} else {
+            		range.start = Integer.parseInt(rangeValues[0]);
+            	}
+
+                String rawEnd = rangeValues[1];
+
+                if (rawEnd.isEmpty()) {
+                    range.end = -1;
+                    range.isValid = true;
+                    return(range);
+                } else if (StringUtils.isNumeric(rawEnd)) {
+                	range.end = Integer.parseInt(rawEnd);
+                	range.isValid = true;
+                    return(range);
+                }
+            }
+        }
+
+        range.start = 0;
+        range.end = 0;
+        range.isValid = false;
+        return (range);
+    }
+	
+	
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
 	 *      response)

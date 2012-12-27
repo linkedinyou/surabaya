@@ -88,6 +88,11 @@
       	<artifactId>slf4j-log4j12</artifactId>
       	<scope>test</scope>
       </dependency>
+      <dependency>
+      	<groupId>org.apache.commons</groupId>
+      	<artifactId>commons-lang3</artifactId>
+      	<scope>runtime</scope>
+      </dependency>
    </dependencies>
 
    <build>

@@ -54,8 +54,11 @@ public class AssetService {
         	String content = IOUtils.toString(entity.getContent(), "UTF-8");
         	log.debug("ContentLength: {}", contentLength);
         	log.debug("ContentType: {}", contentType);
-        	log.debug("respstring: {}", content);
-			
+        	log.debug("respstring: " + content);
+        	
+        	assetBase.fromXml(content);
+        	
+        	return(assetBase);
 			
 		} catch (Exception ex) {
 			log.error("Exception in AssetService", ex);
