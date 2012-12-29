@@ -21,7 +21,6 @@ package org.openjgrid.datatypes;
 import java.util.UUID;
 
 import org.joda.time.DateTime;
-import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,13 +105,8 @@ public class AssetMetadata {
 		asset_type = value;
 	}
 
-	public String getContentType() throws AssetServiceException {
-		if ( !(content_type==null || content_type.isEmpty())  ) {
-			return(content_type);
-		} else {
-			log.error("SLUtil.SLAssetTypeToContentType(m_type) not implemented");
-			throw new AssetServiceException("SLUtil.SLAssetTypeToContentType(m_type) not implemented");
-		}
+	public String getContentType() {
+		return(content_type);
 	}
 
 	public byte[] getSHA1() {

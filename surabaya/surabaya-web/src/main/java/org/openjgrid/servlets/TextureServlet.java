@@ -40,6 +40,7 @@ import org.openjgrid.datatypes.AssetType;
 import org.openjgrid.datatypes.Constants;
 import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;
+import org.openjgrid.services.infrastructure.SLTypeMappingService;
 import org.openjgrid.util.IntRange;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -64,6 +65,9 @@ public class TextureServlet extends HttpServlet {
 	@EJB
 	private AssetService assetService;
 
+	@EJB(mappedName = "java:module/SLTypeMappingService")
+	private SLTypeMappingService slTypeMappingService;
+	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		try {
@@ -156,7 +160,7 @@ public class TextureServlet extends HttpServlet {
 	}
 
 	private boolean fetchTexture(HttpServletRequest httpRequest, HttpServletResponse httpResponse, UUID textureID, String format) throws AssetServiceException, IOException {
-		log.debug("fetchTexture() called");
+		log.info("fetchTexture() called ID: {}", textureID.toString());
 		AssetBase texture = null;
 		String fullID = textureID.toString();
 		if (!format.equals(DEFAULT_FORMAT)) {
@@ -213,12 +217,12 @@ public class TextureServlet extends HttpServlet {
 	 * @throws IOException 
 	 */
 	private void writeTextureData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, AssetBase texture, String format) throws AssetServiceException, IOException {
-		log.debug("() called");
+		log.debug("writeTextureData() called");
         String range = httpRequest.getHeader("Range");
-        log.debug("Range Header: {}", range);
-
+        
         // JP2's only
         if (!Util.isNullOrEmpty(range)) {
+            log.debug("Range Header: {}", range);
             // Range request
             IntRange intRange = tryParseRange(range);
             if (intRange.isValid) {
@@ -241,7 +245,11 @@ public class TextureServlet extends HttpServlet {
                     // However, if we return PartialContent (or OK) instead, the viewer will display that resolution.
 
                     httpResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                    httpResponse.setContentType(texture.getContentType());
+                    String contentType = texture.getContentType();
+                    if(Util.isNullOrEmpty(contentType)) {
+                    	contentType = slTypeMappingService.slAssetTypeToContentType(texture.getType());
+                    } 
+                    httpResponse.setContentType(contentType);
                 } else {
                     // Handle the case where no second range value was given.  This is equivalent to requesting
                     // the rest of the entity.
@@ -265,7 +273,11 @@ public class TextureServlet extends HttpServlet {
                     httpResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
                     httpResponse.setContentLength(len);
-                    httpResponse.setContentType(texture.getContentType());
+                    String contentType = texture.getContentType();
+                    if(Util.isNullOrEmpty(contentType)) {
+                    	contentType = slTypeMappingService.slAssetTypeToContentType(texture.getType());
+                    } 
+                    httpResponse.setContentType(contentType);
                     httpResponse.addHeader("Content-Range", "bytes "+intRange.start+"-"+intRange.end+"/"+texture.getDataLength());
 
                     OutputStream out = httpResponse.getOutputStream();
@@ -283,7 +295,11 @@ public class TextureServlet extends HttpServlet {
             httpResponse.setStatus(HttpServletResponse.SC_OK);
             httpResponse.setContentLength(texture.getDataLength());
             if (format.equals(DEFAULT_FORMAT)) {
-                httpResponse.setContentType(texture.getContentType());
+                String contentType = texture.getContentType();
+                if(Util.isNullOrEmpty(contentType)) {
+                	contentType = slTypeMappingService.slAssetTypeToContentType(texture.getType());
+                } 
+                httpResponse.setContentType(contentType);
             } else {
                 httpResponse.setContentType("image/" + format);
             }
@@ -315,7 +331,7 @@ public class TextureServlet extends HttpServlet {
             String[] rangeValues = header.substring(6).split("-");
 
             if (rangeValues.length == 2) {
-            	if(StringUtils.isNumeric(rangeValues[0])) {
+            	if(!StringUtils.isNumeric(rangeValues[0])) {
             		range.isValid = false;
             		return(range);
             	} else {

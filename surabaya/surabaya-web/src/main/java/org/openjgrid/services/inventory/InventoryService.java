@@ -22,7 +22,8 @@ import org.openjgrid.datatypes.llsd.InventoryCollection;
 import org.openjgrid.datatypes.llsd.InventoryException;
 import org.openjgrid.datatypes.llsd.InventoryFolderBase;
 import org.openjgrid.datatypes.llsd.InventoryItemBase;
-import org.openjgrid.services.configuration.ConfigurationService;
+import org.openjgrid.services.infrastructure.ConfigurationService;
+import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,8 +69,11 @@ public class InventoryService {
         	String content = IOUtils.toString(entity.getContent(), "UTF-8");
         	log.debug("ContentLength: {}", contentLength);
         	log.debug("ContentType: {}", contentType);
-        	log.debug("respstring: {}", content);
+//        	log.debug("respstring: {}", content);
     		
+        	if(Util.isNullOrEmpty(content)) {
+        		return(null);
+        	}
         	invCollection.fromXml(content);
         	
     		return (invCollection);
@@ -108,7 +112,7 @@ public class InventoryService {
         	String content = IOUtils.toString(entity.getContent(), "UTF-8");
         	log.debug("ContentLength: {}", contentLength);
         	log.debug("ContentType: {}", contentType);
-        	log.debug("respstring: {}", content);
+//        	log.debug("respstring: {}", content);
 			
         	containingFolder.fromXml(content);
         	
@@ -148,7 +152,7 @@ public class InventoryService {
     	String content = IOUtils.toString(entity.getContent(), "UTF-8");
     	log.debug("ContentLength: {}", contentLength);
     	log.debug("ContentType: {}", contentType);
-    	log.debug("respstring: {}", content);
+//    	log.debug("respstring: {}", content);
 
     	inventoryItemBase.fromXml(content);
     	

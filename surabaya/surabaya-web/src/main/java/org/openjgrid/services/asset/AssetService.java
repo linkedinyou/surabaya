@@ -18,7 +18,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import org.openjgrid.datatypes.AssetBase;
 import org.openjgrid.datatypes.llsd.InventoryCollection;
-import org.openjgrid.services.configuration.ConfigurationService;
+import org.openjgrid.services.infrastructure.ConfigurationService;
+import org.openjgrid.util.HexDump;
+import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,11 +53,14 @@ public class AssetService {
 
         	long contentLength = entity.getContentLength();
         	Header contentType = entity.getContentType();
-        	String content = IOUtils.toString(entity.getContent(), "UTF-8");
+        	String content = IOUtils.toString(entity.getContent());
         	log.debug("ContentLength: {}", contentLength);
         	log.debug("ContentType: {}", contentType);
-        	log.debug("respstring: " + content);
+//        	log.debug("respstring: " + content);
         	
+        	if(Util.isNullOrEmpty(content)) {
+        		return (null);
+        	}
         	assetBase.fromXml(content);
         	
         	return(assetBase);

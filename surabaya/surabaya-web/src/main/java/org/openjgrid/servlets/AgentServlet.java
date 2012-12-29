@@ -38,7 +38,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.agents.Agent;
 import org.openjgrid.services.agent.AgentManagementService;
-import org.openjgrid.services.configuration.ConfigurationService;
+import org.openjgrid.services.infrastructure.ConfigurationService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -225,12 +225,8 @@ public class InventoryDescendentsServlet extends HttpServlet {
 				log.error("Request {}: ", request);
 			}
 
-			log.debug("Result of fetchInventor: {}", inventoryItemstr);
-
 			inventoryItemstr = inventoryItemstr.replace("<llsd><map><key>folders</key><array>", "");
 			inventoryItemstr = inventoryItemstr.replace("</array></map></llsd>", "");
-
-			log.debug("fetchinventory after replace: {}", inventoryItemstr);
 
 			response.append(inventoryItemstr);
 

@@ -22,11 +22,14 @@ import java.io.InputStreamReader;
 import java.util.UUID;
 
 import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.openjgrid.services.asset.AssetServiceException;
+import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,64 +115,61 @@ public class AssetBase {
 	public void fromXml(String xmlString) throws XMLStreamException {
 		String itemName = null;
 
-		xmlString = xmlString.substring(1);
-		
-		log.debug("Clean XML String: {}", xmlString);
+		if(!Util.isNullOrEmpty(xmlString)) {
+			xmlString = xmlString.replaceFirst(".*<\\?xml", "<?xml");
+		} 
 		
 		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
 		xmlStream.next();
-		if (!xmlStream.isStartElement() || !xmlStream.getLocalName().equalsIgnoreCase("AssetBase")) {
-			throw new XMLStreamException("Expected <AssetBase>");
-		}
-		xmlStream.next();
-		while(!xmlStream.getLocalName().equalsIgnoreCase("AssetBase") || !xmlStream.isEndElement()) {
-			itemName = xmlStream.getLocalName();
-
-			switch(itemName) {
-			case "Data":
-				this.data = xmlStream.getElementText().getBytes();
-				break;
-			case "FullID":
-				xmlStream.next();
-				xmlStream.next();
-				this.metadata.setFullID(UUID.fromString(xmlStream.getText()));
-				xmlStream.next();
-				xmlStream.next();
-				break;
-			case "ID":
-				this.metadata.setID(xmlStream.getElementText());
-				break;
-			case "Name":
-				this.metadata.setName(xmlStream.getElementText());
-				break;
-			case "Description":
-				xmlStream.next();
-				if(!xmlStream.isEndElement()) {
-					this.metadata.setDescription(xmlStream.getText());
-					xmlStream.next();
+		while (xmlStream.getEventType() != XMLStreamConstants.END_DOCUMENT) {
+			switch(xmlStream.getEventType()) {
+			case XMLStreamConstants.START_ELEMENT:
+				itemName = xmlStream.getLocalName();				
+				switch(itemName) {
+				case "AssetBase":
+					break;
+				case "Data":
+					this.data = Base64.decodeBase64(xmlStream.getElementText().getBytes());
+					break;
+				case "FullID":
+					break;
+				case "Guid":
+					this.metadata.setFullID(UUID.fromString(xmlStream.getElementText()));
+					break;
+				case "ID":
+					this.metadata.setID(xmlStream.getElementText());
+					break;
+				case "Name":
+					this.metadata.setName(xmlStream.getElementText());
+					break;
+				case "Description":
+					this.metadata.setDescription(xmlStream.getElementText());
+					break;
+				case "Type":
+					this.metadata.setType((byte) Integer.parseInt(xmlStream.getElementText()));
+					break;
+				case "Local":
+					this.metadata.isLocal(Boolean.parseBoolean(xmlStream.getElementText()));
+					break;
+				case "Temporary":
+					this.metadata.isTemporary(Boolean.parseBoolean(xmlStream.getElementText()));
+					break;
+				case "CreatorID":
+					this.metadata.setCreatorID(xmlStream.getElementText());
+					break;
+				case "Flags":
+					this.metadata.setFlags(AssetFlags.valueOf(xmlStream.getElementText()).getType());
+					break;
+				default:
+					throw new XMLStreamException("Unable to assign item with name: " + itemName);				
 				}
+				xmlStream.next();
 				break;
-			case "Type":
-				this.metadata.setType((byte) Integer.parseInt(xmlStream.getElementText()));
-				break;
-			case "Local":
-				this.metadata.isLocal(Boolean.parseBoolean(xmlStream.getElementText()));
-				break;
-			case "Temporary":
-				this.metadata.isTemporary(Boolean.parseBoolean(xmlStream.getElementText()));
-				break;
-			case "CreatorID":
-				this.metadata.setCreatorID(xmlStream.getElementText());
-				break;
-			case "Flags":
-				this.metadata.setFlags(AssetFlags.valueOf(xmlStream.getElementText()).getType());
-				break;
-			default:
-				throw new XMLStreamException("Unable to assign item with name: " + itemName);				
+			default: 
+				xmlStream.next();
 			}
-			xmlStream.next();
 		}
 		xmlStream.close();
 	}
@@ -196,14 +196,18 @@ public class AssetBase {
     public void setID(String value) { 
     	metadata.setID(value); 
     }
-   
+
+    public UUID getFullID() { 
+    	return (metadata.getFullID()); 
+    }
+
     public String getName() {
     	return (metadata.getName()); 
     }
     public void setName(String value) { 
     	metadata.setName(value); 
     }
-
+    
     public String getDescription() {
     	return (metadata.getDescription()); 
     }
