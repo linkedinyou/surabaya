@@ -21,7 +21,6 @@ package org.openjgrid.servlets;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,10 +32,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.client.HttpClient;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.AssetBase;
 import org.openjgrid.datatypes.AssetType;
-import org.openjgrid.datatypes.Constants;
 import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.services.infrastructure.SLTypeMappingService;
@@ -55,11 +54,10 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "TextureServlet", urlPatterns = { "/CAPS/GTEX/*" })
-public class TextureServlet extends HttpServlet {
-	private static final long serialVersionUID = -7144097163138378596L;
-	private static final Logger log = LoggerFactory.getLogger(TextureServlet.class);
-	private static final String DEFAULT_FORMAT = "x-j2c";
+@WebServlet(name = "MeshServlet", urlPatterns = { "/CAPS/MESH/*" })
+public class MeshServlet extends HttpServlet {
+	private static final long serialVersionUID = 7904169852381829113L;
+	private static final Logger log = LoggerFactory.getLogger(MeshServlet.class);
 
 	@EJB
 	private AssetService assetService;
@@ -79,7 +77,7 @@ public class TextureServlet extends HttpServlet {
 			// the last 4 char of the CAPS Path are omitted otherwise a match to
 			// the CAPS Path
 			// given with the agent would not fit
-			Pattern p = Pattern.compile("^/CAPS/GTEX/(.*)....//");
+			Pattern p = Pattern.compile("^/CAPS/MESH/(.*)....//");
 			Matcher m = p.matcher(uri);
 			if (m.find()) {
 				capsPath = m.group(1);
@@ -90,9 +88,9 @@ public class TextureServlet extends HttpServlet {
 			// corresponding processing
 			// if (capsPath.equals(agent.getFetchinventory2_caps().toString()))
 			// {
-			if (capsPath.equalsIgnoreCase("9e097a00-4f2d-11e2-bcfd-0800200c9a66")) {
+			if (capsPath.equalsIgnoreCase("50e820e0-5244-11e2-bcfd-0800200c9a66")) {
 				response.setContentType(request.getContentType());
-				getTexture(request, response, httpclient);
+				getMesh(request, response, httpclient);
 				// StringEntity entity = new StringEntity(reply);
 				// entity.writeTo(out);
 				// out.close();
@@ -111,112 +109,69 @@ public class TextureServlet extends HttpServlet {
 	 * @throws IOException
 	 * @throws AssetServiceException 
 	 */
-	private void getTexture(HttpServletRequest request, HttpServletResponse response, HttpClient httpclient) throws IOException, AssetServiceException {
-		log.debug("getTexture() called");
+	private void getMesh(HttpServletRequest request, HttpServletResponse response, HttpClient httpclient) throws IOException, AssetServiceException {
+		log.debug("getMesh() called");
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
-		String[] textureIds = null;
-		String[] formats = null;
-		String textureId = null;
-		String formatString = null;
-		if (parameterMap.containsKey("texture_id")) {
-			textureIds = parameterMap.get("texture_id");
-			textureId = textureIds[0];
+		assert( Util.dumpParameterMap(parameterMap) );
+		
+		String[] meshIds = null;
+		String meshIdString = null;
+		
+		if (parameterMap.containsKey("mesh_id")) {
+			meshIds = parameterMap.get("mesh_id");
+			meshIdString = meshIds[0];
 		} else {
-			log.error("getTexture() no texture_id received");
-		}
-		if (parameterMap.containsKey("format")) {
-			// TODO implement handling of the "format" Parameter
-			formats = parameterMap.get("format");
-			formatString = formats[0];
-			log.error("getTexture() format String received ... handling is currently not implemented ");
+			log.error("getMesh() no mesh_id received");
 		}
 
-		UUID textureID = Constants.UUID_ZERO;
-		if (!Util.isNullOrEmpty(textureId) && Util.parseUUID(textureId)) {
-			textureID = UUID.fromString(textureId);
+		if (!Util.isNullOrEmpty(meshIdString) && Util.parseUUID(meshIdString)) {
 
-			String[] formatArray;
-			if (Util.isNullOrEmpty(formatString)) {
-				// TODO Handling format alternatives not implemented
-				// formats =
-				// WebUtil.GetPreferredImageTypes(httpRequest.Headers.Get("Accept"));
-				// if (formats.Length == 0)
-				formatArray = new String[] { DEFAULT_FORMAT }; // default
-			} else {
-				formatArray = new String[] { formatString.toLowerCase() };
-			}
+            AssetBase mesh = assetService.getAsset(meshIdString);
+            
+            if(mesh != null) {
+        		log.debug("Mesh requested: " + meshIdString + " and found Data-Size: " + mesh.getDataLength() );
+            	if(mesh.getType() == AssetType.Mesh.getAssetType()) {
+            		writeMeshData(request, response, mesh);            		
+            	} else {
+            		
+            		log.error("Mesh requested: " + meshIdString + "Type received: " + mesh.getType() );
+            		
+            		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    response.setContentType("text/plain");
+                    OutputStream out = response.getOutputStream();
+                    StringEntity entity = new StringEntity("Unfortunately, this asset isn't a mesh.");
+                    entity.writeTo(out);
+                    out.close();
+            	}
+            } else {
 
-			for (int i = 0; i < formatArray.length; i++) {
-				if (fetchTexture(request, response, textureID, formatArray[i])) {
-					break;
-				}
-			}
+        		log.error("Mesh requested: " + meshIdString + " notFound"  );
+            	
+            	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                response.setContentType("text/plain");
+                OutputStream out = response.getOutputStream();
+                StringEntity entity = new StringEntity("Your Mesh wasn't found.  Sorry!");
+                entity.writeTo(out);
+                out.close();
+            	
+            }
+            
+            
 		} else {
-			log.error("Failed to parse texture ID");
+			log.error("Failed to parse mesh ID");
 		}
 
 	}
-
-	private boolean fetchTexture(HttpServletRequest httpRequest, HttpServletResponse httpResponse, UUID textureID, String format) throws AssetServiceException, IOException {
-		log.info("fetchTexture() called ID: {}", textureID.toString());
-		AssetBase texture = null;
-		String fullID = textureID.toString();
-		if (!format.equals(DEFAULT_FORMAT)) {
-			fullID = fullID + "-" + format;
-		}
-
-		// TODO implement caching: texture = m_assetService.GetCached(fullID);
-		if (texture == null) {
-
-			// Fetch locally or remotely. Misses return a 404
-			texture = assetService.getAsset(textureID.toString());
-
-			if (texture != null) {
-				if (texture.getType() != AssetType.Texture.getAssetType()) {
-					httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
-					return(true);
-				}
-				if (format.equals(DEFAULT_FORMAT)) {
-					writeTextureData(httpRequest, httpResponse, texture, format);
-					return(true);
-				} else {
-					// TODO implement AssetBase newTexture = new
-					// AssetBase(texture.ID + "-" + format, texture.Name,
-					// (sbyte)AssetType.Texture, texture.Metadata.CreatorID);
-					// newTexture.Data = ConvertTextureData(texture, format);
-					// if (newTexture.Data.Length == 0)
-					// return false; // !!! Caller try another codec, please!
-					//
-					// newTexture.Flags = AssetFlags.Collectable;
-					// newTexture.Temporary = true;
-					// m_assetService.Store(newTexture);
-					// WriteTextureData(httpRequest, httpResponse, newTexture,
-					// format);
-					log.error("Format {} handling not yet implemented", format);
-					return(true);
-				}
-			}
-		} // else {
-			// m_log.DebugFormat("[GETTEXTURE]: texture was in the cache");
-			// WriteTextureData(httpRequest, httpResponse, texture, format);
-			// log.error("Caching not yet implemented");
-			// return (false);
-		// }
-
-		return (false);
-	}
-
 	/**
 	 * @param httpRequest
 	 * @param httpResponse
-	 * @param texture
-	 * @param format
+	 * @param mesh
 	 * @throws AssetServiceException 
 	 * @throws IOException 
 	 */
-	private void writeTextureData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, AssetBase texture, String format) throws AssetServiceException, IOException {
-		log.debug("writeTextureData() called");
+	private void writeMeshData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, AssetBase mesh) throws AssetServiceException, IOException {
+		log.debug("writeMeshData() called");
         String range = httpRequest.getHeader("Range");
         
         // JP2's only
@@ -227,10 +182,10 @@ public class TextureServlet extends HttpServlet {
             if (intRange.isValid) {
                 // Before clamping start make sure we can satisfy it in order to avoid
                 // sending back the last byte instead of an error status
-                if (intRange.start >= texture.getData().length) {
+                if (intRange.start >= mesh.getData().length) {
                     log.debug(
-                        "Client requested range for texture "+texture.getID()+
-                        " starting at "+intRange.start+" but texture has end of"+texture.getDataLength());
+                        "Client requested range for mesh "+mesh.getID()+
+                        " starting at "+intRange.start+" but mesh has end of"+mesh.getDataLength());
 
                     // Stricly speaking, as per http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html, we should be sending back
                     // Requested Range Not Satisfiable (416) here.  However, it appears that at least recent implementations
@@ -244,9 +199,9 @@ public class TextureServlet extends HttpServlet {
                     // However, if we return PartialContent (or OK) instead, the viewer will display that resolution.
 
                     httpResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-                    String contentType = texture.getContentType();
+                    String contentType = mesh.getContentType();
                     if(Util.isNullOrEmpty(contentType)) {
-                    	contentType = slTypeMappingService.slAssetTypeToContentType(texture.getType());
+                    	contentType = slTypeMappingService.slAssetTypeToContentType(mesh.getType());
                     } 
                     httpResponse.setContentType(contentType);
                 } else {
@@ -255,11 +210,11 @@ public class TextureServlet extends HttpServlet {
                     if (intRange.end == -1)
                         intRange.end = Integer.MAX_VALUE;
 
-                    intRange.end = Util.clamp(intRange.end, 0, texture.getDataLength() - 1);
+                    intRange.end = Util.clamp(intRange.end, 0, mesh.getDataLength() - 1);
                     intRange.start = Util.clamp(intRange.start, 0, intRange.end);
                     int len = intRange.end - intRange.start + 1;
 
-                    log.debug("Serving " + intRange.start + " to " + intRange.end + " of " + texture.getDataLength() + " bytes for texture " + texture.getID());
+                    log.debug("Serving " + intRange.start + " to " + intRange.end + " of " + mesh.getDataLength() + " bytes for mesh " + mesh.getID());
 
                     // Always return PartialContent, even if the range covered the entire data length
                     // We were accidentally sending back 404 before in this situation
@@ -272,16 +227,16 @@ public class TextureServlet extends HttpServlet {
                     httpResponse.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
                     httpResponse.setContentLength(len);
-                    String contentType = texture.getContentType();
+                    String contentType = mesh.getContentType();
                     if(Util.isNullOrEmpty(contentType)) {
-                    	contentType = slTypeMappingService.slAssetTypeToContentType(texture.getType());
+                    	contentType = slTypeMappingService.slAssetTypeToContentType(mesh.getType());
                     } 
                     httpResponse.setContentType(contentType);
-                    httpResponse.addHeader("Content-Range", "bytes "+intRange.start+"-"+intRange.end+"/"+texture.getDataLength());
+                    httpResponse.addHeader("Content-Range", "bytes "+intRange.start+"-"+intRange.end+"/"+mesh.getDataLength());
 
                     OutputStream out = httpResponse.getOutputStream();
 
-                    out.write(texture.getData(), intRange.start, len);
+                    out.write(mesh.getData(), intRange.start, len);
                     out.flush();
                     out.close();
                 }
@@ -292,19 +247,15 @@ public class TextureServlet extends HttpServlet {
         } else {
             // Full content request
             httpResponse.setStatus(HttpServletResponse.SC_OK);
-            httpResponse.setContentLength(texture.getDataLength());
-            if (format.equals(DEFAULT_FORMAT)) {
-                String contentType = texture.getContentType();
-                if(Util.isNullOrEmpty(contentType)) {
-                	contentType = slTypeMappingService.slAssetTypeToContentType(texture.getType());
-                } 
-                httpResponse.setContentType(contentType);
-            } else {
-                httpResponse.setContentType("image/" + format);
-            }
+            httpResponse.setContentLength(mesh.getDataLength());
+            String contentType = mesh.getContentType();
+            if(Util.isNullOrEmpty(contentType)) {
+            	contentType = slTypeMappingService.slAssetTypeToContentType(mesh.getType());
+            } 
+            httpResponse.setContentType(contentType);
             OutputStream out = httpResponse.getOutputStream();
 
-            out.write(texture.getData());
+            out.write(mesh.getData());
             out.flush();
             out.close();
         }

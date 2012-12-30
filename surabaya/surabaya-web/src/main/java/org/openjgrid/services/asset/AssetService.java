@@ -49,6 +49,7 @@ public class AssetService {
 		try {
 			if (cache.containsKey(assetID)) {
 				log.debug("Cache Hit: {}", assetID);
+			    content = cache.get(assetID);
 			} else {
 				log.debug("Cache Miss: {}", assetID);
 
@@ -65,7 +66,8 @@ public class AssetService {
 					cache.put(assetID, content);					
 				}
 			}
-			// log.debug("respstring: " + content);
+			
+			log.debug("80 bytes respstring: " + content.substring(0,80));
 			if (Util.isNullOrEmpty(content)) {
 				return (null);
 			}

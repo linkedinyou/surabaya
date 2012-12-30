@@ -85,7 +85,7 @@ public class FetchInventoryServlet extends HttpServlet {
 			OutputStream out = response.getOutputStream();
 			HttpClient httpclient = new DefaultHttpClient();
 
-			Util.dumpHttpRequest(request);
+			assert(Util.dumpHttpRequest(request));
 
 			String uri = request.getRequestURI();
 			String capsPath = null;
