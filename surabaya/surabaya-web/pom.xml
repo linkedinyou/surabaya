@@ -62,10 +62,6 @@
       	<artifactId>jackson-core-lgpl</artifactId>
       </dependency>
       <dependency>
-      	<groupId>org.codehaus.jackson</groupId>
-      	<artifactId>jackson-mapper-lgpl</artifactId>
-      </dependency>
-      <dependency>
       	<groupId>org.jboss.spec.javax.ejb</groupId>
       	<artifactId>jboss-ejb-api_3.1_spec</artifactId>
       </dependency>
@@ -102,6 +98,10 @@
       	<groupId>org.infinispan</groupId>
       	<artifactId>infinispan-core</artifactId>
       	<scope>provided</scope>
+      </dependency>
+      <dependency>
+      	<groupId>org.codehaus.jackson</groupId>
+      	<artifactId>jackson-mapper-lgpl</artifactId>
       </dependency>
    </dependencies>
 

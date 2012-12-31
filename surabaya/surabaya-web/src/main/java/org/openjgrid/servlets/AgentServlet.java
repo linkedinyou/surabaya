@@ -20,7 +20,8 @@ package org.openjgrid.servlets;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -29,14 +30,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openjgrid.agents.Agent;
+import org.openjgrid.services.agent.AgentCaps;
 import org.openjgrid.services.agent.AgentManagementService;
 import org.openjgrid.services.infrastructure.ConfigurationService;
 import org.openjgrid.util.Util;
@@ -52,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "AgentServlet", urlPatterns = {"/agent/*"})
+@WebServlet(name = "AgentServlet", urlPatterns = {"/agent"})
 public class AgentServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(AgentServlet.class);
@@ -71,60 +68,52 @@ public class AgentServlet extends HttpServlet {
 	 * @throws ServletException
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unchecked")
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException {
         response.setContentType("text/xml;charset=UTF-8");
         OutputStream out = response.getOutputStream();
+        Map<String, String> result = new HashMap<String, String>();
+		ObjectMapper objectMapper = new ObjectMapper();
+        
+        assert(Util.dumpHttpRequest(request));
         
         try {
-        	HttpClient httpclient = new DefaultHttpClient();
-        	HttpPost httppost = new HttpPost("http://localhost:"+
-        			configuration.getProperty("OpenSim", "sim_http_port") + 
-        			request.getRequestURI());
         	Agent agent = null;      	        	        	
         	if (request.getContentType().equalsIgnoreCase("application/json")) {
         		String jsonString = Util.requestContent2String(request);
-        		agent = new Agent(jsonString);
-        		log.debug("Agent-Name: {} {} ", agent.getFirst_name(), agent.getLast_name() );
-        		log.debug("Agent-UUID: {}", agent.getAgent_id().toString());
-        		log.debug("Agent-CAPS: {}", agent.getCaps_path());
-        		StringEntity stringEntity = new StringEntity(jsonString,request.getCharacterEncoding());
-        		stringEntity.setContentType(request.getContentType());
-        		httppost.setEntity(stringEntity);
-        	} else if (request.getContentType().equalsIgnoreCase("application/x-gzip")) {
-        		ByteArrayEntity byteArrayEntity = new ByteArrayEntity(Util.requestContent2ByteArray(request));
-        		httppost.setEntity(byteArrayEntity);
+        		AgentCaps agentCaps = new AgentCaps();
+        		agentCaps.capsMap = objectMapper.readValue(jsonString, agentCaps.capsMap.getClass());
+        		agent = new Agent(agentCaps.capsMap);
+        		log.debug("Agent-UUID: {}", agent.agent_id.toString());
+        		log.debug("Agent-HOST: {}", agent.host);
+        		
+            	if(agent != null) {
+            		// if there is already an agent remove with the given id
+            		// remove it first (Housekeeping)
+            		if(agentManagementService.hasAgent(agent.agent_id)) {
+            			agentManagementService.removeAgent(agent.agent_id.toString());
+            		}
+            		agentManagementService.setAgent(agent.agent_id.toString(), agent);
+            		agentManagementService.setAgent(agent.fetchinventory2_caps,agent);
+            		agentManagementService.setAgent(agent.fetchinventorydescendents2_caps, agent);
+            		agentManagementService.setAgent(agent.getmesh_caps, agent);
+            		agentManagementService.setAgent(agent.gettexture_caps, agent);
+            	}
+            	result.put("result", "ok");
+
         	} else {
-                Util.dumpHttpRequest(request);        		
+        		log.error("Unexpected ContentType: {}", request.getContentType());
+                Util.dumpHttpRequest(request);
+                result.put("result", "fail");
+                result.put("reason", "invalid ContentType : "+ request.getContentType());
         	}
         	
-    		httppost.setHeader("expect", "100-continue");
-    		httppost.setHeader("connection", "close");
+        	StringEntity resultStringEntity = new StringEntity(objectMapper.writeValueAsString(result));
+        	resultStringEntity.writeTo(out);
+        	out.flush();
+        	out.close();
         	
-        	HttpResponse httpResponse = httpclient.execute(httppost);
-        	HttpEntity entity = httpResponse.getEntity();
-        	log.debug("HttpResponse-ContentType: {}",entity.getContentType());
-        	if (entity != null) {
-       	    	entity.writeTo(out);
-       	        out.close();
-        	}
-        	if(agent != null) {
-        		// if there is already an agent remove with the given id
-        		// remove it first (Housekeeping)
-        		if(agentManagementService.hasAgent(agent.getAgent_id())) {
-        			agentManagementService.removeAgent(agent.getAgent_id());
-        		}
-        		agent.setFetchinventory2_caps(UUID.randomUUID());
-        		agent.setFetchinventorydescendents2_caps(UUID.randomUUID());
-        		agent.setGetmesh_caps(UUID.randomUUID());
-        		agent.setGettexture_caps(UUID.randomUUID());
-        		agentManagementService.setAgent(agent.getAgent_id().toString(), agent);
-        		agentManagementService.setAgent(agent.getFetchinventory2_caps().toString(),agent);
-        		agentManagementService.setAgent(agent.getFetchinventorydescendents2_caps().toString(), agent);
-        		agentManagementService.setAgent(agent.getGetmesh_caps().toString(), agent);
-        		agentManagementService.setAgent(agent.getGettexture_caps().toString(), agent);
-        		agentManagementService.setAgent(agent.getCaps_path(), agent);
-        	}
         	
         } catch (Exception ex) {
         	log.debug("Exception occurred in AgentServlet.processRequest():",ex);

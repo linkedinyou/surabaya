@@ -75,35 +75,6 @@
       	<artifactId>slf4j-api</artifactId>
       	<scope>provided</scope>
       </dependency>
-      <dependency>
-      	<groupId>org.apache.httpcomponents</groupId>
-      	<artifactId>httpclient</artifactId>
-      	<scope>runtime</scope>
-      </dependency>
-      <dependency>
-      	<groupId>org.codehaus.jackson</groupId>
-      	<artifactId>jackson-mapper-lgpl</artifactId>
-      	<scope>runtime</scope>
-      </dependency>
-      <dependency>
-      	<groupId>org.codehaus.jackson</groupId>
-      	<artifactId>jackson-lgpl</artifactId>
-      	<scope>runtime</scope>
-      </dependency>
-      <dependency>
-      	<groupId>org.codehaus.jackson</groupId>
-      	<artifactId>jackson-core-lgpl</artifactId>
-      	<scope>runtime</scope>
-      </dependency>
-      <dependency>
-      	<groupId>joda-time</groupId>
-      	<artifactId>joda-time</artifactId>
-      	<scope>runtime</scope>
-      </dependency>
-      <dependency>
-      	<groupId>org.apache.commons</groupId>
-      	<artifactId>commons-io</artifactId>
-      </dependency>
    </dependencies>
 
    <build>

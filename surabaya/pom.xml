@@ -91,11 +91,6 @@
             </dependency>
             <dependency>
             	<groupId>org.codehaus.jackson</groupId>
-            	<artifactId>jackson-lgpl</artifactId>
-            	<version>0.9.5</version>
-            </dependency>
-            <dependency>
-            	<groupId>org.codehaus.jackson</groupId>
             	<artifactId>jackson-core-lgpl</artifactId>
             	<version>1.9.11</version>
             </dependency>

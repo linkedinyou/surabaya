@@ -124,22 +124,19 @@ public class AgentManagementService {
 	
 	private void removeAllAgentEntries(Agent anAgent) {
 		// First remove all CAPS entries
-		if(anAgent.getFetchinventory2_caps() != null) {
-			agentMap.remove(anAgent.getFetchinventory2_caps().toString());
+		if(anAgent.fetchinventory2_caps != null) {
+			agentMap.remove(anAgent.fetchinventory2_caps);
 		}
-		if(anAgent.getFetchinventorydescendents2_caps() != null) {
-			agentMap.remove(anAgent.getFetchinventorydescendents2_caps().toString());
+		if(anAgent.fetchinventorydescendents2_caps != null) {
+			agentMap.remove(anAgent.fetchinventorydescendents2_caps);
 		}
-		if(anAgent.getGetmesh_caps() != null) {
-			agentMap.remove(anAgent.getGetmesh_caps().toString());
+		if(anAgent.getmesh_caps != null) {
+			agentMap.remove(anAgent.getmesh_caps);
 		}
-		if(anAgent.getGettexture_caps() != null) {
-			agentMap.remove(anAgent.getGettexture_caps().toString());
-		}
-		if(anAgent.getCaps_path() != null) {
-			agentMap.remove(anAgent.getCaps_path());
+		if(anAgent.gettexture_caps != null) {
+			agentMap.remove(anAgent.gettexture_caps);
 		}
 		// Then remove the Agent itself
-		agentMap.remove(anAgent.getAgent_id());
+		agentMap.remove(anAgent.agent_id);
 	}
 }
