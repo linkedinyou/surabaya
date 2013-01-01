@@ -35,7 +35,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.openjgrid.agents.Agent;
 import org.openjgrid.services.agent.AgentCaps;
 import org.openjgrid.services.agent.AgentManagementService;
-import org.openjgrid.services.infrastructure.ConfigurationService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +52,6 @@ import org.slf4j.LoggerFactory;
 public class AgentServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final Logger log = LoggerFactory.getLogger(AgentServlet.class);
-
-	@EJB(mappedName="java:module/ConfigurationService")
-	private ConfigurationService configuration;
 
 	@EJB(mappedName="java:module/AgentManagementService")
 	private AgentManagementService agentManagementService;
@@ -95,10 +91,6 @@ public class AgentServlet extends HttpServlet {
             			agentManagementService.removeAgent(agent.agent_id.toString());
             		}
             		agentManagementService.setAgent(agent.agent_id.toString(), agent);
-            		agentManagementService.setAgent(agent.fetchinventory2_caps,agent);
-            		agentManagementService.setAgent(agent.fetchinventorydescendents2_caps, agent);
-            		agentManagementService.setAgent(agent.getmesh_caps, agent);
-            		agentManagementService.setAgent(agent.gettexture_caps, agent);
             	}
             	result.put("result", "ok");
 

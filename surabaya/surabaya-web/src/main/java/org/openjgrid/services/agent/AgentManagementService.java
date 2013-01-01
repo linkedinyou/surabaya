@@ -19,6 +19,7 @@
 package org.openjgrid.services.agent;
 
 import java.util.UUID;
+import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -61,17 +62,53 @@ public class AgentManagementService {
 	private static final Logger log = LoggerFactory.getLogger(AgentManagementService.class);
 	private ConcurrentMap<String, Agent> agentMap = null;
 	
+	private Vector<String> textureCapsIds = null;
+	private Vector<String> meshCapsIds = null;
+	private Vector<String> inventoryCapsIds = null;
+	private Vector<String> inventoryDescendentsCapsIds = null;
+	private Vector<String> closeCapsIds = null;
+	
 	@PostConstruct
 	public void create() throws Exception {
 		log.debug("create() called");
 		agentMap = new ConcurrentHashMap<String, Agent>(); 
+		textureCapsIds = new Vector<String>();
+		meshCapsIds = new Vector<String>();
+		inventoryCapsIds = new Vector<String>();
+		inventoryDescendentsCapsIds = new Vector<String>();
+		closeCapsIds = new Vector<String>();
+		
 	}
 
 	public void setAgent(String agentId, Agent agent) {
 		log.debug("setAgent() called: agentMap.size: {}", agentMap.size());
 		agentMap.put(agentId, agent);
+		textureCapsIds.add(agent.gettexture_caps);
+		meshCapsIds.add(agent.getmesh_caps);
+		inventoryCapsIds.add(agent.fetchinventory2_caps);
+		inventoryDescendentsCapsIds.add(agent.fetchinventorydescendents2_caps);
+		closeCapsIds.add(agent.close_caps);
 	}
 
+	public boolean hasTextureCapsId(String id) {
+		return (textureCapsIds.contains(id));
+	}
+	
+	public boolean hasMeshCapsId(String id) {
+		return (meshCapsIds.contains(id));
+	}
+
+	public boolean hasInventoryCapsId(String id) {
+		return (inventoryCapsIds.contains(id));
+	}
+
+	public boolean hasInventoryDescendentsCapsId(String id) {
+		return (inventoryDescendentsCapsIds.contains(id));
+	}
+	
+	public boolean hasCloseCapsId(String id) {
+		return (closeCapsIds.contains(id));
+	}
 	/**
 	 * @throws AgentNotFoundException 
 	 */
@@ -125,16 +162,19 @@ public class AgentManagementService {
 	private void removeAllAgentEntries(Agent anAgent) {
 		// First remove all CAPS entries
 		if(anAgent.fetchinventory2_caps != null) {
-			agentMap.remove(anAgent.fetchinventory2_caps);
+			inventoryCapsIds.remove(anAgent.fetchinventory2_caps);
 		}
 		if(anAgent.fetchinventorydescendents2_caps != null) {
-			agentMap.remove(anAgent.fetchinventorydescendents2_caps);
+			inventoryDescendentsCapsIds.remove(anAgent.fetchinventorydescendents2_caps);
 		}
 		if(anAgent.getmesh_caps != null) {
-			agentMap.remove(anAgent.getmesh_caps);
+			meshCapsIds.remove(anAgent.getmesh_caps);
 		}
 		if(anAgent.gettexture_caps != null) {
-			agentMap.remove(anAgent.gettexture_caps);
+			textureCapsIds.remove(anAgent.gettexture_caps);
+		}
+		if(anAgent.close_caps != null) {
+			closeCapsIds.remove(anAgent.close_caps);
 		}
 		// Then remove the Agent itself
 		agentMap.remove(anAgent.agent_id);

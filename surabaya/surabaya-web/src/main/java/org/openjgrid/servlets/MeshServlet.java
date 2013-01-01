@@ -36,6 +36,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.AssetBase;
 import org.openjgrid.datatypes.AssetType;
+import org.openjgrid.services.agent.AgentManagementService;
 import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.services.infrastructure.SLTypeMappingService;
@@ -64,6 +65,9 @@ public class MeshServlet extends HttpServlet {
 
 	@EJB(mappedName = "java:module/SLTypeMappingService")
 	private SLTypeMappingService slTypeMappingService;
+
+	@EJB(mappedName = "java:module/AgentManagementService")
+	AgentManagementService agentManagementService;
 	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -83,17 +87,9 @@ public class MeshServlet extends HttpServlet {
 				capsPath = m.group(1);
 			}
 			log.debug("CAPS Path: {}", capsPath);
-			// Agent agent = agentManagementService.getAgent(capsPath);
-			// Now let's find out, what Caps actually is requested and do the
-			// corresponding processing
-			// if (capsPath.equals(agent.getFetchinventory2_caps().toString()))
-			// {
-			if (capsPath.equalsIgnoreCase("50e820e0-5244-11e2-bcfd-0800200c9a66")) {
+			if (agentManagementService.hasMeshCapsId(capsPath)) {
 				response.setContentType(request.getContentType());
 				getMesh(request, response, httpclient);
-				// StringEntity entity = new StringEntity(reply);
-				// entity.writeTo(out);
-				// out.close();
 			} else {
 				log.error("Unknow Request received");
 			}

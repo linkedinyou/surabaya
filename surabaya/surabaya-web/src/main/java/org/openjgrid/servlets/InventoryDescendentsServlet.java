@@ -52,6 +52,7 @@ import org.openjgrid.datatypes.llsd.LLSDInventoryDescendents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolder;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
+import org.openjgrid.services.agent.AgentManagementService;
 import org.openjgrid.services.inventory.InventoryService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -78,8 +79,8 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	private static final long serialVersionUID = -8627204223385024589L;
 	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet.class);
 
-	// @EJB(mappedName = "java:module/AgentManagementService")
-	// AgentManagementService agentManagementService;
+	@EJB(mappedName = "java:module/AgentManagementService")
+	AgentManagementService agentManagementService;
 
 	@EJB
 	private InventoryService inventoryService;
@@ -104,8 +105,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 				capsPath = m.group(1);
 			}
 			log.debug("CAPS Path: {}", capsPath);
-//			if (capsPath.equals(agent.getFetchinventorydescendents2_caps().toString())) {
-			if (capsPath.equalsIgnoreCase("8a4ebd90-4c35-11e2-bcfd-0800200c9a66")) {
+			if (agentManagementService.hasInventoryDescendentsCapsId(capsPath)) {
 				response.setContentType(request.getContentType());
 				String reply = fetchInventoryDescentdents(request, httpclient);
 				StringEntity entity = new StringEntity(reply);
