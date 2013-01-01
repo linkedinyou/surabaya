@@ -115,60 +115,10 @@ public class InventoryDescendentsServlet extends HttpServlet {
 				log.error("Unknow Request received");
 			}
 
-			log.debug("end of processRequest");
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
 		}
 	}
-
-//	private StringEntity getSeed(HttpServletRequest request,
-//			HttpClient httpclient, Agent agent) throws IOException {
-//		log.debug("getSeed() called");
-//		HttpPost httppost = new HttpPost("http://localhost:"
-//				+ configuration.getProperty("OpenSim", "sim_http_port")
-//				+ request.getRequestURI());
-//		String jsonString = Util.requestContent2String(request);
-//		StringEntity stringEntity = new StringEntity(jsonString,
-//				request.getCharacterEncoding());
-//		stringEntity.setContentType(request.getContentType());
-//		httppost.setEntity(stringEntity);
-//		httppost.setHeader("expect", "100-continue");
-//		httppost.setHeader("connection", "close");
-//
-//		HttpResponse httpResponse = httpclient.execute(httppost);
-//		HttpEntity entity = httpResponse.getEntity();
-//
-//		long contentLength = entity.getContentLength();
-//		Header contentType = entity.getContentType();
-//		String content = IOUtils.toString(entity.getContent(), "UTF-8");
-//		log.debug("ContentLength: {}", contentLength);
-//		log.debug("ContentType: {}", contentType);
-//		log.debug("Content: {}", content);
-//		String capsFromSim = null;
-//		Pattern p = Pattern.compile("^<llsd><map>(.*)</map></llsd>");
-//		Matcher m = p.matcher(content);
-//		if (m.find()) {
-//			capsFromSim = m.group(1);
-//		}
-//		log.debug("CAPS from OpenSim: {}", capsFromSim);
-//		StringBuilder sb = new StringBuilder("<llsd><map>");
-//		sb.append(capsFromSim);
-//		sb.append("<key>FetchInventoryDescendents2</key><string>http://");
-//		sb.append(configuration.getProperty("Surabaya", "hostname"));
-//		sb.append(":");
-//		sb.append(configuration.getProperty("Surabaya", "http_port"));
-//		sb.append("/CAPS/").append(agent.getFetchinventorydescendents2_caps()).append("0000/</string>");
-//		// TODO add the CAPS URLs for FetchInventory2 served by this Server, to
-//		// the List.
-//		// TODO add the CAPS URLs for GetTexture served by this Server, to the
-//		// List.
-//		// TODO add the CAPS URLs for GetMesh served by this Server, to the
-//		// List.
-//		sb.append("</map></llsd>");
-//		log.debug("CAPS after Injection {}", sb.toString());
-//		StringEntity result = new StringEntity(sb.toString());
-//		return (result);
-//	}
 
 
 	@SuppressWarnings("unchecked")
@@ -176,7 +126,6 @@ public class InventoryDescendentsServlet extends HttpServlet {
 			HttpClient httpclient) throws IOException, XMLStreamException, InventoryException {
 		log.debug("fetchInventoryDescentdents2() called");
 		String requestString = Util.requestContent2String(request);
-		log.debug("Content: {}", requestString);
 
 		// nasty temporary hack here, the linden client falsely
 		// identifies the uuid 00000000-0000-0000-0000-000000000000

@@ -18,8 +18,6 @@
  */
 package org.openjgrid.datatypes;
 
-import static org.junit.Assert.*;
-
 import java.util.UUID;
 
 import javax.xml.stream.XMLStreamException;

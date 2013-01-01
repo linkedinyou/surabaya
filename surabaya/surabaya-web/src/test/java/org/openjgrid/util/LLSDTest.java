@@ -34,7 +34,7 @@ import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
 
 /**
- * @author markusgasser
+ * @author Akira Sonoda
  *
  */
 public class LLSDTest {

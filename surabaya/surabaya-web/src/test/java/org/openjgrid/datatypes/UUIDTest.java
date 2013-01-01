@@ -18,10 +18,6 @@
  */
 package org.openjgrid.datatypes;
 
-import static org.junit.Assert.*;
-
-import java.util.UUID;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.openjgrid.util.Util;

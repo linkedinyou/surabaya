@@ -109,7 +109,6 @@ public class FetchInventoryServlet extends HttpServlet {
 				log.error("Unknow Request received");
 			}
 
-			log.debug("end of processRequest");
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
 		}

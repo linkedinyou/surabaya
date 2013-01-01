@@ -88,14 +88,12 @@ public class TextureServlet extends HttpServlet {
 			if (m.find()) {
 				capsPath = m.group(1);
 			}
-			log.debug("CAPS Path: {}", capsPath);
 			if (agentManagementService.hasTextureCapsId(capsPath)) {
 				response.setContentType(request.getContentType());
 				getTexture(request, response, httpclient);
 			} else {
 				log.error("Unknow Request received");
 			}
-			log.debug("end of processRequest");
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
 		}
@@ -162,7 +160,6 @@ public class TextureServlet extends HttpServlet {
 			fullID = fullID + "-" + format;
 		}
 
-		// TODO implement caching: texture = m_assetService.GetCached(fullID);
 		if (texture == null) {
 
 			// Fetch locally or remotely. Misses return a 404
@@ -193,13 +190,8 @@ public class TextureServlet extends HttpServlet {
 					return(true);
 				}
 			}
-		} // else {
-			// m_log.DebugFormat("[GETTEXTURE]: texture was in the cache");
-			// WriteTextureData(httpRequest, httpResponse, texture, format);
-			// log.error("Caching not yet implemented");
-			// return (false);
-		// }
-
+		} 
+		
 		return (false);
 	}
 

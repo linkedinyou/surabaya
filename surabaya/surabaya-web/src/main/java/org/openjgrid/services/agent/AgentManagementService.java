@@ -131,7 +131,6 @@ public class AgentManagementService {
 	}
 
 	public void removeAgent(String agentID) throws AgentNotFoundException {
-		log.debug("removeAgent() called: agentMap.size: {}", agentMap.size());
 		if(agentMap.containsKey(agentID)) {
 			Agent anAgent = agentMap.get(agentID);
 			removeAllAgentEntries(anAgent);
@@ -141,7 +140,6 @@ public class AgentManagementService {
 	}
 
 	public void removeAgent(UUID capsID) throws AgentNotFoundException {
-		log.debug("removeAgent() called: agentMap.size: {}", agentMap.size());
 		if(agentMap.containsKey(capsID.toString())) {
 			Agent anAgent = agentMap.get(capsID.toString());
 			removeAllAgentEntries(anAgent);
@@ -151,7 +149,6 @@ public class AgentManagementService {
 	}
 
 	public boolean hasAgent(UUID capsID) {
-		log.debug("hasAgent() called: agentMap.size: {}", agentMap.size());
 		if(agentMap.containsKey(capsID.toString())) {
 			return(true);
 		} else {

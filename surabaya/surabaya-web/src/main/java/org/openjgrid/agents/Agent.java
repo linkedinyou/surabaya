@@ -18,15 +18,9 @@
  */
 package org.openjgrid.agents;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import org.joda.time.DateTime;
-
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +32,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class Agent {
 
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(Agent.class);
 
 	public UUID agent_id = null;
@@ -48,6 +43,7 @@ public final class Agent {
 	public String fetchinventorydescendents2_caps = null;
 	public String gettexture_caps = null;
 	public String getmesh_caps = null;
+	public String close_caps = null;
 
 	public Agent() { }
 	
@@ -60,6 +56,7 @@ public final class Agent {
 		this.fetchinventorydescendents2_caps = values.get("FetchInventoryDescendents2");
 		this.gettexture_caps = values.get("GetTexture");
 		this.getmesh_caps = values.get("GetMesh");
+		this.close_caps = values.get("AgentClose");
 	}
 	
 }

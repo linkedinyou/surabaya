@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 @LLSDMapping(mapTo="struct", mappedName = "")
 public class InventoryCollection {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(InventoryCollection.class);
 	
 	@LLSDMapping(mapTo="array", mappedName = "Folders")

@@ -18,8 +18,6 @@
  */
 package org.openjgrid.datatypes.llsd;
 
-import static org.junit.Assert.*;
-
 import java.util.UUID;
 
 import javax.xml.stream.XMLStreamException;
@@ -27,18 +25,14 @@ import javax.xml.stream.XMLStreamException;
 import org.junit.Before;
 import org.junit.Test;
 import org.openjgrid.datatypes.exceptions.NotImplementedException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * @author markusgasser
+ * @author Akira Sonoda
  *
  */
 public class InventoryItemBaseTest {
 
-	
-	private static final Logger log = LoggerFactory.getLogger(InventoryItemBaseTest.class);
-	
+		
 	/**
 	 * @throws java.lang.Exception
 	 */

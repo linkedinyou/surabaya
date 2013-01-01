@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class AssetMetadata {
 	
+	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(AssetMetadata.class);
 	
 	private UUID fullid;
