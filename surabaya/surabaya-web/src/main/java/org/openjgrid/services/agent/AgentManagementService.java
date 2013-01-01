@@ -22,6 +22,7 @@ import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.ConcurrencyManagement;
@@ -62,21 +63,21 @@ public class AgentManagementService {
 	private static final Logger log = LoggerFactory.getLogger(AgentManagementService.class);
 	private ConcurrentMap<String, Agent> agentMap = null;
 	
-	private Vector<String> textureCapsIds = null;
-	private Vector<String> meshCapsIds = null;
-	private Vector<String> inventoryCapsIds = null;
-	private Vector<String> inventoryDescendentsCapsIds = null;
-	private Vector<String> closeCapsIds = null;
+	private CopyOnWriteArrayList<String> textureCapsIds = null;
+	private CopyOnWriteArrayList<String> meshCapsIds = null;
+	private CopyOnWriteArrayList<String> inventoryCapsIds = null;
+	private CopyOnWriteArrayList<String> inventoryDescendentsCapsIds = null;
+	private CopyOnWriteArrayList<String> closeCapsIds = null;
 	
 	@PostConstruct
 	public void create() throws Exception {
 		log.debug("create() called");
 		agentMap = new ConcurrentHashMap<String, Agent>(); 
-		textureCapsIds = new Vector<String>();
-		meshCapsIds = new Vector<String>();
-		inventoryCapsIds = new Vector<String>();
-		inventoryDescendentsCapsIds = new Vector<String>();
-		closeCapsIds = new Vector<String>();
+		textureCapsIds = new CopyOnWriteArrayList<String>();
+		meshCapsIds = new CopyOnWriteArrayList<String>();
+		inventoryCapsIds = new CopyOnWriteArrayList<String>();
+		inventoryDescendentsCapsIds = new CopyOnWriteArrayList<String>();
+		closeCapsIds = new CopyOnWriteArrayList<String>();
 		
 	}
 
