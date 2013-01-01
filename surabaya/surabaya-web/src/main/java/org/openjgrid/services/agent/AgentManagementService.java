@@ -19,7 +19,6 @@
 package org.openjgrid.services.agent;
 
 import java.util.UUID;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
