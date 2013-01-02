@@ -381,7 +381,6 @@ public class LLSD {
 		}
 
 		return ret;
-		// TODO
 	}
 
 	public static ArrayList<Object> llsdParseArray(XMLStreamReader llsdStream)

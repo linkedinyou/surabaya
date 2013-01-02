@@ -69,7 +69,7 @@ public class TextureServlet extends HttpServlet {
 	private SLTypeMappingService slTypeMappingService;
 
 	@EJB(mappedName = "java:module/AgentManagementService")
-	AgentManagementService agentManagementService;
+	private AgentManagementService agentManagementService;
 	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
