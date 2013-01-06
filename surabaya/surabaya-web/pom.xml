@@ -103,6 +103,10 @@
       	<groupId>org.codehaus.jackson</groupId>
       	<artifactId>jackson-mapper-lgpl</artifactId>
       </dependency>
+      <dependency>
+      	<groupId>junit</groupId>
+      	<artifactId>junit</artifactId>
+      </dependency>
    </dependencies>
 
    <build>

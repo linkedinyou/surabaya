@@ -64,10 +64,10 @@ public class AssetService {
 				log.debug("ContentType: {}", contentType);
 				if(!Util.isNullOrEmpty(content)) {
 					cache.put(assetID, content);					
+					log.debug("80 bytes respstring: " + content.substring(0,80));
 				}
 			}
 			
-			log.debug("80 bytes respstring: " + content.substring(0,80));
 			if (Util.isNullOrEmpty(content)) {
 				return (null);
 			}

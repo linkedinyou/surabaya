@@ -1,9 +1,9 @@
 *~
 .classpath
+*.class
 .settings
 target
 .DS_Store
-.class
 .faces-config.xml.jsfdia
 MANIFEST.MF
 .idea
