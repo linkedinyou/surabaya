@@ -54,12 +54,12 @@ public class ConfigurationService {
     	sim_props.put("sim_http_port", "9000");
     	props.put("OpenSim", sim_props);
     	ConcurrentMap<String, String> surabaya_props = new ConcurrentHashMap<String, String>();
-    	surabaya_props.put("hostname", "localhost");
+    	surabaya_props.put("hostname", "suai.dyndns.org");
     	surabaya_props.put("http_port", "8080");
     	props.put("Surabaya", surabaya_props);
     	ConcurrentMap<String, String> grid_props = new ConcurrentHashMap<String, String>();
-    	grid_props.put("inventory_service", "http://localhost:8003");
-    	grid_props.put("asset_service", "http://localhost:8003");
+    	grid_props.put("inventory_service", "http://inventory.osgrid.org");
+    	grid_props.put("asset_service", "http://assets.osgrid.org");
     	props.put("grid", grid_props);
     	
     
