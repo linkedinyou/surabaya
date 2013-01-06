@@ -44,10 +44,12 @@ import javax.xml.stream.XMLStreamWriter;
 public class LLSD {
 	private static final Logger log = LoggerFactory.getLogger(LLSD.class);
 
-	public static Object llsdDeserialize(String llsdString)
-			throws XMLStreamException, LLSDParseException {
-		return llsdDeserialize(new InputStreamReader(
-				IOUtils.toInputStream(llsdString)));
+	public static Object llsdDeserialize(String llsdString) throws XMLStreamException, LLSDParseException {
+		try {
+			return llsdDeserialize(new InputStreamReader(IOUtils.toInputStream(llsdString)));
+		} catch (LLSDParseException ex) {
+			throw new LLSDParseException(ex.getMessage() + "--" + llsdString + "--"); 
+		}
 	}
 
 	public static Object llsdDeserialize(InputStreamReader llsdReader)
