@@ -55,6 +55,15 @@ public class LLSDTest {
 		LLSD.llsdDeserialize(llsdString);
 	}
 
+	/**
+	 * Test method for {@link org.openjgrid.util.LLSD#llsdDeserialize(java.lang.String)}.
+	 */
+	@Test
+	public void testLLSDDeserializeStringWithStringDatatype() throws Exception {
+		String llsdString = "<llsd><map><key>agent_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid><key>cap_name</key><string>FetchInventory2</string><key>items</key><array><map><key>item_id</key><uuid>16c7d979-c48f-47bb-b677-93201cc266b4</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map><map><key>item_id</key><uuid>278af03c-d8ac-4dce-afcb-e3bb287753ed</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map><map><key>item_id</key><uuid>3a8ea189-78ae-409b-9211-103e2a09ea83</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map><map><key>item_id</key><uuid>3b7e0413-c7d4-45c1-9feb-c230d979f0af</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map><map><key>item_id</key><uuid>3db7fa6b-fc7f-428c-a671-bf60031fde20</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map><map><key>item_id</key><uuid>66af8145-fb6a-4087-8a2c-b020d45d88e8</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map><map><key>item_id</key><uuid>6d55f714-2008-43bb-ba99-1b99abe73ba3</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map><map><key>item_id</key><uuid>a33277ba-c0dc-4dfa-bd6c-368f4c5fec93</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map><map><key>item_id</key><uuid>f71430ba-3575-477e-8548-79dece3cec3c</uuid><key>owner_id</key><uuid>09a23ec1-d8af-4375-bd4d-3fc0d92e2174</uuid></map></array></map></llsd>";
+		LLSD.llsdDeserialize(llsdString);
+	}
+	
 	@Test
 	public void testLLSDSerializeStructure() throws Exception {
 		LLSDInventoryFolderContents contents = new LLSDInventoryFolderContents();

@@ -284,7 +284,8 @@ public class LLSD {
 			// return UUID.Zero;
 			// }
 			ret = UUID.fromString(llsdStream.getElementText().trim());
-			// case "string":
+		} else if ( datatype.equalsIgnoreCase("string")) {
+			ret = llsdStream.getElementText().trim();
 			// {
 			// if (reader.IsEmptyElement)
 			// {
