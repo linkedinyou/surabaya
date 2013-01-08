@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openjgrid.datatypes;
+package org.openjgrid.datatypes.asset;
 
 import java.io.InputStreamReader;
 import java.util.UUID;
@@ -28,6 +28,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.openjgrid.datatypes.Constants;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;

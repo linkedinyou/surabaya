@@ -16,11 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openjgrid.datatypes;
+package org.openjgrid.datatypes.asset;
 
 import java.util.UUID;
 
 import org.joda.time.DateTime;
+import org.openjgrid.datatypes.Constants;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

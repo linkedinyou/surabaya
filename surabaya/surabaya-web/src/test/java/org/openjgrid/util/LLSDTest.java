@@ -26,8 +26,8 @@ import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openjgrid.datatypes.llsd.InventoryFolderBase;
-import org.openjgrid.datatypes.llsd.InventoryItemBase;
+import org.openjgrid.datatypes.inventory.InventoryFolderBase;
+import org.openjgrid.datatypes.inventory.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.LLSD;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolder;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;

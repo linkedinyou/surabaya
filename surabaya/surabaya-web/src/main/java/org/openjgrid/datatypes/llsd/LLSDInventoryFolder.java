@@ -20,6 +20,8 @@ package org.openjgrid.datatypes.llsd;
 
 import java.util.UUID;
 
+import org.openjgrid.datatypes.inventory.InventoryFolderBase;
+
 /**
  * @author Akira Sonoda
  *

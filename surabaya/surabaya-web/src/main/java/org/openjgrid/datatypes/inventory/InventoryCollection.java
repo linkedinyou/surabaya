@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openjgrid.datatypes.llsd;
+package org.openjgrid.datatypes.inventory;
 
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -28,6 +28,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.io.IOUtils;
+import org.openjgrid.datatypes.llsd.LLSDMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

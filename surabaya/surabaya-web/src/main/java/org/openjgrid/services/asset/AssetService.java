@@ -13,7 +13,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.AssetBase;
+import org.openjgrid.datatypes.asset.AssetBase;
 import org.openjgrid.services.infrastructure.ConfigurationService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;

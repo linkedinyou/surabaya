@@ -24,6 +24,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openjgrid.datatypes.asset.AssetBase;
+import org.openjgrid.datatypes.asset.AssetFlags;
 
 /**
  * @author Akira Sonoda

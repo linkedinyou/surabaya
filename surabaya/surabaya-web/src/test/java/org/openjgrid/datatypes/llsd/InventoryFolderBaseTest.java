@@ -24,6 +24,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openjgrid.datatypes.inventory.InventoryException;
+import org.openjgrid.datatypes.inventory.InventoryFolderBase;
 
 /**
  * @author Akira Sonoda
@@ -39,7 +41,7 @@ public class InventoryFolderBaseTest {
 	}
 
 	/**
-	 * Test method for {@link org.openjgrid.datatypes.llsd.InventoryFolderBase#fromXml(java.lang.String)}.
+	 * Test method for {@link org.openjgrid.datatypes.inventory.InventoryFolderBase#fromXml(java.lang.String)}.
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */

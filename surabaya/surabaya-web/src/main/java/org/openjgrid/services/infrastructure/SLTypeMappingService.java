@@ -26,7 +26,7 @@ import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
-import org.openjgrid.datatypes.AssetType;
+import org.openjgrid.datatypes.asset.AssetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -34,9 +34,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.AssetBase;
-import org.openjgrid.datatypes.AssetType;
 import org.openjgrid.datatypes.Constants;
+import org.openjgrid.datatypes.asset.AssetBase;
+import org.openjgrid.datatypes.asset.AssetType;
 import org.openjgrid.services.agent.AgentManagementService;
 import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;

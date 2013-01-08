@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-package org.openjgrid.datatypes.llsd;
+package org.openjgrid.datatypes.inventory;
 
 import java.io.InputStreamReader;
 import java.util.UUID;
