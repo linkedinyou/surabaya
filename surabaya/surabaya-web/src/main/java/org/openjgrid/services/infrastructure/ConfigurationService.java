@@ -49,19 +49,29 @@ public class ConfigurationService {
      */
     public ConfigurationService() {
     	
+    	// TODO Check if still needed OpenSim Config 
     	log.debug("CongirurationService() starting");
     	ConcurrentMap<String, String> sim_props = new ConcurrentHashMap<String, String>();
     	sim_props.put("sim_http_port", "9000");
     	props.put("OpenSim", sim_props);
+    	
+    	// TODO Check if still needed Surabaya Config
     	ConcurrentMap<String, String> surabaya_props = new ConcurrentHashMap<String, String>();
     	surabaya_props.put("hostname", "suai.dyndns.org");
     	surabaya_props.put("http_port", "8080");
     	props.put("Surabaya", surabaya_props);
+    	
+    	// Grid Services Config
     	ConcurrentMap<String, String> grid_props = new ConcurrentHashMap<String, String>();
     	grid_props.put("inventory_service", "http://inventory.osgrid.org");
     	grid_props.put("asset_service", "http://assets.osgrid.org");
     	props.put("grid", grid_props);
     	
+    	// Library Service Config
+    	ConcurrentMap<String, String> libraryservice_props = new ConcurrentHashMap<String, String>();
+    	libraryservice_props.put("LibraryName", "OpenSim Library");
+    	libraryservice_props.put("DefaultLibrary", "inventory/Libraries.xml");
+    	props.put("LibraryService", libraryservice_props);
     
     }
  
@@ -91,6 +101,24 @@ public class ConfigurationService {
             }             
         } else {
             return(null);
+        }
+    }
+
+    /**
+     * @param aPropertyGroup
+     * @param property
+     * @param defaultValue
+     * @return
+     */
+    public String getProperty(String aPropertyGroup, String property, String defaultValue ) {
+        if(props.containsKey(aPropertyGroup)) {
+            if(props.get(aPropertyGroup).containsKey(property)) {
+                return ((String) props.get(aPropertyGroup).get(property));
+            } else {
+                return (defaultValue);
+            }             
+        } else {
+            return(defaultValue);
         }
     }
 

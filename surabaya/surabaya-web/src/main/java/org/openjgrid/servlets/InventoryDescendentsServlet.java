@@ -43,6 +43,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.asset.AssetType;
 import org.openjgrid.datatypes.inventory.InventoryCollection;
 import org.openjgrid.datatypes.inventory.InventoryException;
+import org.openjgrid.datatypes.inventory.InventoryFolder;
 import org.openjgrid.datatypes.inventory.InventoryFolderBase;
 import org.openjgrid.datatypes.inventory.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.Fetch;
@@ -53,6 +54,7 @@ import org.openjgrid.datatypes.llsd.LLSDInventoryFolder;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
 import org.openjgrid.services.agent.AgentManagementService;
+import org.openjgrid.services.infrastructure.LibraryService;
 import org.openjgrid.services.inventory.InventoryService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -82,6 +84,9 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	@EJB(mappedName = "java:module/AgentManagementService")
 	AgentManagementService agentManagementService;
 
+	@EJB(mappedName = "java:module/LibraryService")
+	LibraryService libraryService;
+	
 	@EJB
 	private InventoryService inventoryService;
 
@@ -290,7 +295,22 @@ public class InventoryDescendentsServlet extends HttpServlet {
                 );
         
         Fetch result = new Fetch();
-        // I'll leave out the processing of the Library because I guess it is not needed
+        result.version = 0;
+        result.descendents = 0;
+
+        InventoryFolder inventoryFolder = null;
+        if (libraryService != null && libraryService.LibraryRootFolder != null && agent_id == libraryService.LibraryRootFolder.Owner)
+        {
+            if ((inventoryFolder = libraryService.getLibraryRootFolder().findFolder(folder_id)) != null)
+            {
+                InventoryCollection ret = new InventoryCollection();
+                ret.folderList = new ArrayList<InventoryFolderBase>();
+                ret.itemList = inventoryFolder.getListOfItems();
+                result.descendents = ret.folderList.size() + ret.itemList.size();
+
+                return (result);
+            }
+        }
         
 		if (!folder_id.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
             result.inventoryCollection = inventoryService.getFolderContent(agent_id, folder_id);
