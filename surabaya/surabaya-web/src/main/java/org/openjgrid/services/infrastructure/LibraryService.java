@@ -18,6 +18,8 @@
  */
 package org.openjgrid.services.infrastructure;
 
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -28,7 +30,10 @@ import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.openjgrid.datatypes.Constants;
 import org.openjgrid.datatypes.asset.AssetType;
 import org.openjgrid.datatypes.inventory.InventoryException;
@@ -69,8 +74,9 @@ public class LibraryService {
 
 	/**
 	 * @throws InventoryException
+	 * @throws ConfigurationException 
 	 */
-	public LibraryService() throws InventoryException {
+	public LibraryService() throws InventoryException, ConfigurationException {
 		String librariesLocation = FilenameUtils.concat("inventory",
 				"Libraries.xml");
 		String libraryName = "OpenSim Library";
@@ -130,13 +136,91 @@ public class LibraryService {
 
 	/**
 	 * @param librariesLocation
+	 * @throws ConfigurationException 
+	 * @throws InventoryException 
 	 */
-	private void loadLibraries(String librariesLocation) {
+	@SuppressWarnings("rawtypes")
+	private void loadLibraries(String librariesLocation) throws ConfigurationException, InventoryException {
         log.info("Loading library control file {}", librariesLocation);
-        LoadFromFile(librariesLocation, "Libraries control", ReadLibraryFromConfig);
-
+        String filePath = FilenameUtils.getPathNoEndSeparator(librariesLocation);
+		XMLConfiguration xmlConfiguration = new XMLConfiguration();
+		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(librariesLocation));
+		Object property = xmlConfiguration.getProperty("Section[@Name]");
+		if(property instanceof Collection) {
+			int numOfSections = ((Collection) property).size();
+			for(int i=0; i<numOfSections;i++) {
+				
+				String filetype1 = xmlConfiguration.getString("Section("+i+").Key(0)[@Name]");
+				String filename1 = xmlConfiguration.getString("Section("+i+").Key(0)[@Value]");
+				if(filetype1.equals("foldersFile")) {
+					loadFoldersFromFile(FilenameUtils.concat(filePath, filename1));
+				} else {
+					throw new ConfigurationException("Expecting \"foldersFile\" but received: " + filetype1);
+				}
+				
+				String filetype2 = xmlConfiguration.getString("Section("+i+").Key(1)[@Name]");
+				String filename2 = xmlConfiguration.getString("Section("+i+").Key(1)[@Value]");		
+				if(filetype2.equals("itemsFile")) {
+					loadItemsFromFile(FilenameUtils.concat(filePath, filename2));
+				} else {
+					throw new ConfigurationException("Expecting \"itemsFile\" but received: " + filetype2);
+				}
+			}
+		} else {
+			throw new ConfigurationException("Expecting multiple Sections in " + librariesLocation);
+		}
 	}
 
+	private void loadItemsFromFile(String itemsLocation) throws ConfigurationException {
+		// TODO Auto-generated method stub
+		XMLConfiguration xmlConfiguration = new XMLConfiguration();
+		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(itemsLocation));
+		Object property = xmlConfiguration.getProperty("Section[@Name]");
+		
+	}
+
+	private void loadFoldersFromFile(String foldersLocation) throws ConfigurationException, InventoryException {
+		log.debug("loadFoldersFromFile: {}", foldersLocation);
+		
+		XMLConfiguration xmlConfiguration = new XMLConfiguration();
+		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(foldersLocation));
+		Object property = xmlConfiguration.getProperty("Section[@Name]");
+
+		UUID folderId = null;
+		String folderName = null;
+		UUID parentFolderId = null;
+		int type = 0;
+		// TODO ID = new UUID(config.GetString("folderID", m_LibraryRootFolder.ID.ToString()
+		// TODO Name = config.GetString("name", "unknown");
+		// TODO ParentID = new UUID(config.GetString("parentFolderID", m_LibraryRootFolder.ID.ToString()));
+		// TODO Type = (short)config.GetInt("type", 8)
+		
+		addFolderToLibrary(folderId, folderName, parentFolderId, type);
+	}
+
+	private void addFolderToLibrary(UUID folderId, String folderName, UUID parentFolderId, int type ) throws InventoryException {
+		InventoryFolder folderInfo = new InventoryFolder();
+		
+		folderInfo.setId(folderId);
+        folderInfo.setName(folderName);
+        folderInfo.setParentFolderId(parentFolderId); 
+        folderInfo.setType(type);
+
+        folderInfo.setOwnerId(libOwner);
+        folderInfo.setVersion(1);
+
+        if (libraryFolders.containsKey(folderInfo.getParentFolderId())) {
+            InventoryFolder parentFolder = libraryFolders.get(folderInfo.getParentFolderId());
+            libraryFolders.put(folderInfo.getId(), folderInfo);
+            parentFolder.addChildFolder(folderInfo);
+            log.debug("Adding folder {} ({})", folderInfo.getName(), folderInfo.getId());
+        } else {
+            log.warn(
+                "Couldn't add folder {} since parent folder with ID {} does not exist!",
+                folderInfo.getName(), folderInfo.getParentFolderId());
+        }
+	}
+	
 	// Getter & Setter
 
 	public InventoryFolder getLibraryRootFolder() {

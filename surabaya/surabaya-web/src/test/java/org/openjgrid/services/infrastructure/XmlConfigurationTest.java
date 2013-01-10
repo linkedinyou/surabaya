@@ -18,10 +18,9 @@
  */
 package org.openjgrid.services.infrastructure;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.Iterator;
 
 import junit.framework.Assert;
@@ -51,6 +50,10 @@ public class XmlConfigurationTest {
 		sb.append("    <Key Name=\"foldersFile\" Value=\"OpenSimLibrary/OpenSimLibraryFolders.xml\"/>\n");
 		sb.append("    <Key Name=\"itemsFile\" Value=\"OpenSimLibrary/OpenSimLibrary.xml\"/>\n");
 		sb.append("  </Section>");
+		sb.append("  <Section Name=\"OpenSim NonStandard Library\">\n");
+		sb.append("    <Key Name=\"foldersFile\" Value=\"OpenSimLibrary/OpenSimNonLibraryFolders.xml\"/>\n");
+		sb.append("    <Key Name=\"itemsFile\" Value=\"OpenSimLibrary/OpenSimNonLibrary.xml\"/>\n");
+		sb.append("  </Section>");
 		sb.append("</Nini>");
 		xmlString = sb.toString();
 	}
@@ -62,10 +65,29 @@ public class XmlConfigurationTest {
 		XMLConfiguration xmlConfiguration = new XMLConfiguration();
 		xmlConfiguration.load(file);
 		Iterator<String> keys = xmlConfiguration.getKeys();
+		Assert.assertTrue(keys.hasNext());
 		while(keys.hasNext()) {
 			System.out.println("Key: " + keys.next());
 		}
-		
 	}
 
+	
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testGetValuesOutOfNiniConfiguration() throws IOException, ConfigurationException {
+		Assert.assertTrue(xmlString != null);
+		InputStream file = IOUtils.toInputStream(xmlString, "UTF-8");
+		XMLConfiguration xmlConfiguration = new XMLConfiguration();
+		xmlConfiguration.load(file);
+		Object prop = xmlConfiguration.getProperty("Section[@Name]");
+		int numOfSections = ((Collection) prop).size();
+		Assert.assertTrue(numOfSections == 2);
+		for(int i=0; i<numOfSections; i++) {
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(0)[@Name]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(0)[@Value]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(1)[@Name]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(1)[@Value]"));	
+		}
+		
+	}
 }
