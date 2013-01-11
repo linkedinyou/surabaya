@@ -55,15 +55,13 @@ import org.slf4j.LoggerFactory;
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)
 public class LibraryService {
 
-	private static final Logger log = LoggerFactory
-			.getLogger(LibraryService.class);
+	private static final Logger log = LoggerFactory.getLogger(LibraryService.class);
 
 	@EJB(mappedName = "java:module/ConfigurationService")
 	private ConfigurationService configurationService;
 
 	private InventoryFolder libraryRootFolder = null;
-	private UUID libOwner = UUID
-			.fromString("11111111-1111-0000-0000-000100bba000");
+	private UUID libOwner = UUID.fromString("11111111-1111-0000-0000-000100bba000");
 
 	/**
 	 * Holds the root library folder and all its descendents. This is really
@@ -74,22 +72,18 @@ public class LibraryService {
 
 	/**
 	 * @throws InventoryException
-	 * @throws ConfigurationException 
+	 * @throws ConfigurationException
 	 */
 	public LibraryService() throws InventoryException, ConfigurationException {
-		String librariesLocation = FilenameUtils.concat("inventory",
-				"Libraries.xml");
+		String librariesLocation = FilenameUtils.concat("inventory", "Libraries.xml");
 		String libraryName = "OpenSim Library";
 
-		librariesLocation = configurationService.getProperty("LibraryService",
-				"DefaultLibrary", librariesLocation);
-		libraryName = configurationService.getProperty("LibraryService",
-				"DefaultLibrary", libraryName);
+		librariesLocation = configurationService.getProperty("LibraryService", "DefaultLibrary", librariesLocation);
+		libraryName = configurationService.getProperty("LibraryService", "DefaultLibrary", libraryName);
 
 		libraryRootFolder = new InventoryFolder();
 		libraryRootFolder.setOwnerId(libOwner);
-		libraryRootFolder.setId(UUID
-				.fromString("00000112-000f-0000-0000-000100bba000"));
+		libraryRootFolder.setId(UUID.fromString("00000112-000f-0000-0000-000100bba000"));
 		libraryRootFolder.setName(libraryName);
 		libraryRootFolder.setParentFolderId(Constants.UUID_ZERO);
 		libraryRootFolder.setType(8);
@@ -112,10 +106,9 @@ public class LibraryService {
 	 * @return
 	 * @throws InventoryException
 	 */
-	public InventoryItemBase createItem(UUID inventoryID, UUID assetID,
-			String name, String description, int assetType, int invType,
+	public InventoryItemBase createItem(UUID inventoryID, UUID assetID, String name, String description, int assetType, int invType,
 			UUID parentFolderID) throws InventoryException {
-		
+
 		InventoryItemBase item = new InventoryItemBase();
 		item.setOwnerId(libOwner);
 		item.setCreatorId(libOwner.toString());
@@ -131,36 +124,36 @@ public class LibraryService {
 		item.setCurrentPermissions(0x7FFFFFFF);
 		item.setNextPermissions(0x7FFFFFFF);
 		return (item);
-		
+
 	}
 
 	/**
 	 * @param librariesLocation
-	 * @throws ConfigurationException 
-	 * @throws InventoryException 
+	 * @throws ConfigurationException
+	 * @throws InventoryException
 	 */
 	@SuppressWarnings("rawtypes")
 	private void loadLibraries(String librariesLocation) throws ConfigurationException, InventoryException {
-        log.info("Loading library control file {}", librariesLocation);
-        String filePath = FilenameUtils.getPathNoEndSeparator(librariesLocation);
+		log.info("Loading library control file {}", librariesLocation);
+		String filePath = FilenameUtils.getPathNoEndSeparator(librariesLocation);
 		XMLConfiguration xmlConfiguration = new XMLConfiguration();
 		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(librariesLocation));
 		Object property = xmlConfiguration.getProperty("Section[@Name]");
-		if(property instanceof Collection) {
+		if (property instanceof Collection) {
 			int numOfSections = ((Collection) property).size();
-			for(int i=0; i<numOfSections;i++) {
-				
-				String filetype1 = xmlConfiguration.getString("Section("+i+").Key(0)[@Name]");
-				String filename1 = xmlConfiguration.getString("Section("+i+").Key(0)[@Value]");
-				if(filetype1.equals("foldersFile")) {
+			for (int i = 0; i < numOfSections; i++) {
+
+				String filetype1 = xmlConfiguration.getString("Section(" + i + ").Key(0)[@Name]");
+				String filename1 = xmlConfiguration.getString("Section(" + i + ").Key(0)[@Value]");
+				if (filetype1.equals("foldersFile")) {
 					loadFoldersFromFile(FilenameUtils.concat(filePath, filename1));
 				} else {
 					throw new ConfigurationException("Expecting \"foldersFile\" but received: " + filetype1);
 				}
-				
-				String filetype2 = xmlConfiguration.getString("Section("+i+").Key(1)[@Name]");
-				String filename2 = xmlConfiguration.getString("Section("+i+").Key(1)[@Value]");		
-				if(filetype2.equals("itemsFile")) {
+
+				String filetype2 = xmlConfiguration.getString("Section(" + i + ").Key(1)[@Name]");
+				String filename2 = xmlConfiguration.getString("Section(" + i + ").Key(1)[@Value]");
+				if (filetype2.equals("itemsFile")) {
 					loadItemsFromFile(FilenameUtils.concat(filePath, filename2));
 				} else {
 					throw new ConfigurationException("Expecting \"itemsFile\" but received: " + filetype2);
@@ -176,12 +169,63 @@ public class LibraryService {
 		XMLConfiguration xmlConfiguration = new XMLConfiguration();
 		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(itemsLocation));
 		Object property = xmlConfiguration.getProperty("Section[@Name]");
-		
+
+		// TODO id = new UUID(config.GetString("inventoryID",
+		// m_LibraryRootFolder.ID.ToString()));
+		// TODO assetId = new UUID(config.GetString("assetID",
+		// item.ID.ToString()));
+		// TODO parentFolder = new UUID(config.GetString("folderID",
+		// m_LibraryRootFolder.ID.ToString()));
+		// TODO Name = config.GetString("name", String.Empty);
+		// TODO Description = config.GetString("description", item.Name);
+		// TODO InvType = config.GetInt("inventoryType", 0);
+		// TODO AssetType = config.GetInt("assetType", item.InvType);
+		// TODO CurrentPermissions = (uint)config.GetLong("currentPermissions",
+		// (uint)PermissionMask.All);
+		// TODO NextPermissions = (uint)config.GetLong("nextPermissions",
+		// (uint)PermissionMask.All);
+		// TODO EveryOnePermissions =
+		// (uint)config.GetLong("everyonePermissions", (uint)PermissionMask.All
+		// - (uint)PermissionMask.Modify);
+		// TODO BasePermissions = (uint)config.GetLong("basePermissions",
+		// (uint)PermissionMask.All);
+		// TODO Flags = (uint)config.GetInt("flags", 0);
+	}
+
+	private void addItemToLibrary(UUID id, UUID assetId, UUID parentFolderId, String name, String description, int invType,
+			int assetType, int currentPermissions, int nextPermissions, int everyOnePermissions, int basePermissions, int flags) throws InventoryException {
+		InventoryItemBase item = new InventoryItemBase();
+		item.setOwnerId(libOwner);
+		item.setCreatorId(libOwner.toString());
+		item.setId(id);
+		item.setAssetId(assetId);
+		item.setParentFolderId(parentFolderId);
+		item.setName(name);
+		item.setDescription(description);
+		item.setInvType(invType);
+		item.setAssetType(assetType);
+		item.setCurrentPermissions(currentPermissions);
+		item.setNextPermissions(nextPermissions);
+		item.setEveryOnePermissions(everyOnePermissions);
+		item.setBasePermissions(basePermissions);
+		item.setFlags(flags);
+
+		if (libraryFolders.containsKey(item.getParentFolderId())) {
+			InventoryFolder parentFolder = libraryFolders.get(item.getParentFolderId());
+			try {
+				parentFolder.Items.put(item.getId(), item);
+			} catch (Exception ex) {
+				log.warn("Item {} [{}] not added, duplicate item", item.getId(), item.getName());
+			}
+		} else {
+			log.warn("Couldn't add item {} since parent folder with ID {} does not exist!", item.getName(), item.getParentFolderId());
+		}
+
 	}
 
 	private void loadFoldersFromFile(String foldersLocation) throws ConfigurationException, InventoryException {
 		log.debug("loadFoldersFromFile: {}", foldersLocation);
-		
+
 		XMLConfiguration xmlConfiguration = new XMLConfiguration();
 		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(foldersLocation));
 		Object property = xmlConfiguration.getProperty("Section[@Name]");
@@ -190,37 +234,38 @@ public class LibraryService {
 		String folderName = null;
 		UUID parentFolderId = null;
 		int type = 0;
-		// TODO ID = new UUID(config.GetString("folderID", m_LibraryRootFolder.ID.ToString()
+		// TODO ID = new UUID(config.GetString("folderID",
+		// m_LibraryRootFolder.ID.ToString()
 		// TODO Name = config.GetString("name", "unknown");
-		// TODO ParentID = new UUID(config.GetString("parentFolderID", m_LibraryRootFolder.ID.ToString()));
+		// TODO ParentID = new UUID(config.GetString("parentFolderID",
+		// m_LibraryRootFolder.ID.ToString()));
 		// TODO Type = (short)config.GetInt("type", 8)
-		
+
 		addFolderToLibrary(folderId, folderName, parentFolderId, type);
 	}
 
-	private void addFolderToLibrary(UUID folderId, String folderName, UUID parentFolderId, int type ) throws InventoryException {
+	private void addFolderToLibrary(UUID folderId, String folderName, UUID parentFolderId, int type) throws InventoryException {
 		InventoryFolder folderInfo = new InventoryFolder();
-		
+
 		folderInfo.setId(folderId);
-        folderInfo.setName(folderName);
-        folderInfo.setParentFolderId(parentFolderId); 
-        folderInfo.setType(type);
+		folderInfo.setName(folderName);
+		folderInfo.setParentFolderId(parentFolderId);
+		folderInfo.setType(type);
 
-        folderInfo.setOwnerId(libOwner);
-        folderInfo.setVersion(1);
+		folderInfo.setOwnerId(libOwner);
+		folderInfo.setVersion(1);
 
-        if (libraryFolders.containsKey(folderInfo.getParentFolderId())) {
-            InventoryFolder parentFolder = libraryFolders.get(folderInfo.getParentFolderId());
-            libraryFolders.put(folderInfo.getId(), folderInfo);
-            parentFolder.addChildFolder(folderInfo);
-            log.debug("Adding folder {} ({})", folderInfo.getName(), folderInfo.getId());
-        } else {
-            log.warn(
-                "Couldn't add folder {} since parent folder with ID {} does not exist!",
-                folderInfo.getName(), folderInfo.getParentFolderId());
-        }
+		if (libraryFolders.containsKey(folderInfo.getParentFolderId())) {
+			InventoryFolder parentFolder = libraryFolders.get(folderInfo.getParentFolderId());
+			libraryFolders.put(folderInfo.getId(), folderInfo);
+			parentFolder.addChildFolder(folderInfo);
+			log.debug("Adding folder {} ({})", folderInfo.getName(), folderInfo.getId());
+		} else {
+			log.warn("Couldn't add folder {} since parent folder with ID {} does not exist!", folderInfo.getName(),
+					folderInfo.getParentFolderId());
+		}
 	}
-	
+
 	// Getter & Setter
 
 	public InventoryFolder getLibraryRootFolder() {
