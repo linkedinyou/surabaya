@@ -18,11 +18,9 @@
  */
 package org.openjgrid.services.infrastructure;
 
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
@@ -33,9 +31,8 @@ import javax.ejb.Startup;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.openjgrid.datatypes.Constants;
-import org.openjgrid.datatypes.asset.AssetType;
+import org.openjgrid.datatypes.asset.PermissionMask;
 import org.openjgrid.datatypes.inventory.InventoryException;
 import org.openjgrid.datatypes.inventory.InventoryFolder;
 import org.openjgrid.datatypes.inventory.InventoryItemBase;
@@ -164,36 +161,108 @@ public class LibraryService {
 		}
 	}
 
-	private void loadItemsFromFile(String itemsLocation) throws ConfigurationException {
-		// TODO Auto-generated method stub
+	@SuppressWarnings("rawtypes")
+	private void loadItemsFromFile(String itemsLocation) throws ConfigurationException, InventoryException {
+		UUID id = libraryRootFolder.getId();
+		UUID assetId = id;
+		UUID parentFolderId = id;
+		String name = "";
+		String description = name;
+		int invType = 0;
+		int assetType = invType;
+		long currentPermissions = PermissionMask.All.getPermissionMask();
+		long nextPermissions = PermissionMask.All.getPermissionMask();
+		long everyOnePermissions = PermissionMask.All.getPermissionMask() - PermissionMask.Modify.getPermissionMask();
+		long basePermissions = PermissionMask.All.getPermissionMask();
+		long flags = 0;
+
 		XMLConfiguration xmlConfiguration = new XMLConfiguration();
 		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(itemsLocation));
-		Object property = xmlConfiguration.getProperty("Section[@Name]");
+		Object propSection = xmlConfiguration.getProperty("Section[@Name]");
 
-		// TODO id = new UUID(config.GetString("inventoryID",
-		// m_LibraryRootFolder.ID.ToString()));
-		// TODO assetId = new UUID(config.GetString("assetID",
-		// item.ID.ToString()));
-		// TODO parentFolder = new UUID(config.GetString("folderID",
-		// m_LibraryRootFolder.ID.ToString()));
-		// TODO Name = config.GetString("name", String.Empty);
-		// TODO Description = config.GetString("description", item.Name);
-		// TODO InvType = config.GetInt("inventoryType", 0);
-		// TODO AssetType = config.GetInt("assetType", item.InvType);
-		// TODO CurrentPermissions = (uint)config.GetLong("currentPermissions",
-		// (uint)PermissionMask.All);
-		// TODO NextPermissions = (uint)config.GetLong("nextPermissions",
-		// (uint)PermissionMask.All);
-		// TODO EveryOnePermissions =
-		// (uint)config.GetLong("everyonePermissions", (uint)PermissionMask.All
-		// - (uint)PermissionMask.Modify);
-		// TODO BasePermissions = (uint)config.GetLong("basePermissions",
-		// (uint)PermissionMask.All);
-		// TODO Flags = (uint)config.GetInt("flags", 0);
+		int numOfSections = 0;
+		if (propSection instanceof Collection) {
+			numOfSections = ((Collection) propSection).size();
+		} else if (propSection == null) {
+			numOfSections = 0;
+		} else {
+			numOfSections = 1;
+		}
+
+		// / now get the data out of the configuration
+		if (numOfSections > 0) {
+			for (int i = 0; i < numOfSections; i++) {
+				int numOfKeys = 0;
+				Object propKey = xmlConfiguration.getProperty("Section(" + i + ").Key[@Name]");
+				if (propKey instanceof Collection) {
+					numOfKeys = ((Collection) propKey).size();
+				} else if (propKey == null) {
+					numOfKeys = 0;
+				} else {
+					numOfKeys = 1;
+				}
+
+				for (int j = 0; j < numOfKeys; j++) {
+					String itemProperty = xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Name]");
+					switch (itemProperty) {
+					case ("inventoryID"):
+						id = UUID.fromString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", 
+								libraryRootFolder.getId().toString()));
+						break;
+					case ("assetID"):
+						assetId = UUID.fromString(xmlConfiguration.getString(xmlConfiguration.getString(
+								"Section(" + i + ").Key(" + j + ")[@Value]", id.toString())));
+						break;
+					case ("folderID"):
+						parentFolderId = UUID.fromString(xmlConfiguration.getString(
+								"Section(" + i + ").Key(" + j + ")[@Value]", libraryRootFolder.getId().toString()));
+						break;
+					case ("name"):
+						name = xmlConfiguration.getString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", ""));
+						break;
+					case ("description"):
+						description = xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", name);
+						break;
+					case ("inventoryType"):
+						invType = xmlConfiguration.getInt("Section(" + i + ").Key(" + j + ")[@Value]", 0);
+						break;
+					case ("assetType"):
+						assetType = xmlConfiguration.getInt("Section(" + i + ").Key(" + j + ")[@Value]", invType);
+						break;
+					case ("currentPermissions"):
+						currentPermissions = xmlConfiguration.getLong("Section(" + i + ").Key(" + j + ")[@Value]",
+								PermissionMask.All.getPermissionMask());
+						break;
+					case ("nextPermissions"):
+						nextPermissions = xmlConfiguration.getLong("Section(" + i + ").Key(" + j + ")[@Value]",
+								PermissionMask.All.getPermissionMask());
+						break;
+					case ("everyonePermissions"):
+						everyOnePermissions = xmlConfiguration.getLong("Section(" + i + ").Key(" + j + ")[@Value]",
+								PermissionMask.All.getPermissionMask() - PermissionMask.Modify.getPermissionMask());
+						break;
+					case ("basePermissions"):
+						basePermissions = xmlConfiguration.getLong("Section(" + i + ").Key(" + j + ")[@Value]",
+								PermissionMask.All.getPermissionMask());
+						break;
+					case ("flags"):
+						flags = xmlConfiguration.getLong("Section(" + i + ").Key(" + j + ")[@Value]", 0);
+						break;
+					default:
+						throw new ConfigurationException("Unknown ItemProperty: " + itemProperty);
+
+					}
+				}
+				addItemToLibrary(id, assetId, parentFolderId, name, description, invType, assetType, currentPermissions,
+						nextPermissions, everyOnePermissions, basePermissions, flags);
+			}
+		}
+
 	}
 
 	private void addItemToLibrary(UUID id, UUID assetId, UUID parentFolderId, String name, String description, int invType,
-			int assetType, int currentPermissions, int nextPermissions, int everyOnePermissions, int basePermissions, int flags) throws InventoryException {
+			int assetType, long currentPermissions, long nextPermissions, long everyOnePermissions, long basePermissions, long flags)
+			throws InventoryException {
 		InventoryItemBase item = new InventoryItemBase();
 		item.setOwnerId(libOwner);
 		item.setCreatorId(libOwner.toString());
@@ -223,25 +292,66 @@ public class LibraryService {
 
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void loadFoldersFromFile(String foldersLocation) throws ConfigurationException, InventoryException {
 		log.debug("loadFoldersFromFile: {}", foldersLocation);
+		UUID folderId = libraryRootFolder.getId();
+		String folderName = "unknown";
+		UUID parentFolderId = libraryRootFolder.getId();
+		int type = 8;
 
+		
 		XMLConfiguration xmlConfiguration = new XMLConfiguration();
 		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(foldersLocation));
-		Object property = xmlConfiguration.getProperty("Section[@Name]");
+		Object propSection = xmlConfiguration.getProperty("Section[@Name]");
+		
+		int numOfSections = 0;
+		if (propSection instanceof Collection) {
+			numOfSections = ((Collection) propSection).size();
+		} else if (propSection == null) {
+			numOfSections = 0;
+		} else {
+			numOfSections = 1;
+		}
 
-		UUID folderId = null;
-		String folderName = null;
-		UUID parentFolderId = null;
-		int type = 0;
-		// TODO ID = new UUID(config.GetString("folderID",
-		// m_LibraryRootFolder.ID.ToString()
-		// TODO Name = config.GetString("name", "unknown");
-		// TODO ParentID = new UUID(config.GetString("parentFolderID",
-		// m_LibraryRootFolder.ID.ToString()));
-		// TODO Type = (short)config.GetInt("type", 8)
+		// / now get the data out of the configuration
+		if (numOfSections > 0) {
+			for (int i = 0; i < numOfSections; i++) {
+				int numOfKeys = 0;
+				Object propKey = xmlConfiguration.getProperty("Section(" + i + ").Key[@Name]");
+				if (propKey instanceof Collection) {
+					numOfKeys = ((Collection) propKey).size();
+				} else if (propKey == null) {
+					numOfKeys = 0;
+				} else {
+					numOfKeys = 1;
+				}
 
-		addFolderToLibrary(folderId, folderName, parentFolderId, type);
+				for (int j = 0; j < numOfKeys; j++) {
+					String itemProperty = xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Name]");
+					switch (itemProperty) {
+					case ("folderID"):
+						folderId = UUID.fromString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", 
+								     libraryRootFolder.getId().toString()));
+						break;
+					case ("name"):
+						folderName = xmlConfiguration.getString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", "unknown"));
+						break;
+					case ("parentFolderID"):
+						parentFolderId = UUID.fromString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", 
+							     libraryRootFolder.getId().toString()));
+						break;
+					case ("type"):
+						type = xmlConfiguration.getInt("Section(" + i + ").Key(" + j + ")[@Value]", 8);
+						break;
+					default:
+						throw new ConfigurationException("Unknown ItemProperty: " + itemProperty);
+
+					}
+				}
+				addFolderToLibrary(folderId, folderName, parentFolderId, type);
+			}
+		}
 	}
 
 	private void addFolderToLibrary(UUID folderId, String folderName, UUID parentFolderId, int type) throws InventoryException {
@@ -266,6 +376,18 @@ public class LibraryService {
 		}
 	}
 
+	public UUID getLibraryRootFolderOwner() {
+		if(libraryRootFolder != null) {
+			return(libraryRootFolder.getOwnerId());
+		} else {
+			return(Constants.UUID_ZERO);
+		}
+	}
+	
+	public boolean hasRootFolder() {
+		return (libraryRootFolder == null);
+	}
+	
 	// Getter & Setter
 
 	public InventoryFolder getLibraryRootFolder() {

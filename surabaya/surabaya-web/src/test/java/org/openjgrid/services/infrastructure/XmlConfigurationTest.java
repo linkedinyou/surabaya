@@ -38,6 +38,10 @@ import org.junit.Test;
 public class XmlConfigurationTest {
 
 	String xmlString = null;
+	String singleSectionXmlString = null;
+	String emptySectionXmlString = null;
+	String itemXmlString = null;
+	
 	
 	/**
 	 * @throws java.lang.Exception
@@ -56,6 +60,30 @@ public class XmlConfigurationTest {
 		sb.append("  </Section>");
 		sb.append("</Nini>");
 		xmlString = sb.toString();
+
+		StringBuilder ssb = new StringBuilder();
+		ssb.append("<Nini>\n");
+		ssb.append("  <Section Name=\"OpenSim Standard Library\">\n");
+		ssb.append("    <Key Name=\"foldersFile\" Value=\"OpenSimLibrary/OpenSimLibraryFolders.xml\"/>\n");
+		ssb.append("    <Key Name=\"itemsFile\" Value=\"OpenSimLibrary/OpenSimLibrary.xml\"/>\n");
+		ssb.append("  </Section>");
+		ssb.append("</Nini>");
+		singleSectionXmlString = ssb.toString();
+
+		StringBuilder esb = new StringBuilder();
+		esb.append("<Nini>\n");
+		esb.append("</Nini>");
+		emptySectionXmlString = esb.toString();
+
+		StringBuilder isb = new StringBuilder();
+		isb.append("<Nini>\n");
+		isb.append("  <Section Name=\"OpenSim Standard Library\">\n");
+		isb.append("    <Key Name=\"Name\" Value=\"Akira Sonoda\"/>\n");
+		isb.append("    <Key Name=\"AgeInDays\" Value=\"1500\"/>\n");
+		isb.append("  </Section>");
+		isb.append("</Nini>");
+		itemXmlString = isb.toString();
+		
 	}
 
 	@Test
@@ -90,4 +118,107 @@ public class XmlConfigurationTest {
 		}
 		
 	}
+	
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testGetValuesOutOfNiniConfigurationSingleSection() throws IOException, ConfigurationException {
+		Assert.assertTrue(singleSectionXmlString != null);
+		InputStream file = IOUtils.toInputStream(singleSectionXmlString, "UTF-8");
+		XMLConfiguration xmlConfiguration = new XMLConfiguration();
+		xmlConfiguration.load(file);
+		Object prop = xmlConfiguration.getProperty("Section[@Name]");
+		int numOfSections = 0;
+		if(prop instanceof Collection) {
+			numOfSections = ((Collection) prop).size();
+		} else if (prop == null ) {
+			numOfSections = 0;
+		} else {
+			numOfSections = 1;			
+		}
+		Assert.assertTrue(numOfSections == 1);
+		for(int i=0; i<numOfSections; i++) {
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(0)[@Name]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(0)[@Value]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(1)[@Name]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(1)[@Value]"));	
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testGetValuesOutOfNiniConfigurationEmptySection() throws IOException, ConfigurationException {
+		Assert.assertTrue(emptySectionXmlString != null);
+		InputStream file = IOUtils.toInputStream(emptySectionXmlString, "UTF-8");
+		XMLConfiguration xmlConfiguration = new XMLConfiguration();
+		xmlConfiguration.load(file);
+		Object prop = xmlConfiguration.getProperty("Section[@Name]");
+		int numOfSections = 0;
+		if(prop instanceof Collection) {
+			numOfSections = ((Collection) prop).size();
+		} else if (prop == null ) {
+			numOfSections = 0;
+		} else {
+			numOfSections = 1;			
+		}
+		Assert.assertTrue(numOfSections == 0);
+		for(int i=0; i<numOfSections; i++) {
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(0)[@Name]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(0)[@Value]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(1)[@Name]"));
+			System.out.println("Name: " + xmlConfiguration.getString("Section("+i+").Key(1)[@Value]"));	
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testGetNumberOfKeys() throws IOException, ConfigurationException {
+		Assert.assertTrue(xmlString != null);
+		InputStream file = IOUtils.toInputStream(xmlString, "UTF-8");
+		XMLConfiguration xmlConfiguration = new XMLConfiguration();
+		xmlConfiguration.load(file);
+		Object prop = xmlConfiguration.getProperty("Section[@Name]");
+		int numOfSections = 0;
+		if(prop instanceof Collection) {
+			numOfSections = ((Collection) prop).size();
+		} else if (prop == null ) {
+			numOfSections = 0;
+		} else {
+			numOfSections = 1;			
+		}
+		for(int i=0; i<numOfSections; i++) {
+			Object keyProp = xmlConfiguration.getProperty("Section("+i+").Key[@Name]");
+			if(keyProp instanceof Collection) {
+				int numKeys = ((Collection) keyProp).size();
+				System.out.println("Number of Keys: " + numKeys);
+				Assert.assertTrue( numKeys == 2 );
+			}
+		}
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void testGetInteger() throws IOException, ConfigurationException {
+		Assert.assertTrue(itemXmlString != null);
+		InputStream file = IOUtils.toInputStream(itemXmlString, "UTF-8");
+		XMLConfiguration xmlConfiguration = new XMLConfiguration();
+		xmlConfiguration.load(file);
+		Object prop = xmlConfiguration.getProperty("Section[@Name]");
+		int numOfSections = 0;
+		if(prop instanceof Collection) {
+			numOfSections = ((Collection) prop).size();
+		} else if (prop == null ) {
+			numOfSections = 0;
+		} else {
+			numOfSections = 1;			
+		}
+		for(int i=0; i<numOfSections; i++) {
+			String name = xmlConfiguration.getString("Section("+i+").Key(0)[@Value]");
+			System.out.println("Name: " + name);
+			int age = xmlConfiguration.getInt("Section("+i+").Key(1)[@Value]");
+			System.out.println("Age in Days: " + age);
+			Assert.assertEquals("Akira Sonoda", name);
+			Assert.assertEquals(1500, age);
+		}
+	}
+	
 }

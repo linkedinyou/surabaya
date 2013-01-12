@@ -299,15 +299,13 @@ public class InventoryDescendentsServlet extends HttpServlet {
         result.descendents = 0;
 
         InventoryFolder inventoryFolder = null;
-        if (libraryService != null && libraryService.LibraryRootFolder != null && agent_id == libraryService.LibraryRootFolder.Owner)
-        {
-            if ((inventoryFolder = libraryService.getLibraryRootFolder().findFolder(folder_id)) != null)
-            {
+        if (libraryService != null && libraryService.hasRootFolder() && agent_id == libraryService.getLibraryRootFolderOwner()) {
+            if ((inventoryFolder = libraryService.getLibraryRootFolder().findFolder(folder_id)) != null) {
                 InventoryCollection ret = new InventoryCollection();
                 ret.folderList = new ArrayList<InventoryFolderBase>();
                 ret.itemList = inventoryFolder.getListOfItems();
                 result.descendents = ret.folderList.size() + ret.itemList.size();
-
+                
                 return (result);
             }
         }
