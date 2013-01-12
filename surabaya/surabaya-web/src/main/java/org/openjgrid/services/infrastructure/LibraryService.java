@@ -22,8 +22,10 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.ConcurrencyManagementType;
+import javax.ejb.DependsOn;
 import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
@@ -50,6 +52,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 @Startup
 @ConcurrencyManagement(ConcurrencyManagementType.BEAN)
+@DependsOn("ConfigurationService")
 public class LibraryService {
 
 	private static final Logger log = LoggerFactory.getLogger(LibraryService.class);
@@ -71,12 +74,13 @@ public class LibraryService {
 	 * @throws InventoryException
 	 * @throws ConfigurationException
 	 */
-	public LibraryService() throws InventoryException, ConfigurationException {
-		String librariesLocation = FilenameUtils.concat("inventory", "Libraries.xml");
+	@PostConstruct
+	public void initialize() throws InventoryException, ConfigurationException {
+		String librariesLocation = FilenameUtils.concat("/etc/surabaya/inventory", "Libraries.xml");
 		String libraryName = "OpenSim Library";
 
-		librariesLocation = configurationService.getProperty("LibraryService", "DefaultLibrary", librariesLocation);
-		libraryName = configurationService.getProperty("LibraryService", "DefaultLibrary", libraryName);
+		librariesLocation = configurationService.getProperty("LibraryService", "default_library", librariesLocation);
+		libraryName = configurationService.getProperty("LibraryService", "library_name", libraryName);
 
 		libraryRootFolder = new InventoryFolder();
 		libraryRootFolder.setOwnerId(libOwner);
@@ -133,8 +137,8 @@ public class LibraryService {
 	private void loadLibraries(String librariesLocation) throws ConfigurationException, InventoryException {
 		log.info("Loading library control file {}", librariesLocation);
 		String filePath = FilenameUtils.getPathNoEndSeparator(librariesLocation);
-		XMLConfiguration xmlConfiguration = new XMLConfiguration();
-		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(librariesLocation));
+		filePath = FilenameUtils.concat("/", filePath);
+		XMLConfiguration xmlConfiguration = new XMLConfiguration(librariesLocation);
 		Object property = xmlConfiguration.getProperty("Section[@Name]");
 		if (property instanceof Collection) {
 			int numOfSections = ((Collection) property).size();
@@ -163,6 +167,7 @@ public class LibraryService {
 
 	@SuppressWarnings("rawtypes")
 	private void loadItemsFromFile(String itemsLocation) throws ConfigurationException, InventoryException {
+		log.debug("loadItemsFromFile: {}", itemsLocation);
 		UUID id = libraryRootFolder.getId();
 		UUID assetId = id;
 		UUID parentFolderId = id;
@@ -176,8 +181,7 @@ public class LibraryService {
 		long basePermissions = PermissionMask.All.getPermissionMask();
 		long flags = 0;
 
-		XMLConfiguration xmlConfiguration = new XMLConfiguration();
-		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(itemsLocation));
+		XMLConfiguration xmlConfiguration = new XMLConfiguration(itemsLocation);
 		Object propSection = xmlConfiguration.getProperty("Section[@Name]");
 
 		int numOfSections = 0;
@@ -210,15 +214,14 @@ public class LibraryService {
 								libraryRootFolder.getId().toString()));
 						break;
 					case ("assetID"):
-						assetId = UUID.fromString(xmlConfiguration.getString(xmlConfiguration.getString(
-								"Section(" + i + ").Key(" + j + ")[@Value]", id.toString())));
+						assetId = UUID.fromString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", id.toString()));
 						break;
 					case ("folderID"):
 						parentFolderId = UUID.fromString(xmlConfiguration.getString(
 								"Section(" + i + ").Key(" + j + ")[@Value]", libraryRootFolder.getId().toString()));
 						break;
 					case ("name"):
-						name = xmlConfiguration.getString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", ""));
+						name = xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", "");
 						break;
 					case ("description"):
 						description = xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", name);
@@ -299,10 +302,8 @@ public class LibraryService {
 		String folderName = "unknown";
 		UUID parentFolderId = libraryRootFolder.getId();
 		int type = 8;
-
 		
-		XMLConfiguration xmlConfiguration = new XMLConfiguration();
-		xmlConfiguration.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(foldersLocation));
+		XMLConfiguration xmlConfiguration = new XMLConfiguration(foldersLocation);
 		Object propSection = xmlConfiguration.getProperty("Section[@Name]");
 		
 		int numOfSections = 0;
@@ -335,7 +336,7 @@ public class LibraryService {
 								     libraryRootFolder.getId().toString()));
 						break;
 					case ("name"):
-						folderName = xmlConfiguration.getString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", "unknown"));
+						folderName = xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", "unknown");
 						break;
 					case ("parentFolderID"):
 						parentFolderId = UUID.fromString(xmlConfiguration.getString("Section(" + i + ").Key(" + j + ")[@Value]", 
@@ -385,7 +386,7 @@ public class LibraryService {
 	}
 	
 	public boolean hasRootFolder() {
-		return (libraryRootFolder == null);
+		return (libraryRootFolder != null);
 	}
 	
 	// Getter & Setter

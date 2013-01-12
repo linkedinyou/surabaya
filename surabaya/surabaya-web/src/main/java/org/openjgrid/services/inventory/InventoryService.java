@@ -50,7 +50,7 @@ public class InventoryService {
 		InventoryCollection invCollection = new InventoryCollection();
 		try {
 			invCollection.userId = userID;
-			HttpPost httppost = new HttpPost(configuration.getProperty("grid",
+			HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
 					"inventory_service") + "/xinventory");
 			
 			StringBuilder sb = new StringBuilder("PRINCIPAL=").append(userID.toString());
@@ -93,7 +93,7 @@ public class InventoryService {
 	public InventoryFolderBase getFolder(InventoryFolderBase containingFolder) {
 		log.debug("getFolder()");
 		try {
-			HttpPost httppost = new HttpPost(configuration.getProperty("grid",
+			HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
 					"inventory_service") + "/xinventory");
 
 			StringBuilder sb = new StringBuilder();
@@ -133,7 +133,7 @@ public class InventoryService {
 	 */
 	public InventoryItemBase getItem(InventoryItemBase inventoryItemBase) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
 		log.debug("getItem({})", inventoryItemBase.getId().toString());
-		HttpPost httppost = new HttpPost(configuration.getProperty("grid",
+		HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
 				"inventory_service") + "/xinventory");
 
 		StringBuilder sb = new StringBuilder();

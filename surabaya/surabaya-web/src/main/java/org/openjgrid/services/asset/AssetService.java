@@ -53,7 +53,7 @@ public class AssetService {
 			} else {
 				log.debug("Cache Miss: {}", assetID);
 
-				HttpGet httpget = new HttpGet(configuration.getProperty("grid", "asset_service") + "/assets/" + assetID);
+				HttpGet httpget = new HttpGet(configuration.getProperty("Grid", "asset_service") + "/assets/" + assetID);
 				HttpResponse httpResponse = httpclient.execute(httpget);
 				HttpEntity entity = httpResponse.getEntity();
 

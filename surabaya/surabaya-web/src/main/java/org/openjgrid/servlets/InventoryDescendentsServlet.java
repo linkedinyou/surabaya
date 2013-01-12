@@ -224,18 +224,11 @@ public class InventoryDescendentsServlet extends HttpServlet {
 		contents.folder_id = inventoryRequest.folder_id;
 
 		reply.folders.add(contents);
-		// InventoryCollection invCollection = new InventoryCollection();
-		// invCollection.folderList = new ArrayList<InventoryFolderBase>();
-		// invCollection.itemList = new ArrayList<InventoryItemBase>();
-		// Integer version = 0;
-		// Integer descendents = 0;
 		Fetch fetchresult = new Fetch();
 
 		// invCollection = fetch(
 		fetchresult = fetch(inventoryRequest.owner_id,
 				inventoryRequest.folder_id, inventoryRequest.owner_id,
-				// inventoryRequest.fetch_folders, inventoryRequest.fetch_items,
-				// inventoryRequest.sort_order, version, descendents);
 				inventoryRequest.fetch_folders, inventoryRequest.fetch_items,
 				inventoryRequest.sort_order);
 
@@ -263,7 +256,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 
 		log.debug("Replying to request for folder: "
 				+ inventoryRequest.folder_id + "(fetch items: "
-				+ inventoryRequest.fetch_items + "fetch folders: "
+				+ inventoryRequest.fetch_items + " fetch folders: "
 				+ inventoryRequest.fetch_folders + " with "
 				+ contents.items.size() + " items and "
 				+ contents.categories.size() + " folders for agent "
@@ -299,11 +292,12 @@ public class InventoryDescendentsServlet extends HttpServlet {
         result.descendents = 0;
 
         InventoryFolder inventoryFolder = null;
-        if (libraryService != null && libraryService.hasRootFolder() && agent_id == libraryService.getLibraryRootFolderOwner()) {
+        if (libraryService != null && libraryService.hasRootFolder() && agent_id.equals(libraryService.getLibraryRootFolderOwner())) {
             if ((inventoryFolder = libraryService.getLibraryRootFolder().findFolder(folder_id)) != null) {
                 InventoryCollection ret = new InventoryCollection();
                 ret.folderList = new ArrayList<InventoryFolderBase>();
                 ret.itemList = inventoryFolder.getListOfItems();
+                result.inventoryCollection = ret;
                 result.descendents = ret.folderList.size() + ret.itemList.size();
                 
                 return (result);
