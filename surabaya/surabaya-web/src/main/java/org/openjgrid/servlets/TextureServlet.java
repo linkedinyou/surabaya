@@ -92,7 +92,13 @@ public class TextureServlet extends HttpServlet {
 				response.setContentType(request.getContentType());
 				getTexture(request, response, httpclient);
 			} else {
-				log.error("Unknow Request received");
+				log.error("Unknown Request received");
+				log.error("CAPS Path: {}", capsPath);
+				Util.dumpUnexpectedHttpRequest(request);
+				Map<String, String[]> parameterMap = request.getParameterMap();
+				Util.dumpUnexpectedParameterMap(parameterMap);
+				log.error("End of Unknown  Request Dump");
+				
 			}
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
