@@ -80,8 +80,11 @@ public class AgentManagementService {
 		
 	}
 
-	public void setAgent(String agentId, Agent agent) {
-		log.debug("setAgent() called: agentMap.size: {}", agentMap.size());
+	public void setAgent(String agentId, Agent agent) throws AgentNotFoundException {
+		log.info("setAgent() called: agentId: {}", agentId);
+		if(hasAgent(agentId)) {
+			removeAgent(agentId);
+		}
 		agentMap.put(agentId, agent);
 		textureCapsIds.add(agent.gettexture_caps);
 		meshCapsIds.add(agent.getmesh_caps);
@@ -147,7 +150,16 @@ public class AgentManagementService {
 			throw(new AgentNotFoundException());
 		}		
 	}
+	
+	public boolean hasAgent(String agentId) {
+		if(agentMap.containsKey(agentId)) {
+			return(true);
+		} else {
+			return(false);
+		}		
+	}
 
+	
 	public boolean hasAgent(UUID capsID) {
 		if(agentMap.containsKey(capsID.toString())) {
 			return(true);
