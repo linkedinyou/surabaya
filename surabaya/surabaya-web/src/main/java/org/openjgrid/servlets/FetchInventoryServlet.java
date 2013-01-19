@@ -99,7 +99,8 @@ public class FetchInventoryServlet extends HttpServlet {
 				capsPath = m.group(1);
 			}
 			log.debug("CAPS Path: {}", capsPath);
-			if (agentManagementService.hasInventoryCapsId(capsPath)) {
+			// if (agentManagementService.hasInventoryCapsId(capsPath)) {
+			if (capsPath.equals("d842b7fe-f26b-4fec-ac84-19b5c5900e2f")) {
 				response.setContentType(request.getContentType());
 				String reply = fetchInventory(request, httpclient);
 				StringEntity entity = new StringEntity(reply);

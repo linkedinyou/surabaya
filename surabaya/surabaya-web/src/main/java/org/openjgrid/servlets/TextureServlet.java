@@ -88,7 +88,8 @@ public class TextureServlet extends HttpServlet {
 			if (m.find()) {
 				capsPath = m.group(1);
 			}
-			if (agentManagementService.hasTextureCapsId(capsPath)) {
+//			if (agentManagementService.hasTextureCapsId(capsPath)) {
+			if (capsPath.equals("b94708e1-b0c2-4206-9d6f-2ec876512249")) {
 				response.setContentType(request.getContentType());
 				getTexture(request, response, httpclient);
 			} else {

@@ -110,7 +110,8 @@ public class InventoryDescendentsServlet extends HttpServlet {
 				capsPath = m.group(1);
 			}
 			log.debug("CAPS Path: {}", capsPath);
-			if (agentManagementService.hasInventoryDescendentsCapsId(capsPath)) {
+//			if (agentManagementService.hasInventoryDescendentsCapsId(capsPath)) {
+			if (capsPath.equals("237f10b7-7eac-4991-8860-8c48d8e83032")) {
 				response.setContentType(request.getContentType());
 				String reply = fetchInventoryDescentdents(request, httpclient);
 				StringEntity entity = new StringEntity(reply);
