@@ -1,5 +1,7 @@
 package org.openjgrid.services.asset;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -50,6 +52,7 @@ public class AssetService {
 			if (cache.containsKey(assetID)) {
 				log.debug("Cache Hit: {}", assetID);
 			    content = cache.get(assetID);
+				log.debug("80 bytes content from cache: " + content.substring(0,80));
 			} else {
 				log.debug("Cache Miss: {}", assetID);
 
@@ -64,7 +67,9 @@ public class AssetService {
 				log.debug("ContentType: {}", contentType);
 				if(!Util.isNullOrEmpty(content)) {
 					cache.put(assetID, content);					
-					log.debug("80 bytes respstring: " + content.substring(0,80));
+					log.debug("80 bytes content put to cache: " + content.substring(0,80));
+				} else {
+					log.error("Asset with ID: {} requestet, rsult was null", assetID);
 				}
 			}
 			
@@ -82,4 +87,13 @@ public class AssetService {
 		return (assetBase);
 	}
 
+	public void cacheAsset(String assetID, String serializedAsset) {
+		log.debug("cacheAsset(assetID: {}, String serializedAsset)", assetID);
+		cache.put(assetID, serializedAsset);
+	}
+	
+	public void cacheAsset(String assetID, String serializedAsset, long lifespan, TimeUnit timeunit ) {
+		log.debug("cacheAsset(assetID: {}, String serializedAsset, long , timeunit)", assetID);
+		cache.put(assetID, serializedAsset, lifespan, timeunit);
+	}
 }

@@ -37,7 +37,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.Constants;
 import org.openjgrid.datatypes.asset.AssetBase;
 import org.openjgrid.datatypes.asset.AssetType;
-import org.openjgrid.services.agent.AgentManagementService;
+// import org.openjgrid.services.agent.AgentManagementService;
 import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.services.infrastructure.SLTypeMappingService;
@@ -68,8 +68,8 @@ public class TextureServlet extends HttpServlet {
 	@EJB(mappedName = "java:module/SLTypeMappingService")
 	private SLTypeMappingService slTypeMappingService;
 
-	@EJB(mappedName = "java:module/AgentManagementService")
-	private AgentManagementService agentManagementService;
+	// @EJB(mappedName = "java:module/AgentManagementService")
+	// private AgentManagementService agentManagementService;
 	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
