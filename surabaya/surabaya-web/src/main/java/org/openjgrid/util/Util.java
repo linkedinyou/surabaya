@@ -111,6 +111,27 @@ public final class Util {
 		return (true);
 	}
 
+	public static final void dumpUnexpectedParameterMap(Map<String, String[]> map) {
+		if (map != null) {
+			log.warn("---- HTTP Unexpected ParameterMap Dump ----");
+			Iterator<Entry<String, String[]>> mapIter = map.entrySet().iterator();
+			while (mapIter.hasNext()) {
+				Entry<String, String[]> entry = (Entry<String, String[]>) mapIter.next();
+				log.warn("Parameter: {}", entry.getKey());
+				String[] values = entry.getValue();
+				if (values != null) {
+					for (int i = 0; i < values.length; i++) {
+						log.warn("  Value: {}", values[i]);
+					}
+				}
+			}
+			log.warn("---- HTTP Unexpected ParameterMap Dump END----");
+		} else {
+			log.debug("Empty Map received");
+		}
+	}
+
+	
 	public static final boolean dumpHttpRequest(HttpServletRequest request) {
 
 		log.debug("---- HTTP ServletRequest Dump ----");
@@ -126,6 +147,21 @@ public final class Util {
 		return (true);
 
 	}
+	
+	public static final void dumpUnexpectedHttpRequest(HttpServletRequest request) {
+
+		log.warn("---- HTTP ServletRequest Dump ----");
+		log.warn("Method     : {}", request.getMethod());
+		log.warn("Request URI: {}", request.getRequestURI());
+		log.warn("Protocol   : {}", request.getProtocol());
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while (headerNames.hasMoreElements()) {
+			String headerName = headerNames.nextElement();
+			log.warn("Header: {} - {}", headerName, request.getHeader(headerName));
+		}
+		log.warn("---- End HTTP ServletRequest Dump ----");
+	}
+
 
 	public static String requestContent2String(HttpServletRequest request) throws IOException {
 		BufferedReader aReader = request.getReader();

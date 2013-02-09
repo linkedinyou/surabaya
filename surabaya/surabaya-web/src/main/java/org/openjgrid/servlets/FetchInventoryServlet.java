@@ -39,8 +39,8 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.llsd.InventoryException;
-import org.openjgrid.datatypes.llsd.InventoryItemBase;
+import org.openjgrid.datatypes.inventory.InventoryException;
+import org.openjgrid.datatypes.inventory.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.LLSD;
 import org.openjgrid.datatypes.llsd.LLSDFetchInventory;
 import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
@@ -99,7 +99,8 @@ public class FetchInventoryServlet extends HttpServlet {
 				capsPath = m.group(1);
 			}
 			log.debug("CAPS Path: {}", capsPath);
-			if (agentManagementService.hasInventoryCapsId(capsPath)) {
+			// if (agentManagementService.hasInventoryCapsId(capsPath)) {
+			if (capsPath.equals("d842b7fe-f26b-4fec-ac84-19b5c5900e2f")) {
 				response.setContentType(request.getContentType());
 				String reply = fetchInventory(request, httpclient);
 				StringEntity entity = new StringEntity(reply);

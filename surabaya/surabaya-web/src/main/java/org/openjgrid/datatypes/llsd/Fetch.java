@@ -20,6 +20,10 @@ package org.openjgrid.datatypes.llsd;
 
 import java.util.ArrayList;
 
+import org.openjgrid.datatypes.inventory.InventoryCollection;
+import org.openjgrid.datatypes.inventory.InventoryFolderBase;
+import org.openjgrid.datatypes.inventory.InventoryItemBase;
+
 /**
  * Workaround class in order to keep the original OpenSim logic working
  * because Java supports no out arguments.

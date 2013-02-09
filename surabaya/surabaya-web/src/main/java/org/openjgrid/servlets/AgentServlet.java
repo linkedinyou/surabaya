@@ -64,7 +64,7 @@ public class AgentServlet extends HttpServlet {
 	 * @throws ServletException
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException {
         response.setContentType("text/xml;charset=UTF-8");
@@ -75,24 +75,26 @@ public class AgentServlet extends HttpServlet {
         assert(Util.dumpHttpRequest(request));
         
         try {
-        	Agent agent = null;      	        	        	
         	if (request.getContentType().equalsIgnoreCase("application/json")) {
         		String jsonString = Util.requestContent2String(request);
         		AgentCaps agentCaps = new AgentCaps();
         		agentCaps.capsMap = objectMapper.readValue(jsonString, agentCaps.capsMap.getClass());
-        		agent = new Agent(agentCaps.capsMap);
-        		log.debug("Agent-UUID: {}", agent.agent_id.toString());
-        		log.debug("Agent-HOST: {}", agent.host);
+        		Agent agent = new Agent(agentCaps.capsMap);
+        		log.info("Agent-UUID: {}", agent.agent_id.toString());
+        		log.info("Agent-HOST: {}", agent.host);
         		
-            	if(agent != null) {
+            	if (agent != null) {
             		// if there is already an agent remove with the given id
             		// remove it first (Housekeeping)
             		if(agentManagementService.hasAgent(agent.agent_id)) {
-            			agentManagementService.removeAgent(agent.agent_id.toString());
+            			agentManagementService.removeAgent(agent.agent_id);
             		}
             		agentManagementService.setAgent(agent.agent_id.toString(), agent);
+                	result.put("result", "ok");
+            	} else {
+					log.error("Unable to create Agent: {}", jsonString);
+	                result.put("result", "fail");										
             	}
-            	result.put("result", "ok");
 
         	} else {
         		log.error("Unexpected ContentType: {}", request.getContentType());

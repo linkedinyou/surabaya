@@ -66,14 +66,8 @@
       	<artifactId>jboss-ejb-api_3.1_spec</artifactId>
       </dependency>
       <dependency>
-      	<groupId>org.apache.commons</groupId>
-      	<artifactId>commons-io</artifactId>
-      	<scope>runtime</scope>
-      </dependency>
-      <dependency>
       	<groupId>org.codehaus.woodstox</groupId>
       	<artifactId>woodstox-core-lgpl</artifactId>
-      	<scope>runtime</scope>
       </dependency>
       <dependency>
       	<groupId>joda-time</groupId>
@@ -87,12 +81,10 @@
       <dependency>
       	<groupId>org.apache.commons</groupId>
       	<artifactId>commons-lang3</artifactId>
-      	<scope>runtime</scope>
       </dependency>
       <dependency>
       	<groupId>commons-codec</groupId>
       	<artifactId>commons-codec</artifactId>
-      	<scope>runtime</scope>
       </dependency>
       <dependency>
       	<groupId>org.infinispan</groupId>
@@ -102,6 +94,18 @@
       <dependency>
       	<groupId>org.codehaus.jackson</groupId>
       	<artifactId>jackson-mapper-lgpl</artifactId>
+      </dependency>
+      <dependency>
+      	<groupId>junit</groupId>
+      	<artifactId>junit</artifactId>
+      </dependency>
+      <dependency>
+      	<groupId>commons-io</groupId>
+      	<artifactId>commons-io</artifactId>
+      </dependency>
+      <dependency>
+      	<groupId>commons-configuration</groupId>
+      	<artifactId>commons-configuration</artifactId>
       </dependency>
    </dependencies>
 

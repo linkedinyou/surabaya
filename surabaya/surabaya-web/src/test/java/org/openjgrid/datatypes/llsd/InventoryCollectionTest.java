@@ -24,6 +24,8 @@ import javax.xml.stream.XMLStreamException;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.openjgrid.datatypes.inventory.InventoryCollection;
+import org.openjgrid.datatypes.inventory.InventoryException;
 
 /**
  * @author Akria Sonoda

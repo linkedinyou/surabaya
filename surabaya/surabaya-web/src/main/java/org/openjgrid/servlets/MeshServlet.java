@@ -34,8 +34,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.AssetBase;
-import org.openjgrid.datatypes.AssetType;
+import org.openjgrid.datatypes.asset.AssetBase;
+import org.openjgrid.datatypes.asset.AssetType;
 import org.openjgrid.services.agent.AgentManagementService;
 import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;
@@ -87,7 +87,9 @@ public class MeshServlet extends HttpServlet {
 				capsPath = m.group(1);
 			}
 			log.debug("CAPS Path: {}", capsPath);
-			if (agentManagementService.hasMeshCapsId(capsPath)) {
+			
+			// if (agentManagementService.hasMeshCapsId(capsPath)) {
+			if (capsPath.equals("dd88455c-64d3-4d78-8490-9109ca00bff8")) {
 				response.setContentType(request.getContentType());
 				getMesh(request, response, httpclient);
 			} else {
@@ -131,7 +133,9 @@ public class MeshServlet extends HttpServlet {
             		writeMeshData(request, response, mesh);            		
             	} else {
             		
-            		log.error("Mesh requested: " + meshIdString + "Type received: " + mesh.getType() );
+            		log.error("Mesh requested: " + meshIdString + " Type received: " + mesh.getType());
+            		log.error("     with Name: " + mesh.getName() );
+            		log.error("   Description: " + mesh.getDescription() );
             		
             		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.setContentType("text/plain");

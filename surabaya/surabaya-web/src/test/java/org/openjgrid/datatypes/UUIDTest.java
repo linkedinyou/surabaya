@@ -44,7 +44,7 @@ public class UUIDTest {
 	@Test
 	public void testUUIDtoStringGood() {
 		boolean result = Util.parseUUID("cd769fa0-4e80-11e2-bcfd-0800200c9a66");
-		assert(result == false);
+		assert(result == true);
 	}
 	
 }

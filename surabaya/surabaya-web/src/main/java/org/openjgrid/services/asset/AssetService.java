@@ -1,5 +1,7 @@
 package org.openjgrid.services.asset;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
@@ -13,7 +15,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.AssetBase;
+import org.openjgrid.datatypes.asset.AssetBase;
 import org.openjgrid.services.infrastructure.ConfigurationService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -50,10 +52,11 @@ public class AssetService {
 			if (cache.containsKey(assetID)) {
 				log.debug("Cache Hit: {}", assetID);
 			    content = cache.get(assetID);
+				log.debug("80 bytes content from cache: " + content.substring(0,80));
 			} else {
 				log.debug("Cache Miss: {}", assetID);
 
-				HttpGet httpget = new HttpGet(configuration.getProperty("grid", "asset_service") + "/assets/" + assetID);
+				HttpGet httpget = new HttpGet(configuration.getProperty("Grid", "asset_service") + "/assets/" + assetID);
 				HttpResponse httpResponse = httpclient.execute(httpget);
 				HttpEntity entity = httpResponse.getEntity();
 
@@ -64,10 +67,12 @@ public class AssetService {
 				log.debug("ContentType: {}", contentType);
 				if(!Util.isNullOrEmpty(content)) {
 					cache.put(assetID, content);					
+					log.debug("80 bytes content put to cache: " + content.substring(0,80));
+				} else {
+					log.error("Asset with ID: {} requestet, rsult was null", assetID);
 				}
 			}
 			
-			log.debug("80 bytes respstring: " + content.substring(0,80));
 			if (Util.isNullOrEmpty(content)) {
 				return (null);
 			}
@@ -82,4 +87,13 @@ public class AssetService {
 		return (assetBase);
 	}
 
+	public void cacheAsset(String assetID, String serializedAsset) {
+		log.debug("cacheAsset(assetID: {}, String serializedAsset)", assetID);
+		cache.put(assetID, serializedAsset);
+	}
+	
+	public void cacheAsset(String assetID, String serializedAsset, long lifespan, TimeUnit timeunit ) {
+		log.debug("cacheAsset(assetID: {}, String serializedAsset, long , timeunit)", assetID);
+		cache.put(assetID, serializedAsset, lifespan, timeunit);
+	}
 }

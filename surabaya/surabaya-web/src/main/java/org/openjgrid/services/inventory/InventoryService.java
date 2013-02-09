@@ -18,10 +18,10 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.llsd.InventoryCollection;
-import org.openjgrid.datatypes.llsd.InventoryException;
-import org.openjgrid.datatypes.llsd.InventoryFolderBase;
-import org.openjgrid.datatypes.llsd.InventoryItemBase;
+import org.openjgrid.datatypes.inventory.InventoryCollection;
+import org.openjgrid.datatypes.inventory.InventoryException;
+import org.openjgrid.datatypes.inventory.InventoryFolderBase;
+import org.openjgrid.datatypes.inventory.InventoryItemBase;
 import org.openjgrid.services.infrastructure.ConfigurationService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class InventoryService {
 		InventoryCollection invCollection = new InventoryCollection();
 		try {
 			invCollection.userId = userID;
-			HttpPost httppost = new HttpPost(configuration.getProperty("grid",
+			HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
 					"inventory_service") + "/xinventory");
 			
 			StringBuilder sb = new StringBuilder("PRINCIPAL=").append(userID.toString());
@@ -93,7 +93,7 @@ public class InventoryService {
 	public InventoryFolderBase getFolder(InventoryFolderBase containingFolder) {
 		log.debug("getFolder()");
 		try {
-			HttpPost httppost = new HttpPost(configuration.getProperty("grid",
+			HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
 					"inventory_service") + "/xinventory");
 
 			StringBuilder sb = new StringBuilder();
@@ -133,7 +133,7 @@ public class InventoryService {
 	 */
 	public InventoryItemBase getItem(InventoryItemBase inventoryItemBase) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
 		log.debug("getItem({})", inventoryItemBase.getId().toString());
-		HttpPost httppost = new HttpPost(configuration.getProperty("grid",
+		HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
 				"inventory_service") + "/xinventory");
 
 		StringBuilder sb = new StringBuilder();

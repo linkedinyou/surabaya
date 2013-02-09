@@ -34,10 +34,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.AssetBase;
-import org.openjgrid.datatypes.AssetType;
 import org.openjgrid.datatypes.Constants;
-import org.openjgrid.services.agent.AgentManagementService;
+import org.openjgrid.datatypes.asset.AssetBase;
+import org.openjgrid.datatypes.asset.AssetType;
+// import org.openjgrid.services.agent.AgentManagementService;
 import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.services.infrastructure.SLTypeMappingService;
@@ -68,8 +68,8 @@ public class TextureServlet extends HttpServlet {
 	@EJB(mappedName = "java:module/SLTypeMappingService")
 	private SLTypeMappingService slTypeMappingService;
 
-	@EJB(mappedName = "java:module/AgentManagementService")
-	AgentManagementService agentManagementService;
+	// @EJB(mappedName = "java:module/AgentManagementService")
+	// private AgentManagementService agentManagementService;
 	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -88,11 +88,18 @@ public class TextureServlet extends HttpServlet {
 			if (m.find()) {
 				capsPath = m.group(1);
 			}
-			if (agentManagementService.hasTextureCapsId(capsPath)) {
+//			if (agentManagementService.hasTextureCapsId(capsPath)) {
+			if (capsPath.equals("b94708e1-b0c2-4206-9d6f-2ec876512249")) {
 				response.setContentType(request.getContentType());
 				getTexture(request, response, httpclient);
 			} else {
-				log.error("Unknow Request received");
+				log.error("Unknown Request received");
+				log.error("CAPS Path: {}", capsPath);
+				Util.dumpUnexpectedHttpRequest(request);
+				Map<String, String[]> parameterMap = request.getParameterMap();
+				Util.dumpUnexpectedParameterMap(parameterMap);
+				log.error("End of Unknown  Request Dump");
+				
 			}
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());

@@ -26,6 +26,8 @@ import javax.ejb.ConcurrencyManagementType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,23 +47,36 @@ public class ConfigurationService {
     private ConcurrentMap<String, ConcurrentMap<String, String> > props = new ConcurrentHashMap<String, ConcurrentMap<String, String> >();
     
     /**
+     * @throws ConfigurationException 
      * 
      */
-    public ConfigurationService() {
+    public ConfigurationService() throws ConfigurationException {
     	
+		XMLConfiguration xmlConfiguration = new XMLConfiguration("/etc/surabaya/Surabaya.xml");
+    	
+    	// TODO Check if still needed OpenSim Config 
     	log.debug("CongirurationService() starting");
     	ConcurrentMap<String, String> sim_props = new ConcurrentHashMap<String, String>();
-    	sim_props.put("sim_http_port", "9000");
+    	sim_props.put("sim_http_port", xmlConfiguration.getString("Opensim.sim_http_port", "9000"));
     	props.put("OpenSim", sim_props);
-    	ConcurrentMap<String, String> surabaya_props = new ConcurrentHashMap<String, String>();
-    	surabaya_props.put("hostname", "localhost");
-    	surabaya_props.put("http_port", "8080");
-    	props.put("Surabaya", surabaya_props);
-    	ConcurrentMap<String, String> grid_props = new ConcurrentHashMap<String, String>();
-    	grid_props.put("inventory_service", "http://localhost:8003");
-    	grid_props.put("asset_service", "http://localhost:8003");
-    	props.put("grid", grid_props);
     	
+    	// TODO Check if still needed Surabaya Config
+    	ConcurrentMap<String, String> surabaya_props = new ConcurrentHashMap<String, String>();
+    	surabaya_props.put("hostname", xmlConfiguration.getString("Surabaya.hostname", "localhost"));
+    	surabaya_props.put("http_port", xmlConfiguration.getString("Surabaya.http_port", "8080"));
+    	props.put("Surabaya", surabaya_props);
+    	
+    	// Grid Services Config
+    	ConcurrentMap<String, String> grid_props = new ConcurrentHashMap<String, String>();
+    	grid_props.put("inventory_service", xmlConfiguration.getString("Grid.inventory_service", "http://localhost:8003"));
+    	grid_props.put("asset_service", xmlConfiguration.getString("Grid.asset_service", "http://localhost:8003"));
+    	props.put("Grid", grid_props);
+    	
+    	// Library Service Config
+    	ConcurrentMap<String, String> libraryservice_props = new ConcurrentHashMap<String, String>();
+    	libraryservice_props.put("library_name", xmlConfiguration.getString("LibraryService.library_name", "OpenSim Library"));
+    	libraryservice_props.put("default_library", xmlConfiguration.getString("LibraryService.default_library", "/etc/surabaya/inventory/Libraries.xml"));
+    	props.put("LibraryService", libraryservice_props);
     
     }
  
@@ -91,6 +106,24 @@ public class ConfigurationService {
             }             
         } else {
             return(null);
+        }
+    }
+
+    /**
+     * @param aPropertyGroup
+     * @param property
+     * @param defaultValue
+     * @return
+     */
+    public String getProperty(String aPropertyGroup, String property, String defaultValue ) {
+        if(props.containsKey(aPropertyGroup)) {
+            if(props.get(aPropertyGroup).containsKey(property)) {
+                return ((String) props.get(aPropertyGroup).get(property));
+            } else {
+                return (defaultValue);
+            }             
+        } else {
+            return(defaultValue);
         }
     }
 

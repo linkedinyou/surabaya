@@ -25,6 +25,8 @@ import javax.xml.stream.XMLStreamException;
 import org.junit.Before;
 import org.junit.Test;
 import org.openjgrid.datatypes.exceptions.NotImplementedException;
+import org.openjgrid.datatypes.inventory.InventoryException;
+import org.openjgrid.datatypes.inventory.InventoryItemBase;
 
 /**
  * @author Akira Sonoda
@@ -41,7 +43,7 @@ public class InventoryItemBaseTest {
 	}
 
 	/**
-	 * Test method for {@link org.openjgrid.datatypes.llsd.InventoryItemBase#fromXml(java.lang.String)}.
+	 * Test method for {@link org.openjgrid.datatypes.inventory.InventoryItemBase#fromXml(java.lang.String)}.
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */

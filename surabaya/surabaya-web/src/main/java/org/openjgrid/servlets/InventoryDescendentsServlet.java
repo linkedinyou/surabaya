@@ -40,12 +40,13 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.openjgrid.datatypes.AssetType;
+import org.openjgrid.datatypes.asset.AssetType;
+import org.openjgrid.datatypes.inventory.InventoryCollection;
+import org.openjgrid.datatypes.inventory.InventoryException;
+import org.openjgrid.datatypes.inventory.InventoryFolder;
+import org.openjgrid.datatypes.inventory.InventoryFolderBase;
+import org.openjgrid.datatypes.inventory.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.Fetch;
-import org.openjgrid.datatypes.llsd.InventoryCollection;
-import org.openjgrid.datatypes.llsd.InventoryException;
-import org.openjgrid.datatypes.llsd.InventoryFolderBase;
-import org.openjgrid.datatypes.llsd.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.LLSD;
 import org.openjgrid.datatypes.llsd.LLSDFetchInventoryDescendents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryDescendents;
@@ -53,6 +54,7 @@ import org.openjgrid.datatypes.llsd.LLSDInventoryFolder;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
 import org.openjgrid.services.agent.AgentManagementService;
+import org.openjgrid.services.infrastructure.LibraryService;
 import org.openjgrid.services.inventory.InventoryService;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -82,6 +84,9 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	@EJB(mappedName = "java:module/AgentManagementService")
 	AgentManagementService agentManagementService;
 
+	@EJB(mappedName = "java:module/LibraryService")
+	LibraryService libraryService;
+	
 	@EJB
 	private InventoryService inventoryService;
 
@@ -105,7 +110,8 @@ public class InventoryDescendentsServlet extends HttpServlet {
 				capsPath = m.group(1);
 			}
 			log.debug("CAPS Path: {}", capsPath);
-			if (agentManagementService.hasInventoryDescendentsCapsId(capsPath)) {
+//			if (agentManagementService.hasInventoryDescendentsCapsId(capsPath)) {
+			if (capsPath.equals("237f10b7-7eac-4991-8860-8c48d8e83032")) {
 				response.setContentType(request.getContentType());
 				String reply = fetchInventoryDescentdents(request, httpclient);
 				StringEntity entity = new StringEntity(reply);
@@ -210,7 +216,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */
-	public LLSDInventoryDescendents fetchInventory(
+	private LLSDInventoryDescendents fetchInventory(
 			LLSDFetchInventoryDescendents inventoryRequest) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
 		LLSDInventoryDescendents reply = new LLSDInventoryDescendents();
 		LLSDInventoryFolderContents contents = new LLSDInventoryFolderContents();
@@ -219,18 +225,11 @@ public class InventoryDescendentsServlet extends HttpServlet {
 		contents.folder_id = inventoryRequest.folder_id;
 
 		reply.folders.add(contents);
-		// InventoryCollection invCollection = new InventoryCollection();
-		// invCollection.folderList = new ArrayList<InventoryFolderBase>();
-		// invCollection.itemList = new ArrayList<InventoryItemBase>();
-		// Integer version = 0;
-		// Integer descendents = 0;
 		Fetch fetchresult = new Fetch();
 
 		// invCollection = fetch(
 		fetchresult = fetch(inventoryRequest.owner_id,
 				inventoryRequest.folder_id, inventoryRequest.owner_id,
-				// inventoryRequest.fetch_folders, inventoryRequest.fetch_items,
-				// inventoryRequest.sort_order, version, descendents);
 				inventoryRequest.fetch_folders, inventoryRequest.fetch_items,
 				inventoryRequest.sort_order);
 
@@ -258,7 +257,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 
 		log.debug("Replying to request for folder: "
 				+ inventoryRequest.folder_id + "(fetch items: "
-				+ inventoryRequest.fetch_items + "fetch folders: "
+				+ inventoryRequest.fetch_items + " fetch folders: "
 				+ inventoryRequest.fetch_folders + " with "
 				+ contents.items.size() + " items and "
 				+ contents.categories.size() + " folders for agent "
@@ -282,7 +281,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */
-	public Fetch fetch(UUID agent_id, UUID folder_id,
+	private Fetch fetch(UUID agent_id, UUID folder_id,
 			UUID owner_id, boolean fetch_folders, boolean fetch_items,
 			int sort_order) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
         log.debug(
@@ -290,7 +289,21 @@ public class InventoryDescendentsServlet extends HttpServlet {
                 );
         
         Fetch result = new Fetch();
-        // I'll leave out the processing of the Library because I guess it is not needed
+        result.version = 0;
+        result.descendents = 0;
+
+        InventoryFolder inventoryFolder = null;
+        if (libraryService != null && libraryService.hasRootFolder() && agent_id.equals(libraryService.getLibraryRootFolderOwner())) {
+            if ((inventoryFolder = libraryService.getLibraryRootFolder().findFolder(folder_id)) != null) {
+                InventoryCollection ret = new InventoryCollection();
+                ret.folderList = new ArrayList<InventoryFolderBase>();
+                ret.itemList = inventoryFolder.getListOfItems();
+                result.inventoryCollection = ret;
+                result.descendents = ret.folderList.size() + ret.itemList.size();
+                
+                return (result);
+            }
+        }
         
 		if (!folder_id.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
             result.inventoryCollection = inventoryService.getFolderContent(agent_id, folder_id);
