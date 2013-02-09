@@ -9,7 +9,6 @@
     <name>surabaya application</name>
 
     <modules>
-        <module>surabaya-ejb</module>
         <module>surabaya-web</module>
         <module>surabaya-ear</module>
     </modules>
@@ -80,6 +79,61 @@
             	<artifactId>slf4j-api</artifactId>
             	<version>1.6.1</version>
             </dependency>
+            <dependency>
+            	<groupId>org.apache.httpcomponents</groupId>
+            	<artifactId>httpclient</artifactId>
+            	<version>4.2.2</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.codehaus.jackson</groupId>
+            	<artifactId>jackson-mapper-lgpl</artifactId>
+            	<version>1.9.11</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.codehaus.jackson</groupId>
+            	<artifactId>jackson-core-lgpl</artifactId>
+            	<version>1.9.11</version>
+            </dependency>
+            <dependency>
+            	<groupId>joda-time</groupId>
+            	<artifactId>joda-time</artifactId>
+            	<version>2.1</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.codehaus.woodstox</groupId>
+            	<artifactId>woodstox-core-lgpl</artifactId>
+            	<version>4.1.4</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.slf4j</groupId>
+            	<artifactId>slf4j-log4j12</artifactId>
+            	<version>1.7.2</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.apache.commons</groupId>
+            	<artifactId>commons-lang3</artifactId>
+            	<version>3.1</version>
+            </dependency>
+            <dependency>
+            	<groupId>commons-codec</groupId>
+            	<artifactId>commons-codec</artifactId>
+            	<version>1.7</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.infinispan</groupId>
+            	<artifactId>infinispan-core</artifactId>
+            	<version>5.1.2.FINAL</version>
+            </dependency>
+            <dependency>
+            	<groupId>commons-io</groupId>
+            	<artifactId>commons-io</artifactId>
+            	<version>2.4</version>
+            </dependency>
+            <dependency>
+            	<groupId>commons-configuration</groupId>
+            	<artifactId>commons-configuration</artifactId>
+            	<version>1.9</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -92,8 +146,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.3.2</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.7</source>
+                        <target>1.7</target>
                     </configuration>
                 </plugin>
                 <!-- The JBoss AS plugin deploys your ear to a local JBoss 
