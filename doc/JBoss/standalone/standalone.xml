@@ -83,7 +83,7 @@
                 <level name="ERROR"/>
             </logger>
             <logger category="org.openjgrid">
-                <level name="DEBUG"/>
+                <level name="WARN"/>
             </logger>
             <root-logger>
                 <level name="INFO"/>
