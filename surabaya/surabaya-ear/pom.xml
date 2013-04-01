@@ -21,11 +21,6 @@
          <artifactId>surabaya-web</artifactId>
          <type>war</type>
       </dependency>
-      <dependency>
-         <groupId>org.openjgrid</groupId>
-         <artifactId>surabaya-ejb</artifactId>
-         <type>ejb</type>
-      </dependency>
    </dependencies>
 
    <build>

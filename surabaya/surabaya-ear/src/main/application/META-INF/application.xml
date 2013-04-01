@@ -7,8 +7,5 @@
       <context-root>/</context-root>
     </web>
   </module>
-  <module>
-    <ejb>surabaya-ejb-0.0.1-SNAPSHOT.jar</ejb>
-  </module>
   <library-directory>lib</library-directory>
 </application>

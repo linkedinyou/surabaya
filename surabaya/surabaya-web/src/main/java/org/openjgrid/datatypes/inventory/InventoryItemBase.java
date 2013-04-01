@@ -29,6 +29,8 @@ import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.joda.time.MutableDateTime;
 import org.joda.time.Seconds;
+import org.openjgrid.datatypes.Constants;
+import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,7 +181,11 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 	 * @return the creatorId
 	 */
 	public UUID getCreatorIdAsUUID() {
-		return UUID.fromString(creatorId);
+		if(Util.isNullOrEmpty(creatorId)) {
+			return (Constants.UUID_ZERO);
+		} else {
+			return UUID.fromString(creatorId);
+		}
 	}
 
 
