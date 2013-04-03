@@ -164,7 +164,7 @@ public class AssetBase {
 					this.metadata.setFlags(AssetFlags.valueOf(xmlStream.getElementText()).getType());
 					break;
 				default:
-					throw new XMLStreamException("Unable to assign item with name: " + itemName);				
+					throw new XMLStreamException("Unable to assign item with name: " + itemName + "XMLString: " + xmlString );
 				}
 				xmlStream.next();
 				break;
