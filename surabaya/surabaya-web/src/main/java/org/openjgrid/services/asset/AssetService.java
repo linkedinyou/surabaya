@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -58,6 +59,10 @@ public class AssetService {
 
 				HttpGet httpget = new HttpGet(configuration.getProperty("Grid", "asset_service") + "/assets/" + assetID);
 				HttpResponse httpResponse = httpclient.execute(httpget);
+	    		int statuscode = httpResponse.getStatusLine().getStatusCode();
+	    		if (statuscode != HttpStatus.SC_OK) {
+	    			log.warn("getAsset("+assetID+") http Status: "+statuscode);
+	    		}
 				HttpEntity entity = httpResponse.getEntity();
 
 				long contentLength = entity.getContentLength();

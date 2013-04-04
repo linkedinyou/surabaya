@@ -13,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
@@ -62,6 +63,10 @@ public class InventoryService {
     		httppost.setEntity(stringEntity);
 
     		HttpResponse httpResponse = httpclient.execute(httppost);
+    		int statuscode = httpResponse.getStatusLine().getStatusCode();
+    		if (statuscode != HttpStatus.SC_OK) {
+    			log.warn("getFolderContent(userID: "+userID+", folderID: "+folderID+") http Status: "+statuscode);
+    		}
         	HttpEntity entity = httpResponse.getEntity();
 
         	long contentLength = entity.getContentLength();
@@ -105,6 +110,10 @@ public class InventoryService {
     		httppost.setEntity(stringEntity);
 
     		HttpResponse httpResponse = httpclient.execute(httppost);
+    		int statuscode = httpResponse.getStatusLine().getStatusCode();
+    		if (statuscode != HttpStatus.SC_OK) {
+    			log.warn("getFolder("+containingFolder.getName()+") http Status: "+statuscode);
+    		}
         	HttpEntity entity = httpResponse.getEntity();
 
         	long contentLength = entity.getContentLength();
@@ -145,6 +154,10 @@ public class InventoryService {
 		httppost.setEntity(stringEntity);
 
 		HttpResponse httpResponse = httpclient.execute(httppost);
+		int statuscode = httpResponse.getStatusLine().getStatusCode();
+		if (statuscode != HttpStatus.SC_OK) {
+			log.warn("getItem("+inventoryItemBase.getName()+") http Status: "+statuscode);
+		}
     	HttpEntity entity = httpResponse.getEntity();
 
     	long contentLength = entity.getContentLength();
