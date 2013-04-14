@@ -5,12 +5,12 @@
 		<sim_http_port>9000</sim_http_port>
 	</OpenSim>
 	<Surabaya>
-		<hostname>localhost</hostname>
+		<hostname>akitest.dyndns.info</hostname>
 		<http_port>8080</http_port>
 	</Surabaya>
 	<Grid>
-		<inventory_service>http://localhost:8003</inventory_service>
-		<asset_service>http://localhost:8003</asset_service>
+		<inventory_service>http://inventory.osgrid.org</inventory_service>
+		<asset_service>http://assets.osgrid.org</asset_service>
 	</Grid>
 	<LibraryService>
 		<libaray_name>OpenSim Library</libaray_name>

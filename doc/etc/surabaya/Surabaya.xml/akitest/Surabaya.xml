@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration>
+	<OpenSim>
+		<sim_http_port>9000</sim_http_port>
+	</OpenSim>
+	<Surabaya>
+		<hostname>akitest.dyndns.info</hostname>
+		<http_port>8080</http_port>
+	</Surabaya>
+	<Grid>
+		<inventory_service>http://akitest.dyndns.info:8003</inventory_service>
+		<asset_service>http://akitest.dyndns.info:8003</asset_service>
+	</Grid>
+	<LibraryService>
+		<libaray_name>OpenSim Library</libaray_name>
+		<default_library>/etc/surabaya/inventory/Libraries.xml</default_library>
+	</LibraryService>
+</Configuration>
