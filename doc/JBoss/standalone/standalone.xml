@@ -83,7 +83,7 @@
                 <level name="ERROR"/>
             </logger>
             <logger category="org.openjgrid">
-                <level name="WARN"/>
+                <level name="INFO"/>
             </logger>
             <root-logger>
                 <level name="INFO"/>
@@ -143,8 +143,8 @@
         <subsystem xmlns="urn:jboss:domain:infinispan:1.2" default-cache-container="surabaya-store">
             <cache-container name="surabaya-store" default-cache="surabaya_file_cache" jndi-name="surabaya_cache" start="EAGER">
                 <local-cache name="surabaya_file_cache">
-                    <eviction strategy="LIRS"/>
-                    <file-store path="/opt/surabaya_store/" preload="true" passivation="false" purge="false"/>
+                    <eviction strategy="LIRS" max-entries="150000"/>
+                    <file-store path="/opt/surabaya_store/" preload="true" passivation="true" purge="false"/>
                 </local-cache>
             </cache-container>
         </subsystem>
@@ -265,7 +265,7 @@
             <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
         </interface>
         <interface name="public">
-            <inet-address value="${jboss.bind.address:127.0.0.1}"/>
+            <nic name="eth0"/>
         </interface>
         <interface name="unsecure">
             <inet-address value="${jboss.bind.address.unsecure:127.0.0.1}"/>
