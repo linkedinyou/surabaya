@@ -143,8 +143,12 @@
         <subsystem xmlns="urn:jboss:domain:infinispan:1.2" default-cache-container="surabaya-store">
             <cache-container name="surabaya-store" default-cache="surabaya_file_cache" jndi-name="surabaya_cache" start="EAGER">
                 <local-cache name="surabaya_file_cache">
-                    <eviction strategy="LIRS" max-entries="150000"/>
-                    <file-store path="/opt/surabaya_store/" preload="true" passivation="true" purge="false"/>
+                    <eviction strategy="LIRS"/>
+                    <store class="org.infinispan.loaders.bdbje.BdbjeCacheStore" shared="false" preload="true" passivation="true">
+                        <property name="location">
+                            /opt/jboss/standalone/tmp/surabaya_cache
+                        </property>
+                    </store>
                 </local-cache>
             </cache-container>
         </subsystem>

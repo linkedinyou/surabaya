@@ -1,0 +1,13 @@
+<module xmlns="urn:jboss:module:1.1" name="org.infinispan.cachestore.bdbje">
+    <resources>
+        <resource-root path="infinispan-cachestore-bdbje.jar"/>
+        <resource-root path="je-5.0.34.jar"/>
+    </resources>
+
+    <dependencies>
+        <module name="javax.api"/>
+        <module name="javax.transaction.api"/>
+        <module name="org.infinispan"/>
+        <module name="org.jboss.logging"/>
+    </dependencies>
+</module>
