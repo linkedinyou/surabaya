@@ -182,6 +182,7 @@ public class InventoryItemBase extends InventoryNodeBase implements Cloneable {
 	 */
 	public UUID getCreatorIdAsUUID() {
 		if(Util.isNullOrEmpty(creatorId)) {
+			log.warn("NullOrEmpty CreatorId found");
 			return (Constants.UUID_ZERO);
 		} else {
 			return UUID.fromString(creatorId);
