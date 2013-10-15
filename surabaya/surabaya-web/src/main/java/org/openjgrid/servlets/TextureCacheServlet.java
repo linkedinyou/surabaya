@@ -75,7 +75,7 @@ public class TextureCacheServlet extends HttpServlet {
         		boolean isTemporary = Boolean.parseBoolean(serializedAssetCaps.capsMap.get("temporary"));
         		String serializedAsset = serializedAssetCaps.capsMap.get("serializedAsset");
         		
-        		log.info("assetID: {}",assetID);
+        		long stime = System.currentTimeMillis();
         		
         		if (!Util.isNullOrEmpty(assetID) && !Util.isNullOrEmpty(serializedAsset)) {
         			if(isTemporary) {
@@ -88,7 +88,12 @@ public class TextureCacheServlet extends HttpServlet {
                 	result.put("result", "fail");
                 	result.put("reason", "assetID or serializedAsset empty");
         		}
-
+        		
+        		long rtime = System.currentTimeMillis();
+        		
+        		log.info("handling of assetID: {} took {}ms",assetID, rtime-stime);
+        		
+        		
         	} else {
         		log.error("Unexpected ContentType: {}", request.getContentType());
                 Util.dumpHttpRequest(request);

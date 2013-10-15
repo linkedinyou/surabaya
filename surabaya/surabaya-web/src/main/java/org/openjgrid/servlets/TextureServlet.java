@@ -160,7 +160,7 @@ public class TextureServlet extends HttpServlet {
 	}
 
 	private boolean fetchTexture(HttpServletRequest httpRequest, HttpServletResponse httpResponse, UUID textureID, String format) throws AssetServiceException, IOException {
-		log.info("fetchTexture() called ID: {}", textureID.toString());
+		log.debug("fetchTexture() called ID: {}", textureID.toString());
 		AssetBase texture = null;
 		String fullID = textureID.toString();
 		if (!format.equals(DEFAULT_FORMAT)) {
