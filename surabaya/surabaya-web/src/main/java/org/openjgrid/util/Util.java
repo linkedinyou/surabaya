@@ -69,17 +69,24 @@ public final class Util {
             		range.start = Integer.parseInt(rangeValues[0]);
             	}
 
-                String rawEnd = rangeValues[1];
-
-                if (rawEnd.isEmpty()) {
-                    range.end = -1;
-                    range.isValid = true;
-                    return(range);
-                } else if (StringUtils.isNumeric(rawEnd)) {
-                	range.end = Integer.parseInt(rawEnd);
-                	range.isValid = true;
-                    return(range);
+                if(!StringUtils.isNumeric(rangeValues[1])) {
+            		range.isValid = false;
+            		return(range);                	
+                } else {
+            		range.end = Integer.parseInt(rangeValues[1]);                	
                 }
+                range.isValid = true;
+                return(range);
+            } else if (rangeValues.length == 1) {
+            	if(!StringUtils.isNumeric(rangeValues[0])) {
+            		range.isValid = false;
+            		return(range);
+            	} else {
+            		range.start = Integer.parseInt(rangeValues[0]);
+            	}
+                range.end = -1;
+                range.isValid = true;
+                return(range);
             }
         }
 
