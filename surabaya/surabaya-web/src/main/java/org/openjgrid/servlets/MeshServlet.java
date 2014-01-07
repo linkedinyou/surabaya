@@ -81,7 +81,7 @@ public class MeshServlet extends HttpServlet {
 			// the last 4 char of the CAPS Path are omitted otherwise a match to
 			// the CAPS Path
 			// given with the agent would not fit
-			Pattern p = Pattern.compile("^/CAPS/MESH/(.*)....//");
+			Pattern p = Pattern.compile("^/surabaya-web/CAPS/MESH/(.*)....//");
 			Matcher m = p.matcher(uri);
 			if (m.find()) {
 				capsPath = m.group(1);

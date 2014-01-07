@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.URLDecoder;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -88,27 +89,24 @@ public class FetchInventoryServlet extends HttpServlet {
 
 			assert(Util.dumpHttpRequest(request));
 
-			String uri = request.getRequestURI();
-			String capsPath = null;
-			// the last 4 char of the CAPS Path are omitted otherwise a match to
-			// the CAPS Path
-			// given with the agent would not fit
-			Pattern p = Pattern.compile("^/CAPS/FINV/(.*)..../");
-			Matcher m = p.matcher(uri);
+			String inventoryServerName = null;
+			String inventoryServerPort = null;
+			
+			String url = request.getRequestURI();
+			Pattern p = Pattern.compile("^/surabaya-web/CAPS/FINV/(.*)/(.*)$");
+			Matcher m = p.matcher(url);
 			if (m.find()) {
-				capsPath = m.group(1);
+				inventoryServerName = m.group(1);
+				inventoryServerPort = m.group(2);
 			}
-			log.debug("CAPS Path: {}", capsPath);
-			// if (agentManagementService.hasInventoryCapsId(capsPath)) {
-			if (capsPath.equals("d842b7fe-f26b-4fec-ac84-19b5c5900e2f")) {
-				response.setContentType(request.getContentType());
-				String reply = fetchInventory(request, httpclient);
-				StringEntity entity = new StringEntity(reply);
-				entity.writeTo(out);
-				out.close();
-			} else {
-				log.error("Unknow Request received");
-			}
+			
+			String inventoryServerURL = "http://" + inventoryServerName + ":" + inventoryServerPort;
+			
+			response.setContentType(request.getContentType());
+			String reply = fetchInventory(request, httpclient, inventoryServerURL);
+			StringEntity entity = new StringEntity(reply);
+			entity.writeTo(out);
+			out.close();
 
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
@@ -116,8 +114,9 @@ public class FetchInventoryServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("unchecked")
-	private String fetchInventory(HttpServletRequest request,
-		HttpClient httpclient) throws IOException, XMLStreamException, InventoryException {
+	private String fetchInventory(HttpServletRequest request, HttpClient httpclient, String inventoryServerURL ) 
+		throws IOException, XMLStreamException, InventoryException {
+		
 		log.debug("fetchInventory2() called");
 		String requestString = Util.requestContent2String(request);
 		log.debug("Content: {}", requestString);
@@ -138,7 +137,7 @@ public class FetchInventoryServlet extends HttpServlet {
 			Map<String, Object> itemMap = (Map<String, Object>) itemsIterator.next();
 			UUID itemID = (UUID) itemMap.get("item_id");
 
-			InventoryItemBase item = inventoryService.getItem(new InventoryItemBase(itemID));
+			InventoryItemBase item = inventoryService.getItem(new InventoryItemBase(itemID), inventoryServerURL);
 			if( item != null ) {
                 // We don't know the agent that this request belongs to so we'll use the agent id of the item
                 // which will be the same for all items.

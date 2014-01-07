@@ -46,13 +46,12 @@ public class InventoryService {
 	public void init() {
 		httpclient = new DefaultHttpClient();
 	}
-	public InventoryCollection getFolderContent(UUID userID, UUID folderID) {
+	public InventoryCollection getFolderContent(UUID userID, UUID folderID, String inventoryServerURL) {
 		log.debug("getFolderContent(userID:{}, folderID:{} )", userID, folderID);
 		InventoryCollection invCollection = new InventoryCollection();
 		try {
 			invCollection.userId = userID;
-			HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
-					"inventory_service") + "/xinventory");
+			HttpPost httppost = new HttpPost( inventoryServerURL + "/xinventory");
 			
 			StringBuilder sb = new StringBuilder("PRINCIPAL=").append(userID.toString());
 			sb.append("&FOLDER=").append(folderID.toString());
@@ -95,11 +94,10 @@ public class InventoryService {
 	 * @param containingFolder
 	 * @return
 	 */
-	public InventoryFolderBase getFolder(InventoryFolderBase containingFolder) {
+	public InventoryFolderBase getFolder(InventoryFolderBase containingFolder, String inventoryServerURL) {
 		log.debug("getFolder()");
 		try {
-			HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
-					"inventory_service") + "/xinventory");
+			HttpPost httppost = new HttpPost(inventoryServerURL + "/xinventory");
 
 			StringBuilder sb = new StringBuilder();
 			sb.append("&ID=").append(containingFolder.getId().toString());
@@ -140,10 +138,11 @@ public class InventoryService {
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */
-	public InventoryItemBase getItem(InventoryItemBase inventoryItemBase) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
-		log.debug("getItem({})", inventoryItemBase.getId().toString());
-		HttpPost httppost = new HttpPost(configuration.getProperty("Grid",
-				"inventory_service") + "/xinventory");
+	public InventoryItemBase getItem(InventoryItemBase inventoryItemBase, String inventoryServerURL ) 
+			throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
+		
+		log.debug("getItem({}) inventoryServerURL: {}", inventoryItemBase.getId().toString(), inventoryServerURL);
+		HttpPost httppost = new HttpPost(inventoryServerURL + "/xinventory");
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("&ID=").append(inventoryItemBase.getId().toString());
