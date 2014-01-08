@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.net.URLDecoder;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
