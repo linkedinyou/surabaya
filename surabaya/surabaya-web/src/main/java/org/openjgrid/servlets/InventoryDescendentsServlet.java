@@ -76,7 +76,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "InventoryDescendentsServlet", urlPatterns = { "/surabaya-web/CAPS/FID/*" })
+@WebServlet(name = "InventoryDescendentsServlet", urlPatterns = { "/CAPS/FID/*" })
 public class InventoryDescendentsServlet extends HttpServlet {
 	private static final long serialVersionUID = -8627204223385024589L;
 	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet.class);
