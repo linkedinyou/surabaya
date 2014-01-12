@@ -22,8 +22,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.ejb.EJB;
 import javax.servlet.ServletException;
@@ -56,10 +54,10 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "TextureServlet", urlPatterns = { "/CAPS/GTEX/*" })
-public class TextureServlet extends HttpServlet {
+@WebServlet(name = "TextureServlet", urlPatterns = { "/texture2" })
+public class TextureServlet_2 extends HttpServlet {
 	private static final long serialVersionUID = -7144097163138378596L;
-	private static final Logger log = LoggerFactory.getLogger(TextureServlet.class);
+	private static final Logger log = LoggerFactory.getLogger(TextureServlet_2.class);
 	private static final String DEFAULT_FORMAT = "x-j2c";
 
 	@EJB
@@ -79,28 +77,9 @@ public class TextureServlet extends HttpServlet {
 			assert(Util.dumpHttpRequest(request));
 
 			String uri = request.getRequestURI();
-			String capsPath = null;
-			// the last 4 char of the CAPS Path are omitted otherwise a match to
-			// the CAPS Path
-			// given with the agent would not fit
-			Pattern p = Pattern.compile("/CAPS/GTEX/(.*)....//");
-			Matcher m = p.matcher(uri);
-			if (m.find()) {
-				capsPath = m.group(1);
-			}
-//			if (agentManagementService.hasTextureCapsId(capsPath)) {
-			if (capsPath.equals("b94708e1-b0c2-4206-9d6f-2ec876512249")) {
-				response.setContentType(request.getContentType());
-				getTexture(request, response, httpclient);
-			} else {
-				log.error("Unknown Request received");
-				log.error("CAPS Path: {}", capsPath);
-				Util.dumpUnexpectedHttpRequest(request);
-				Map<String, String[]> parameterMap = request.getParameterMap();
-				Util.dumpUnexpectedParameterMap(parameterMap);
-				log.error("End of Unknown  Request Dump");
-				
-			}
+			log.debug("RequestURL: {}", uri);
+			response.setContentType(request.getContentType());
+			getTexture(request, response, httpclient);
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
 		}

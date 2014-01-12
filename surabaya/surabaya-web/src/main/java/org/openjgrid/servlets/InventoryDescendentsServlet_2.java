@@ -54,7 +54,7 @@ import org.openjgrid.datatypes.llsd.LLSDInventoryFolder;
 import org.openjgrid.datatypes.llsd.LLSDInventoryFolderContents;
 import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
 import org.openjgrid.services.infrastructure.LibraryService;
-import org.openjgrid.services.inventory.InventoryService;
+import org.openjgrid.services.inventory.InventoryService_2;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,16 +75,17 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "InventoryDescendentsServlet", urlPatterns = { "/CAPS/FID/*" })
-public class InventoryDescendentsServlet extends HttpServlet {
+@WebServlet(name = "InventoryDescendentsServlet", urlPatterns = { "/inventorydescendents2/*" })
+public class InventoryDescendentsServlet_2 extends HttpServlet {
 	private static final long serialVersionUID = -8627204223385024589L;
-	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet.class);
+	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet_2.class);
+
 
 	@EJB(mappedName = "java:module/LibraryService")
 	LibraryService libraryService;
 	
 	@EJB
-	private InventoryService inventoryService;
+	private InventoryService_2 inventoryService;
 
 	private void processRequest(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
@@ -96,26 +97,24 @@ public class InventoryDescendentsServlet extends HttpServlet {
 			assert(Util.dumpHttpRequest(request));
 
 			String uri = request.getRequestURI();
-			String capsPath = null;
-			// the last 4 char of the CAPS Path are omitted otherwise a match to
-			// the CAPS Path
-			// given with the agent would not fit
-			Pattern p = Pattern.compile("/CAPS/FID/(.*)..../");
+			String serverName = null;
+			String serverPort = null;
+
+			Pattern p = Pattern.compile("^/inventorydescendents2/(.*)/(.*)");
 			Matcher m = p.matcher(uri);
 			if (m.find()) {
-				capsPath = m.group(1);
+				serverName = m.group(1);
+				serverPort = m.group(2);
 			}
-			log.debug("CAPS Path: {}", capsPath);
-//			if (agentManagementService.hasInventoryDescendentsCapsId(capsPath)) {
-			if (capsPath.equals("237f10b7-7eac-4991-8860-8c48d8e83032")) {
-				response.setContentType(request.getContentType());
-				String reply = fetchInventoryDescentdents(request, httpclient);
-				StringEntity entity = new StringEntity(reply);
-				entity.writeTo(out);
-				out.close();
-			} else {
-				log.error("Unknow Request received");
-			}
+
+			String inventoryServerURL = "http://" + serverName + ":" + serverPort;
+			log.debug("InventoryServerURL: {}", inventoryServerURL);
+			
+			response.setContentType(request.getContentType());
+			String reply = fetchInventoryDescentdents(request, httpclient, inventoryServerURL);
+			StringEntity entity = new StringEntity(reply);
+			entity.writeTo(out);
+			out.close();
 
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
@@ -124,8 +123,8 @@ public class InventoryDescendentsServlet extends HttpServlet {
 
 
 	@SuppressWarnings("unchecked")
-	private String fetchInventoryDescentdents(HttpServletRequest request,
-			HttpClient httpclient) throws IOException, XMLStreamException, InventoryException {
+	private String fetchInventoryDescentdents(HttpServletRequest request, HttpClient httpclient, String inventoryServerURL ) 
+			throws IOException, XMLStreamException, InventoryException {
 		log.debug("fetchInventoryDescentdents2() called");
 		String requestString = Util.requestContent2String(request);
 
@@ -168,7 +167,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 			HashMap<String, Object> inventoryHashMap = (HashMap<String, Object>) foldersrequested.get(i);
 			LLSDFetchInventoryDescendents inventoryRequest = new LLSDFetchInventoryDescendents(inventoryHashMap);
 
-			LLSDInventoryDescendents inventoryReply = fetchInventory(inventoryRequest);
+			LLSDInventoryDescendents inventoryReply = fetchInventory(inventoryRequest, inventoryServerURL);
 			try {
 				inventoryItemstr = LLSD.LLSDSerialize(inventoryReply);
 			} catch (Exception ex) {
@@ -212,8 +211,8 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */
-	private LLSDInventoryDescendents fetchInventory(
-			LLSDFetchInventoryDescendents inventoryRequest) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
+	private LLSDInventoryDescendents fetchInventory( LLSDFetchInventoryDescendents inventoryRequest, String inventoryServerURL) 
+			throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
 		LLSDInventoryDescendents reply = new LLSDInventoryDescendents();
 		LLSDInventoryFolderContents contents = new LLSDInventoryFolderContents();
 		contents.agent_id = inventoryRequest.owner_id;
@@ -227,7 +226,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 		fetchresult = fetch(inventoryRequest.owner_id,
 				inventoryRequest.folder_id, inventoryRequest.owner_id,
 				inventoryRequest.fetch_folders, inventoryRequest.fetch_items,
-				inventoryRequest.sort_order);
+				inventoryRequest.sort_order, inventoryServerURL);
 
 		log.debug("result of fetch: version: {} - descendents: {}",fetchresult.version, fetchresult.descendents);
 
@@ -279,7 +278,9 @@ public class InventoryDescendentsServlet extends HttpServlet {
 	 */
 	private Fetch fetch(UUID agent_id, UUID folder_id,
 			UUID owner_id, boolean fetch_folders, boolean fetch_items,
-			int sort_order) throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
+			int sort_order, String inventoryServerURL) 
+		
+		throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
         log.debug(
                 "Fetching folders (" + fetch_folders + "), items"+ fetch_items +" from "+ folder_id +" for agent "+ owner_id 
                 );
@@ -302,11 +303,11 @@ public class InventoryDescendentsServlet extends HttpServlet {
         }
         
 		if (!folder_id.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
-            result.inventoryCollection = inventoryService.getFolderContent(agent_id, folder_id);
+            result.inventoryCollection = inventoryService.getFolderContent(agent_id, folder_id, inventoryServerURL);
             InventoryFolderBase containingFolder = new InventoryFolderBase();
             containingFolder.setId(folder_id);
             containingFolder.setOwnerId(agent_id);
-            containingFolder = inventoryService.getFolder(containingFolder);
+            containingFolder = inventoryService.getFolder(containingFolder, inventoryServerURL);
             
             if (containingFolder != null) {
 
@@ -324,7 +325,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
                     while (invIter.hasNext()) {
                     	InventoryItemBase item = invIter.next();
                         if (item.getAssetType() == (int) AssetType.Link.getAssetType()) {
-                            InventoryItemBase linkedItem = inventoryService.getItem(new InventoryItemBase(item.getAssetId()));
+                            InventoryItemBase linkedItem = inventoryService.getItem(new InventoryItemBase(item.getAssetId()), inventoryServerURL);
 
                             // Take care of genuinely broken links where the target doesn't exist
                             // HACK: Also, don't follow up links that just point to other links.  In theory this is legitimate,
@@ -342,7 +343,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
                     	InventoryItemBase item = invIter.next();
                     	
                         if ( item.getAssetType() == (int)AssetType.LinkFolder.getAssetType() ) {
-                            InventoryCollection linkedFolderContents = inventoryService.getFolderContent(owner_id, item.getAssetId());
+                            InventoryCollection linkedFolderContents = inventoryService.getFolderContent(owner_id, item.getAssetId(), inventoryServerURL);
                             List<InventoryItemBase> links = linkedFolderContents.itemList;
 
                             itemsToReturn.addAll(0, links);
@@ -357,7 +358,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
                                 if (link != null) {
 
                                     InventoryItemBase linkedItem
-                                        = inventoryService.getItem(new InventoryItemBase(link.getAssetId()));
+                                        = inventoryService.getItem(new InventoryItemBase(link.getAssetId()), inventoryServerURL);
 
                                     if (linkedItem != null) {
                                         itemsToReturn.add(0, linkedItem);

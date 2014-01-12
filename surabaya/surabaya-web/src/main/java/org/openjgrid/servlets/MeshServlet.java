@@ -36,7 +36,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.asset.AssetBase;
 import org.openjgrid.datatypes.asset.AssetType;
-import org.openjgrid.services.agent.AgentManagementService;
 import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.services.infrastructure.SLTypeMappingService;
@@ -65,9 +64,6 @@ public class MeshServlet extends HttpServlet {
 
 	@EJB(mappedName = "java:module/SLTypeMappingService")
 	private SLTypeMappingService slTypeMappingService;
-
-	@EJB(mappedName = "java:module/AgentManagementService")
-	AgentManagementService agentManagementService;
 	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
@@ -81,7 +77,7 @@ public class MeshServlet extends HttpServlet {
 			// the last 4 char of the CAPS Path are omitted otherwise a match to
 			// the CAPS Path
 			// given with the agent would not fit
-			Pattern p = Pattern.compile("^/surabaya-web/CAPS/MESH/(.*)....//");
+			Pattern p = Pattern.compile("/CAPS/MESH/(.*)....//");
 			Matcher m = p.matcher(uri);
 			if (m.find()) {
 				capsPath = m.group(1);

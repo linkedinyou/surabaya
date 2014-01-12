@@ -4,7 +4,7 @@
   <module>
     <web>
       <web-uri>surabaya-web-0.0.1-SNAPSHOT.war</web-uri>
-      <context-root>/surabaya-web</context-root>
+      <context-root>/</context-root>
     </web>
   </module>
   <library-directory>lib</library-directory>
