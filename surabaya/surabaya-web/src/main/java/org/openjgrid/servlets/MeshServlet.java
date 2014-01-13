@@ -68,6 +68,7 @@ public class MeshServlet extends HttpServlet {
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		try {
+			log.info("MeshServlet");
 			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));

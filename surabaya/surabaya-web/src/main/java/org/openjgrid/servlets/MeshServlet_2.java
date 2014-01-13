@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "MeshServlet", urlPatterns = { "/mesh2" })
+@WebServlet(name = "MeshServlet_2", urlPatterns = { "/mesh2/*" })
 public class MeshServlet_2 extends HttpServlet {
 	private static final long serialVersionUID = 7904169852381829113L;
 	private static final Logger log = LoggerFactory.getLogger(MeshServlet_2.class);
@@ -67,6 +67,7 @@ public class MeshServlet_2 extends HttpServlet {
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		try {
+			log.info("MeshServlet_2");
 			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));

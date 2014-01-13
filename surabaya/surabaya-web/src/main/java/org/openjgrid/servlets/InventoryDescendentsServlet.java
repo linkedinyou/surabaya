@@ -90,6 +90,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 
 		try {
+			log.info("InventoryDescendentsServlet");
 			OutputStream out = response.getOutputStream();
 			HttpClient httpclient = new DefaultHttpClient();
 

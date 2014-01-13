@@ -72,6 +72,7 @@ public class TextureServlet extends HttpServlet {
 	// private AgentManagementService agentManagementService;
 	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		log.info("TextureServlet");
 
 		try {
 			HttpClient httpclient = new DefaultHttpClient();

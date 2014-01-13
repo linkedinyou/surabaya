@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "TextureServlet", urlPatterns = { "/texture2" })
+@WebServlet(name = "TextureServlet_2", urlPatterns = { "/texture2/*" })
 public class TextureServlet_2 extends HttpServlet {
 	private static final long serialVersionUID = -7144097163138378596L;
 	private static final Logger log = LoggerFactory.getLogger(TextureServlet_2.class);
@@ -72,6 +72,7 @@ public class TextureServlet_2 extends HttpServlet {
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		try {
+			log.info("TextureServlet_2");
 			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));

@@ -61,6 +61,7 @@ public class TextureCacheServlet extends HttpServlet {
 	
 	@SuppressWarnings("unchecked")
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		log.info("TextureCacheServlet");
         response.setContentType("text/xml;charset=UTF-8");
         OutputStream out = response.getOutputStream();
         Map<String, String> result = new HashMap<String, String>();

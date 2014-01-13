@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "InventoryDescendentsServlet", urlPatterns = { "/inventorydescendents2/*" })
+@WebServlet(name = "InventoryDescendentsServlet_2", urlPatterns = { "/inventorydescendents2/*" })
 public class InventoryDescendentsServlet_2 extends HttpServlet {
 	private static final long serialVersionUID = -8627204223385024589L;
 	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet_2.class);
@@ -91,6 +91,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 			HttpServletResponse response) throws ServletException, IOException {
 
 		try {
+			log.info("InventoryDescendentsServlet_2");
 			OutputStream out = response.getOutputStream();
 			HttpClient httpclient = new DefaultHttpClient();
 
