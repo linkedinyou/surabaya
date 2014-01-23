@@ -75,10 +75,12 @@ public class MeshServlet_2 extends HttpServlet {
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
 			response.setContentType(request.getContentType());
+			long startTime = System.currentTimeMillis();
 			getMesh(request, response, httpclient);
-			log.debug("end of processRequest");
+			long endTime = System.currentTimeMillis();
+			log.info("getMesh took {} ms", endTime - startTime);
 		} catch (Exception ex) {
-			log.debug("Exception {} occurred", ex.getClass().toString());
+			log.error("Exception {} occurred", ex.getClass().toString());
 		}
 	}
 

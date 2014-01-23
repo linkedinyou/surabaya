@@ -72,7 +72,7 @@ public class TextureServlet_2 extends HttpServlet {
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
 		try {
-			log.info("TextureServlet_2");
+			log.debug("TextureServlet_2");
 			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));

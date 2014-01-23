@@ -94,12 +94,17 @@ public class FetchInventoryServlet_2 extends HttpServlet {
 			if (m.find()) {
 				inventoryServerName = m.group(1);
 				inventoryServerPort = m.group(2);
+			} else {
+				log.error("Unexpected URL Format of Inventory Server: " + url);
 			}
 			
 			String inventoryServerURL = "http://" + inventoryServerName + ":" + inventoryServerPort;
 			
 			response.setContentType(request.getContentType());
+			long startTime = System.currentTimeMillis();
 			String reply = fetchInventory(request, httpclient, inventoryServerURL);
+			long endTime = System.currentTimeMillis();
+			log.info("fetchinventory took {} ms", endTime - startTime);
 			StringEntity entity = new StringEntity(reply);
 			entity.writeTo(out);
 			out.close();

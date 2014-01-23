@@ -58,7 +58,11 @@ public class AssetService {
 				log.debug("Cache Miss: {}", assetID);
 
 				HttpGet httpget = new HttpGet(configuration.getProperty("Grid", "asset_service") + "/assets/" + assetID);
+				long startTime = System.currentTimeMillis();
 				HttpResponse httpResponse = httpclient.execute(httpget);
+				long endTime = System.currentTimeMillis();
+	    		log.info("Call to Grid Asset Server took {} ms", endTime - startTime);
+
 	    		int statuscode = httpResponse.getStatusLine().getStatusCode();
 	    		if (statuscode != HttpStatus.SC_OK) {
 	    			log.warn("getAsset("+assetID+") http Status: "+statuscode);

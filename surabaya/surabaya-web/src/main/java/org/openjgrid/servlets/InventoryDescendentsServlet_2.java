@@ -106,13 +106,18 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 			if (m.find()) {
 				serverName = m.group(1);
 				serverPort = m.group(2);
+			} else {
+				log.error("Unexpected URL Format of Inventory Server: " + uri);
 			}
 
 			String inventoryServerURL = "http://" + serverName + ":" + serverPort;
 			log.debug("InventoryServerURL: {}", inventoryServerURL);
 			
 			response.setContentType(request.getContentType());
+			long startTime = System.currentTimeMillis();
 			String reply = fetchInventoryDescentdents(request, httpclient, inventoryServerURL);
+			long endTime = System.currentTimeMillis();
+			log.info("fetchinventoryDescendants took {} ms", endTime - startTime);
 			StringEntity entity = new StringEntity(reply);
 			entity.writeTo(out);
 			out.close();

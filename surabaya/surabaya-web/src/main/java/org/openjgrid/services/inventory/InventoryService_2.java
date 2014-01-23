@@ -61,7 +61,11 @@ public class InventoryService_2 {
     		stringEntity.setContentType("application/x-www-form-urlencoded");
     		httppost.setEntity(stringEntity);
 
+    		long startTime = System.currentTimeMillis();
     		HttpResponse httpResponse = httpclient.execute(httppost);
+    		long endTime = System.currentTimeMillis();
+    		log.info("Call to {} took {} ms", inventoryServerURL, endTime - startTime);
+
     		int statuscode = httpResponse.getStatusLine().getStatusCode();
     		if (statuscode != HttpStatus.SC_OK) {
     			log.warn("getFolderContent(userID: "+userID+", folderID: "+folderID+") http Status: "+statuscode);
@@ -107,7 +111,11 @@ public class InventoryService_2 {
     		stringEntity.setContentType("application/x-www-form-urlencoded");
     		httppost.setEntity(stringEntity);
 
+    		long startTime = System.currentTimeMillis();
     		HttpResponse httpResponse = httpclient.execute(httppost);
+    		long endTime = System.currentTimeMillis();
+    		log.info("Call to {} took {} ms", inventoryServerURL, endTime - startTime);
+    		
     		int statuscode = httpResponse.getStatusLine().getStatusCode();
     		if (statuscode != HttpStatus.SC_OK) {
     			log.warn("getFolder("+containingFolder.getName()+") http Status: "+statuscode);
@@ -152,7 +160,11 @@ public class InventoryService_2 {
 		stringEntity.setContentType("application/x-www-form-urlencoded");
 		httppost.setEntity(stringEntity);
 
+		long startTime = System.currentTimeMillis();
 		HttpResponse httpResponse = httpclient.execute(httppost);
+		long endTime = System.currentTimeMillis();
+		log.info("Call to {} took {} ms", inventoryServerURL, endTime - startTime);
+		
 		int statuscode = httpResponse.getStatusLine().getStatusCode();
 		if (statuscode != HttpStatus.SC_OK) {
 			log.warn("getItem("+inventoryItemBase.getName()+") http Status: "+statuscode);
