@@ -80,6 +80,8 @@ public class FetchInventoryServlet_2 extends HttpServlet {
 
 		try {
 			log.info("FetchInventoryServlet_2");
+			long startTime = System.currentTimeMillis();
+
 			OutputStream out = response.getOutputStream();
 			HttpClient httpclient = new DefaultHttpClient();
 
@@ -101,13 +103,13 @@ public class FetchInventoryServlet_2 extends HttpServlet {
 			String inventoryServerURL = "http://" + inventoryServerName + ":" + inventoryServerPort;
 			
 			response.setContentType(request.getContentType());
-			long startTime = System.currentTimeMillis();
 			String reply = fetchInventory(request, httpclient, inventoryServerURL);
-			long endTime = System.currentTimeMillis();
-			log.info("fetchinventory took {} ms", endTime - startTime);
 			StringEntity entity = new StringEntity(reply);
 			entity.writeTo(out);
 			out.close();
+
+			long endTime = System.currentTimeMillis();
+			log.info("FetchInventoryServlet_2 took {} ms", endTime - startTime);
 
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());

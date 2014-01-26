@@ -68,6 +68,7 @@ public class MeshServlet_2 extends HttpServlet {
 
 		try {
 			log.info("MeshServlet_2");
+			long startTime = System.currentTimeMillis();
 			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));
@@ -75,10 +76,9 @@ public class MeshServlet_2 extends HttpServlet {
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
 			response.setContentType(request.getContentType());
-			long startTime = System.currentTimeMillis();
 			getMesh(request, response, httpclient);
 			long endTime = System.currentTimeMillis();
-			log.info("getMesh took {} ms", endTime - startTime);
+			log.info("MeshServlet_2 took {} ms", endTime - startTime);
 		} catch (Exception ex) {
 			log.error("Exception {} occurred", ex.getClass().toString());
 		}

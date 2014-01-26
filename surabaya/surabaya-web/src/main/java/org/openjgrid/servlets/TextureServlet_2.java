@@ -73,6 +73,7 @@ public class TextureServlet_2 extends HttpServlet {
 
 		try {
 			log.debug("TextureServlet_2");
+			long startTime = System.currentTimeMillis();
 			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));
@@ -81,6 +82,8 @@ public class TextureServlet_2 extends HttpServlet {
 			log.debug("RequestURL: {}", uri);
 			response.setContentType(request.getContentType());
 			getTexture(request, response, httpclient);
+			long endTime = System.currentTimeMillis();
+			log.info("TextureServlet_2 took {} ms", endTime - startTime);
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
 		}
