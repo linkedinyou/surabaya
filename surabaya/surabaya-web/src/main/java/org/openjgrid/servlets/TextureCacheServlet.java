@@ -100,13 +100,14 @@ public class TextureCacheServlet extends HttpServlet {
         	resultStringEntity.writeTo(out);
         	out.flush();
         	out.close();
-
-        	long rtime = System.currentTimeMillis();
-    		log.info("TextureCacheServlet: handling of assetID: {} took {} ms",assetID, rtime-stime);
         	
         } catch (Exception ex) {
         	log.debug("Exception occurred in AgentServlet.processRequest():",ex);
         }
+
+        long rtime = System.currentTimeMillis();
+		log.info("TextureCacheServlet took {} ms", rtime-stime);
+
 	}	
 	
 	/**
