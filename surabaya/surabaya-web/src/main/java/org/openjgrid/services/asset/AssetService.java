@@ -41,19 +41,20 @@ public class AssetService {
 
 	@PostConstruct
 	public void init() {
+		log.info("init()");
 		this.cache = this.container.getCache();
 		httpclient = new DefaultHttpClient();
 	}
 
 	public AssetBase getAsset(String assetID) {
-		log.debug("getAsset(assetID:{})", assetID);
+		log.info("getAsset(assetID:{})", assetID);
 		String content = null;
 		AssetBase assetBase = new AssetBase();
 		try {
 			if (cache.containsKey(assetID)) {
 				log.debug("Cache Hit: {}", assetID);
-			    content = cache.get(assetID);
-				log.debug("80 bytes content from cache: " + content.substring(0,80));
+				content = cache.get(assetID);
+				log.debug("80 bytes content from cache: " + content.substring(0, 80));
 			} else {
 				log.debug("Cache Miss: {}", assetID);
 
@@ -61,12 +62,12 @@ public class AssetService {
 				long startTime = System.currentTimeMillis();
 				HttpResponse httpResponse = httpclient.execute(httpget);
 				long endTime = System.currentTimeMillis();
-	    		log.info("Call to Grid Asset Server took {} ms", endTime - startTime);
+				log.info("Call to Grid Asset Server took {} ms", endTime - startTime);
 
-	    		int statuscode = httpResponse.getStatusLine().getStatusCode();
-	    		if (statuscode != HttpStatus.SC_OK) {
-	    			log.warn("getAsset("+assetID+") http Status: "+statuscode);
-	    		}
+				int statuscode = httpResponse.getStatusLine().getStatusCode();
+				if (statuscode != HttpStatus.SC_OK) {
+					log.warn("getAsset(" + assetID + ") http Status: " + statuscode);
+				}
 				HttpEntity entity = httpResponse.getEntity();
 
 				long contentLength = entity.getContentLength();
@@ -74,14 +75,14 @@ public class AssetService {
 				content = IOUtils.toString(entity.getContent());
 				log.debug("ContentLength: {}", contentLength);
 				log.debug("ContentType: {}", contentType);
-				if(!Util.isNullOrEmpty(content)) {
-					cache.put(assetID, content);					
-					log.debug("80 bytes content put to cache: " + content.substring(0,80));
+				if (!Util.isNullOrEmpty(content)) {
+					cache.put(assetID, content);
+					log.debug("80 bytes content put to cache: " + content.substring(0, 80));
 				} else {
 					log.error("Asset with ID: {} requestet, rsult was null", assetID);
 				}
 			}
-			
+
 			if (Util.isNullOrEmpty(content)) {
 				return (null);
 			}
@@ -98,11 +99,27 @@ public class AssetService {
 
 	public void cacheAsset(String assetID, String serializedAsset) {
 		log.debug("cacheAsset(assetID: {}, String serializedAsset)", assetID);
-		cache.put(assetID, serializedAsset);
+		try {
+			long startTime = System.currentTimeMillis();
+			cache.put(assetID, serializedAsset);
+			long endTime = System.currentTimeMillis();
+			log.info("Caching Asset {} took {} ms", assetID, endTime - startTime);
+			
+		} catch (Exception ex) {
+			log.error("Exception while caching AssetID {}: {}", assetID, ex.getMessage());
+		}
 	}
-	
-	public void cacheAsset(String assetID, String serializedAsset, long lifespan, TimeUnit timeunit ) {
+
+	public void cacheAsset(String assetID, String serializedAsset, long lifespan, TimeUnit timeunit) {
 		log.debug("cacheAsset(assetID: {}, String serializedAsset, long , timeunit)", assetID);
-		cache.put(assetID, serializedAsset, lifespan, timeunit);
+		try {
+			long startTime = System.currentTimeMillis();
+			cache.put(assetID, serializedAsset, lifespan, timeunit);
+			long endTime = System.currentTimeMillis();
+			log.info("Caching Temporary Asset {} took {} ms", assetID, endTime - startTime);
+			
+		} catch (Exception ex) {
+			log.error("Exception while caching AssetID {}: {}", assetID, ex.getMessage());
+		}
 	}
 }

@@ -74,6 +74,7 @@ public class TextureCacheServlet extends HttpServlet {
         		SerializedAssetCaps serializedAssetCaps = new SerializedAssetCaps();
         		serializedAssetCaps.capsMap = objectMapper.readValue(jsonString, serializedAssetCaps.capsMap.getClass());
         		String assetID =  serializedAssetCaps.capsMap.get("assetID");
+
         		boolean isTemporary = Boolean.parseBoolean(serializedAssetCaps.capsMap.get("temporary"));
         		String serializedAsset = serializedAssetCaps.capsMap.get("serializedAsset");
         		
