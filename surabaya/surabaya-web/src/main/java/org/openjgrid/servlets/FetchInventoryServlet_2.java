@@ -44,7 +44,7 @@ import org.openjgrid.datatypes.inventory.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.LLSD;
 import org.openjgrid.datatypes.llsd.LLSDFetchInventory;
 import org.openjgrid.datatypes.llsd.LLSDInventoryItem;
-import org.openjgrid.services.inventory.InventoryService;
+import org.openjgrid.services.inventory.InventoryService_2;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,46 +65,51 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "FetchInventoryServlet", urlPatterns = { "/CAPS/FINV/*" })
-public class FetchInventoryServlet extends HttpServlet {
+@WebServlet(name = "FetchInventoryServlet_2", urlPatterns = { "/fetchinventory2/*" })
+public class FetchInventoryServlet_2 extends HttpServlet {
  	private static final long serialVersionUID = -1815134758746814053L;
 
- 	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet.class);
+ 	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet_2.class);
+
 
 	@EJB
-	private InventoryService inventoryService;
+	private InventoryService_2 inventoryService;
 
 	private void processRequest(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 
 		try {
-			log.info("FetchInventoryServlet");
+			log.info("FetchInventoryServlet_2");
+			long startTime = System.currentTimeMillis();
+
 			OutputStream out = response.getOutputStream();
 			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));
 
-			String uri = request.getRequestURI();
-			String capsPath = null;
-			// the last 4 char of the CAPS Path are omitted otherwise a match to
-			// the CAPS Path
-			// given with the agent would not fit
-			Pattern p = Pattern.compile("/CAPS/FINV/(.*)..../");
-			Matcher m = p.matcher(uri);
+			String inventoryServerName = null;
+			String inventoryServerPort = null;
+			
+			String url = request.getRequestURI();
+			Pattern p = Pattern.compile("^/fetchinventory2/(.*)/(.*)$");
+			Matcher m = p.matcher(url);
 			if (m.find()) {
-				capsPath = m.group(1);
-			}
-			log.debug("CAPS Path: {}", capsPath);
-			// if (agentManagementService.hasInventoryCapsId(capsPath)) {
-			if (capsPath.equals("d842b7fe-f26b-4fec-ac84-19b5c5900e2f")) {
-				response.setContentType(request.getContentType());
-				String reply = fetchInventory(request, httpclient);
-				StringEntity entity = new StringEntity(reply);
-				entity.writeTo(out);
-				out.close();
+				inventoryServerName = m.group(1);
+				inventoryServerPort = m.group(2);
 			} else {
-				log.error("Unknow Request received");
+				log.error("Unexpected URL Format of Inventory Server: " + url);
 			}
+			
+			String inventoryServerURL = "http://" + inventoryServerName + ":" + inventoryServerPort;
+			
+			response.setContentType(request.getContentType());
+			String reply = fetchInventory(request, httpclient, inventoryServerURL);
+			StringEntity entity = new StringEntity(reply);
+			entity.writeTo(out);
+			out.close();
+
+			long endTime = System.currentTimeMillis();
+			log.info("FetchInventoryServlet_2 took {} ms", endTime - startTime);
 
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
@@ -112,8 +117,9 @@ public class FetchInventoryServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("unchecked")
-	private String fetchInventory(HttpServletRequest request,
-		HttpClient httpclient) throws IOException, XMLStreamException, InventoryException {
+	private String fetchInventory(HttpServletRequest request, HttpClient httpclient, String inventoryServerURL ) 
+		throws IOException, XMLStreamException, InventoryException {
+		
 		log.debug("fetchInventory2() called");
 		String requestString = Util.requestContent2String(request);
 		log.debug("Content: {}", requestString);
@@ -134,7 +140,7 @@ public class FetchInventoryServlet extends HttpServlet {
 			Map<String, Object> itemMap = (Map<String, Object>) itemsIterator.next();
 			UUID itemID = (UUID) itemMap.get("item_id");
 
-			InventoryItemBase item = inventoryService.getItem(new InventoryItemBase(itemID));
+			InventoryItemBase item = inventoryService.getItem(new InventoryItemBase(itemID), inventoryServerURL);
 			if( item != null ) {
                 // We don't know the agent that this request belongs to so we'll use the agent id of the item
                 // which will be the same for all items.

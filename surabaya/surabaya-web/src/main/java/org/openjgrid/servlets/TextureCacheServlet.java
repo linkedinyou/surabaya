@@ -61,6 +61,8 @@ public class TextureCacheServlet extends HttpServlet {
 	
 	@SuppressWarnings("unchecked")
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		log.info("TextureCacheServlet");
+		long stime = System.currentTimeMillis();
         response.setContentType("text/xml;charset=UTF-8");
         OutputStream out = response.getOutputStream();
         Map<String, String> result = new HashMap<String, String>();
@@ -72,10 +74,9 @@ public class TextureCacheServlet extends HttpServlet {
         		SerializedAssetCaps serializedAssetCaps = new SerializedAssetCaps();
         		serializedAssetCaps.capsMap = objectMapper.readValue(jsonString, serializedAssetCaps.capsMap.getClass());
         		String assetID =  serializedAssetCaps.capsMap.get("assetID");
+
         		boolean isTemporary = Boolean.parseBoolean(serializedAssetCaps.capsMap.get("temporary"));
         		String serializedAsset = serializedAssetCaps.capsMap.get("serializedAsset");
-        		
-        		long stime = System.currentTimeMillis();
         		
         		if (!Util.isNullOrEmpty(assetID) && !Util.isNullOrEmpty(serializedAsset)) {
         			if(isTemporary) {
@@ -88,11 +89,6 @@ public class TextureCacheServlet extends HttpServlet {
                 	result.put("result", "fail");
                 	result.put("reason", "assetID or serializedAsset empty");
         		}
-        		
-        		long rtime = System.currentTimeMillis();
-        		
-        		log.info("handling of assetID: {} took {}ms",assetID, rtime-stime);
-        		
         		
         	} else {
         		log.error("Unexpected ContentType: {}", request.getContentType());
@@ -109,6 +105,10 @@ public class TextureCacheServlet extends HttpServlet {
         } catch (Exception ex) {
         	log.debug("Exception occurred in AgentServlet.processRequest():",ex);
         }
+
+        long rtime = System.currentTimeMillis();
+		log.info("TextureCacheServlet took {} ms", rtime-stime);
+
 	}	
 	
 	/**
