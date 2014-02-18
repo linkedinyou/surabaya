@@ -42,6 +42,7 @@
       <dependency>
       	<groupId>org.jboss.spec.javax.servlet</groupId>
       	<artifactId>jboss-servlet-api_3.0_spec</artifactId>
+      	<scope>provided</scope>
       </dependency>
       <dependency>
       	<groupId>org.slf4j</groupId>
@@ -58,6 +59,7 @@
       <dependency>
       	<groupId>org.jboss.spec.javax.ejb</groupId>
       	<artifactId>jboss-ejb-api_3.1_spec</artifactId>
+      	<scope>provided</scope>
       </dependency>
       <dependency>
       	<groupId>org.codehaus.woodstox</groupId>
@@ -81,11 +83,6 @@
       	<artifactId>commons-codec</artifactId>
       </dependency>
       <dependency>
-      	<groupId>org.infinispan</groupId>
-      	<artifactId>infinispan-core</artifactId>
-      	<scope>provided</scope>
-      </dependency>
-      <dependency>
       	<groupId>org.codehaus.jackson</groupId>
       	<artifactId>jackson-mapper-lgpl</artifactId>
       </dependency>
@@ -100,6 +97,11 @@
       <dependency>
       	<groupId>commons-configuration</groupId>
       	<artifactId>commons-configuration</artifactId>
+      </dependency>
+      <dependency>
+      	<groupId>org.infinispan</groupId>
+      	<artifactId>infinispan-core</artifactId>
+      	<scope>provided</scope>
       </dependency>
    </dependencies>
 
