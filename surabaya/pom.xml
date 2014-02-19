@@ -21,7 +21,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Define the version of JBoss' Java EE 6 APIs and Tools we want 
             to import. -->
-        <jboss.bom.version>1.0.0.Final</jboss.bom.version>
         <!-- Alternatively, comment out the above line, and un-comment the 
             line below to use version 1.0.0.M12-redhat-1 which is a release certified 
             to work with JBoss EAP 6. It requires you have access to the JBoss EAP 6 
@@ -53,26 +52,7 @@
                 tools for your project, such as Arquillian for testing) and the jboss-javaee-6.0-with-hibernate 
                 stack you can read this as the JBoss stack of the Java EE 6 APIs, with extras 
                 from the Hibernate family of projects) -->
-            <dependency>
-                <groupId>org.jboss.bom</groupId>
-                <artifactId>jboss-javaee-6.0-with-tools</artifactId>
-                <version>${jboss.bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.bom</groupId>
-                <artifactId>jboss-javaee-6.0-with-hibernate</artifactId>
-                <version>${jboss.bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
 
-            <dependency>
-            	<groupId>org.slf4j</groupId>
-            	<artifactId>slf4j-api</artifactId>
-            	<version>1.6.1</version>
-            </dependency>
             <dependency>
             	<groupId>org.apache.httpcomponents</groupId>
             	<artifactId>httpclient</artifactId>
@@ -99,11 +79,6 @@
             	<version>4.1.4</version>
             </dependency>
             <dependency>
-            	<groupId>org.slf4j</groupId>
-            	<artifactId>slf4j-log4j12</artifactId>
-            	<version>1.7.2</version>
-            </dependency>
-            <dependency>
             	<groupId>org.apache.commons</groupId>
             	<artifactId>commons-lang3</artifactId>
             	<version>3.1</version>
@@ -124,11 +99,21 @@
             	<version>1.9</version>
             </dependency>
             <dependency>
-            	<groupId>org.infinispan</groupId>
-            	<artifactId>infinispan</artifactId>
-            	<version>6.0.0.Final</version>
-            	<type>pom</type>
-            	<scope>import</scope>
+            	<groupId>junit</groupId>
+            	<artifactId>junit</artifactId>
+            	<version>4.11</version>
+            	<scope>test</scope>
+            </dependency>
+            <dependency>
+            	<groupId>org.slf4j</groupId>
+            	<artifactId>slf4j-api</artifactId>
+            	<version>1.7.6</version>
+            </dependency>
+            <dependency>
+            	<groupId>org.wildfly</groupId>
+            	<artifactId>wildfly-ejb3</artifactId>
+            	<version>8.0.0.Final</version>
+            	<scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

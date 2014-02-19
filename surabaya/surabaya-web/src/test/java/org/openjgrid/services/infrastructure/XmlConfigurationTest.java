@@ -23,11 +23,10 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Iterator;
 
-import junit.framework.Assert;
-
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.XMLConfiguration;
 import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
