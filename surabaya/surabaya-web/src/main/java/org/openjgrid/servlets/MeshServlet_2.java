@@ -75,7 +75,8 @@ public class MeshServlet_2 extends HttpServlet {
 
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
-			response.setContentType(request.getContentType());
+			String contentType = request.getHeader("Accept");
+			response.setContentType(contentType);
 			getMesh(request, response, httpclient);
 			long endTime = System.currentTimeMillis();
 			log.info("MeshServlet_2 took {} ms", endTime - startTime);

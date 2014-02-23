@@ -80,12 +80,13 @@ public class TextureServlet_2 extends HttpServlet {
 
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
-			response.setContentType(request.getContentType());
+			String contentType = request.getHeader("Accept");
+			response.setContentType(contentType);
 			getTexture(request, response, httpclient);
 			long endTime = System.currentTimeMillis();
 			log.info("TextureServlet_2 took {} ms", endTime - startTime);
 		} catch (Exception ex) {
-			log.debug("Exception {} occurred", ex.getClass().toString());
+			log.error("Exception {} occurred", ex.getClass().toString());
 		}
 	}
 
