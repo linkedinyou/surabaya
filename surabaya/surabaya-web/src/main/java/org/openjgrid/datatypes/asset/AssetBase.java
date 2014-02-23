@@ -19,6 +19,7 @@
 package org.openjgrid.datatypes.asset;
 
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.xml.stream.XMLInputFactory;
@@ -28,6 +29,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.util.ByteArrayBuffer;
 import org.openjgrid.datatypes.Constants;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.util.Util;
@@ -174,6 +176,7 @@ public class AssetBase {
 		}
 		xmlStream.close();
 	}
+	
 	/**
 	 * @return the data
 	 */
@@ -181,6 +184,12 @@ public class AssetBase {
 		return data;
 	}
 
+	public byte[] getData(int from, int to) {
+		byte[] buf = Arrays.copyOfRange(data, from, to);
+		return buf;
+	}
+
+	
 	/**
 	 * @param data the data to set
 	 */

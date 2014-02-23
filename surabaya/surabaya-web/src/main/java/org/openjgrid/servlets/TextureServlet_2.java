@@ -80,7 +80,7 @@ public class TextureServlet_2 extends HttpServlet {
 
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
-			response.setContentType(request.getContentType());
+			response.setContentType(request.getHeader("Accept"));
 			getTexture(request, response, httpclient);
 			long endTime = System.currentTimeMillis();
 			log.info("TextureServlet_2 took {} ms", endTime - startTime);
@@ -259,7 +259,12 @@ public class TextureServlet_2 extends HttpServlet {
 
                     OutputStream out = httpResponse.getOutputStream();
 
-                    out.write(texture.getData(), intRange.start, len);
+                    log.debug("Data Size effective : {}", texture.getData().length);
+                    log.debug("Data Offset start   : {}", intRange.start);
+                    log.debug("Data Size calculated: {}", len);
+                    
+                    httpResponse.addHeader("Content-Range", "bytes "+intRange.start+"-"+intRange.end+"/"+texture.getDataLength());
+                    out.write(texture.getData(intRange.start, len+intRange.start));
                     out.flush();
                     out.close();
                 }
