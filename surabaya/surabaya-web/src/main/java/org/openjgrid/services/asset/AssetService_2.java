@@ -34,16 +34,21 @@ public class AssetService_2 {
 	@EJB(mappedName = "java:module/ConfigurationService")
 	private ConfigurationService configuration;
 
+	Client client = null;
+	
 	@PostConstruct
 	public void init() {
 		log.info("init()");
 		this.cache = this.container.getCache();
+        client = ClientBuilder.newClient();		
 	}
-
+	
 	public AssetBase getAsset(String assetID) {
 		log.info("getAsset(assetID:{})", assetID);
 		String content = null;
 		AssetBase assetBase = new AssetBase();
+		Response response = null;
+		
 		try {
 			if (cache.containsKey(assetID)) {
 				log.debug("Cache Hit: {}", assetID);
@@ -52,12 +57,11 @@ public class AssetService_2 {
 			} else {
 				log.debug("Cache Miss: {}", assetID);
 
-				Client client = ClientBuilder.newClient();
 				WebTarget webTarget = client.target(configuration.getProperty("Grid", "asset_service") + "/assets" + assetID);
 				Builder builder = webTarget.request();
 				
 				long startTime = System.currentTimeMillis();
-				Response response = builder.get();
+				response = builder.get();
 				long endTime = System.currentTimeMillis();
 				log.info("Call to Grid Asset Server took {} ms", endTime - startTime);
 
@@ -70,7 +74,6 @@ public class AssetService_2 {
 				log.debug("Content: {}", content);
 				if (!Util.isNullOrEmpty(content)) {
 					cache.put(assetID, content);
-					log.debug("80 bytes content put to cache: " + content.substring(0, 80));
 				} else {
 					log.error("Asset with ID: {} requestet, rsult was null", assetID);
 				}
@@ -85,6 +88,10 @@ public class AssetService_2 {
 
 		} catch (Exception ex) {
 			log.error("Exception in AssetService", ex);
+		} finally {
+		    if( response != null ) {
+		        response.close();
+		    }
 		}
 
 		return (assetBase);
