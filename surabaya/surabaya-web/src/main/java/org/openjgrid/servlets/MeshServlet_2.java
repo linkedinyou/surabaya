@@ -29,13 +29,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.asset.AssetBase;
 import org.openjgrid.datatypes.asset.AssetType;
-import org.openjgrid.services.asset.AssetService;
 import org.openjgrid.services.asset.AssetServiceException;
+import org.openjgrid.services.asset.AssetService_2;
 import org.openjgrid.services.infrastructure.SLTypeMappingService;
 import org.openjgrid.util.IntRange;
 import org.openjgrid.util.Util;
@@ -58,7 +55,7 @@ public class MeshServlet_2 extends HttpServlet {
 	private static final Logger log = LoggerFactory.getLogger(MeshServlet_2.class);
 
 	@EJB
-	private AssetService assetService;
+	private AssetService_2 assetService;
 
 	@EJB(mappedName = "java:module/SLTypeMappingService")
 	private SLTypeMappingService slTypeMappingService;
@@ -69,14 +66,13 @@ public class MeshServlet_2 extends HttpServlet {
 		try {
 			log.info("MeshServlet_2");
 			long startTime = System.currentTimeMillis();
-			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));
 
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
 			response.setContentType(request.getHeader("Accept"));
-			getMesh(request, response, httpclient);
+			getMesh(request, response);
 			long endTime = System.currentTimeMillis();
 			log.info("MeshServlet_2 took {} ms", endTime - startTime);
 		} catch (Exception ex) {
@@ -90,7 +86,7 @@ public class MeshServlet_2 extends HttpServlet {
 	 * @throws IOException
 	 * @throws AssetServiceException 
 	 */
-	private void getMesh(HttpServletRequest request, HttpServletResponse response, HttpClient httpclient) throws IOException, AssetServiceException {
+	private void getMesh(HttpServletRequest request, HttpServletResponse response) throws IOException, AssetServiceException {
 		log.debug("getMesh() called");
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
@@ -122,10 +118,8 @@ public class MeshServlet_2 extends HttpServlet {
             		
             		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                     response.setContentType("text/plain");
-                    OutputStream out = response.getOutputStream();
-                    StringEntity entity = new StringEntity("Unfortunately, this asset isn't a mesh.");
-                    entity.writeTo(out);
-                    out.close();
+                    response.getWriter().write("Unfortunately, this asset isn't a mesh.");
+                    response.getWriter().flush();
             	}
             } else {
 
@@ -133,11 +127,8 @@ public class MeshServlet_2 extends HttpServlet {
             	
             	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 response.setContentType("text/plain");
-                OutputStream out = response.getOutputStream();
-                StringEntity entity = new StringEntity("Your Mesh wasn't found.  Sorry!");
-                entity.writeTo(out);
-                out.close();
-            	
+                response.getWriter().write("Your Mesh wasn't found.  Sorry!");
+                response.getWriter().flush();
             }
             
             

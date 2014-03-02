@@ -19,7 +19,6 @@
 package org.openjgrid.servlets;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -36,9 +35,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.inventory.InventoryException;
 import org.openjgrid.datatypes.inventory.InventoryItemBase;
 import org.openjgrid.datatypes.llsd.LLSD;
@@ -82,9 +78,6 @@ public class FetchInventoryServlet_2 extends HttpServlet {
 			log.info("FetchInventoryServlet_2");
 			long startTime = System.currentTimeMillis();
 
-			OutputStream out = response.getOutputStream();
-			HttpClient httpclient = new DefaultHttpClient();
-
 			assert(Util.dumpHttpRequest(request));
 
 			String inventoryServerName = null;
@@ -103,10 +96,9 @@ public class FetchInventoryServlet_2 extends HttpServlet {
 			String inventoryServerURL = "http://" + inventoryServerName + ":" + inventoryServerPort;
 			
 			response.setContentType(request.getContentType());
-			String reply = fetchInventory(request, httpclient, inventoryServerURL);
-			StringEntity entity = new StringEntity(reply);
-			entity.writeTo(out);
-			out.close();
+			String reply = fetchInventory(request, inventoryServerURL);
+			response.getWriter().write(reply);
+			response.getWriter().flush();
 
 			long endTime = System.currentTimeMillis();
 			log.info("FetchInventoryServlet_2 took {} ms", endTime - startTime);
@@ -117,7 +109,7 @@ public class FetchInventoryServlet_2 extends HttpServlet {
 	}
 
 	@SuppressWarnings("unchecked")
-	private String fetchInventory(HttpServletRequest request, HttpClient httpclient, String inventoryServerURL ) 
+	private String fetchInventory(HttpServletRequest request, String inventoryServerURL ) 
 		throws IOException, XMLStreamException, InventoryException {
 		
 		log.debug("fetchInventory2() called");
@@ -128,7 +120,7 @@ public class FetchInventoryServlet_2 extends HttpServlet {
 		try {
 			llsdRequestMap = (HashMap<String, Object>) LLSD.llsdDeserialize(requestString);
 		} catch (Exception ex) {
-			log.error("Fetch error: {} {}" + ex.getMessage(), ex.getStackTrace());
+			log.error("Fetch error: {} {}" + ex.getMessage(), ex.getCause());
 			log.error("Request {}: ", request);
 		}
 		ArrayList<Object> itemsrequested = (ArrayList<Object>) llsdRequestMap.get("items");
@@ -153,7 +145,7 @@ public class FetchInventoryServlet_2 extends HttpServlet {
 		try {
 			response = LLSD.LLSDSerialize(llsdReply);
 		} catch (Exception ex) {
-			log.error("LLSD serialize error: {} {}" + ex.getMessage(),ex.getStackTrace());
+			log.error("LLSD serialize error: {} {}" + ex.getMessage(),ex.getCause());
 			log.error("Request {}: ", request);
 		}
 

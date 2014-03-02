@@ -30,13 +30,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.Constants;
 import org.openjgrid.datatypes.asset.AssetBase;
 import org.openjgrid.datatypes.asset.AssetType;
-// import org.openjgrid.services.agent.AgentManagementService;
-import org.openjgrid.services.asset.AssetService;
+import org.openjgrid.services.asset.AssetService_2;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.services.infrastructure.SLTypeMappingService;
 import org.openjgrid.util.IntRange;
@@ -61,7 +58,7 @@ public class TextureServlet_2 extends HttpServlet {
 	private static final String DEFAULT_FORMAT = "x-j2c";
 
 	@EJB
-	private AssetService assetService;
+	private AssetService_2 assetService;
 
 	@EJB(mappedName = "java:module/SLTypeMappingService")
 	private SLTypeMappingService slTypeMappingService;
@@ -74,14 +71,13 @@ public class TextureServlet_2 extends HttpServlet {
 		try {
 			log.debug("TextureServlet_2");
 			long startTime = System.currentTimeMillis();
-			HttpClient httpclient = new DefaultHttpClient();
 
 			assert(Util.dumpHttpRequest(request));
 
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
 			response.setContentType(request.getHeader("Accept"));
-			getTexture(request, response, httpclient);
+			getTexture(request, response);
 			long endTime = System.currentTimeMillis();
 			log.info("TextureServlet_2 took {} ms", endTime - startTime);
 		} catch (Exception ex) {
@@ -95,7 +91,7 @@ public class TextureServlet_2 extends HttpServlet {
 	 * @throws IOException
 	 * @throws AssetServiceException 
 	 */
-	private void getTexture(HttpServletRequest request, HttpServletResponse response, HttpClient httpclient) throws IOException, AssetServiceException {
+	private void getTexture(HttpServletRequest request, HttpServletResponse response) throws IOException, AssetServiceException {
 		log.debug("getTexture() called");
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
@@ -266,7 +262,7 @@ public class TextureServlet_2 extends HttpServlet {
                     httpResponse.addHeader("Content-Range", "bytes "+intRange.start+"-"+intRange.end+"/"+texture.getDataLength());
                     out.write(texture.getData(intRange.start, len+intRange.start));
                     out.flush();
-                    out.close();
+                    // out.close();
                 }
             } else {
                 log.warn("Malformed Range header: " + range);
@@ -289,7 +285,7 @@ public class TextureServlet_2 extends HttpServlet {
 
             out.write(texture.getData());
             out.flush();
-            out.close();
+            // out.close();
         }
 	}
 	

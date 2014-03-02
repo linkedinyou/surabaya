@@ -115,6 +115,12 @@
             	<version>8.0.0.Final</version>
             	<scope>provided</scope>
             </dependency>
+            <dependency>
+            	<groupId>org.wildfly</groupId>
+            	<artifactId>wildfly-jaxrs</artifactId>
+            	<version>8.0.0.Final</version>
+            	<scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

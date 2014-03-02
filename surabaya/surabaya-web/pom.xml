@@ -77,6 +77,10 @@
       	<groupId>org.wildfly</groupId>
       	<artifactId>wildfly-ejb3</artifactId>
       </dependency>
+      <dependency>
+      	<groupId>org.wildfly</groupId>
+      	<artifactId>wildfly-jaxrs</artifactId>
+      </dependency>
    </dependencies>
 
    <build>

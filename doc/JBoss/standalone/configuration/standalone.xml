@@ -115,7 +115,7 @@
                 <level name="ERROR"/>
             </logger>
             <logger category="org.openjgrid">
-                <level name="DEBUG"/>
+                <level name="INFO"/>
             </logger>
             <root-logger>
                 <level name="INFO"/>
@@ -253,18 +253,10 @@
             </cache-container>
             <cache-container name="surabaya-store" default-cache="surabaya-file-store" jndi-name="surabaya_cache" start="EAGER">
                 <local-cache name="surabaya-file-store">
-                    <transaction mode="NON_XA"/>
-                    <eviction max-entries="32"/>
-					<file-store passivation="true"
-					            purge="true"
-					            shared="false"
-								path="/opt/wildfly/standalone/tmp/SingleFileCacheStore" 
-								preload="false" 
-								singleton="false"
-					/>
-					<!--
-                    <store class="org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder" preload="true" passivation="true" singleton="true">
-					-->
+                    <locking isolation="READ_UNCOMMITTED"/>
+                    <transaction mode="FULL_XA" locking="OPTIMISTIC"/>
+                    <eviction max-entries="256"/>
+                    <file-store shared="false" preload="false" passivation="true" purge="true" singleton="false" path="/opt/wildfly/standalone/tmp/SingleFileCacheStore"/>
                 </local-cache>
             </cache-container>
         </subsystem>
@@ -345,7 +337,7 @@
                 </process-id>
             </core-environment>
             <recovery-environment socket-binding="txn-recovery-environment" status-socket-binding="txn-status-manager"/>
-            <coordinator-environment default-timeout="300"/>
+            <coordinator-environment statistics-enabled="true" enable-tsm-status="true" default-timeout="300"/>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:undertow:1.0">
             <buffer-caches>
@@ -389,7 +381,7 @@
             <inet-address value="${jboss.bind.address.management:127.0.0.1}"/>
         </interface>
         <interface name="public">
-            <nic name="en0"/>
+            <nic name="eth0"/>
         </interface>
         <interface name="unsecure">
             <inet-address value="${jboss.bind.address.unsecure:127.0.0.1}"/>

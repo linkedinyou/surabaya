@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.entity.StringEntity;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.openjgrid.services.asset.AssetService;
+import org.openjgrid.services.asset.AssetService_2;
 import org.openjgrid.services.asset.SerializedAssetCaps;
 import org.openjgrid.util.Util;
 import org.slf4j.Logger;
@@ -57,7 +57,7 @@ public class TextureCacheServlet extends HttpServlet {
 	private static final Logger log = LoggerFactory.getLogger(TextureCacheServlet.class);
 
 	@EJB
-	private AssetService assetService;
+	private AssetService_2 assetService;
 	
 	@SuppressWarnings("unchecked")
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

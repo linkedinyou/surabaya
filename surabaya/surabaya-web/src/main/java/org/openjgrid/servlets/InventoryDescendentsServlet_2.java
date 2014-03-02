@@ -36,10 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.openjgrid.datatypes.asset.AssetType;
 import org.openjgrid.datatypes.inventory.InventoryCollection;
 import org.openjgrid.datatypes.inventory.InventoryException;
@@ -94,9 +90,6 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 			log.info("InventoryDescendentsServlet_2");
 			long startTime = System.currentTimeMillis();
 
-			OutputStream out = response.getOutputStream();
-			HttpClient httpclient = new DefaultHttpClient();
-
 			assert(Util.dumpHttpRequest(request));
 
 			String uri = request.getRequestURI();
@@ -116,10 +109,9 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 			log.debug("InventoryServerURL: {}", inventoryServerURL);
 			
 			response.setContentType(request.getContentType());
-			String reply = fetchInventoryDescentdents(request, httpclient, inventoryServerURL);
-			StringEntity entity = new StringEntity(reply);
-			entity.writeTo(out);
-			out.close();
+			String reply = fetchInventoryDescentdents(request, inventoryServerURL);
+			response.getWriter().write(reply);
+			response.getWriter().flush();
 
 			long endTime = System.currentTimeMillis();
 			log.info("InventoryDescendentsServlet_2 took {} ms", endTime - startTime);
@@ -131,7 +123,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 
 
 	@SuppressWarnings("unchecked")
-	private String fetchInventoryDescentdents(HttpServletRequest request, HttpClient httpclient, String inventoryServerURL ) 
+	private String fetchInventoryDescentdents(HttpServletRequest request, String inventoryServerURL ) 
 			throws IOException, XMLStreamException, InventoryException {
 		log.debug("fetchInventoryDescentdents2() called");
 		String requestString = Util.requestContent2String(request);
@@ -163,7 +155,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 		try {
 			llsdRequestMap = (HashMap<String, Object>) LLSD.llsdDeserialize(requestString);
 		} catch (Exception ex) {
-			log.error("Fetch error: {} {}" + ex.getMessage(), ex.getStackTrace());
+			log.error("Fetch error: {} {}" + ex.getMessage(), ex.getCause());
 			log.error("Request {}: ", request);
 		}
 
@@ -179,7 +171,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 			try {
 				inventoryItemstr = LLSD.LLSDSerialize(inventoryReply);
 			} catch (Exception ex) {
-				log.error("LLSD serialize error: {} {}" + ex.getMessage(),ex.getStackTrace());
+				log.error("LLSD serialize error: {} {}" + ex.getMessage(),ex.getCause());
 				log.error("Request {}: ", request);
 			}
 
@@ -215,12 +207,11 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 	 * @param inventoryRequest
 	 * @return
 	 * @throws IOException 
-	 * @throws ClientProtocolException 
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */
 	private LLSDInventoryDescendents fetchInventory( LLSDFetchInventoryDescendents inventoryRequest, String inventoryServerURL) 
-			throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
+			throws IOException, XMLStreamException, InventoryException {
 		LLSDInventoryDescendents reply = new LLSDInventoryDescendents();
 		LLSDInventoryFolderContents contents = new LLSDInventoryFolderContents();
 		contents.agent_id = inventoryRequest.owner_id;
@@ -280,7 +271,6 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 	 * @param descendents
 	 * @return
 	 * @throws IOException 
-	 * @throws ClientProtocolException 
 	 * @throws XMLStreamException 
 	 * @throws InventoryException 
 	 */
@@ -288,7 +278,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 			UUID owner_id, boolean fetch_folders, boolean fetch_items,
 			int sort_order, String inventoryServerURL) 
 		
-		throws ClientProtocolException, IOException, XMLStreamException, InventoryException {
+		throws IOException, XMLStreamException, InventoryException {
         log.debug(
                 "Fetching folders (" + fetch_folders + "), items"+ fetch_items +" from "+ folder_id +" for agent "+ owner_id 
                 );
