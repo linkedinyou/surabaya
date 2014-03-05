@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
-import javax.xml.stream.XMLStreamException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -15,7 +15,9 @@ import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.stream.XMLStreamException;
 
+import org.apache.http.client.ClientProtocolException;
 import org.openjgrid.datatypes.inventory.InventoryCollection;
 import org.openjgrid.datatypes.inventory.InventoryException;
 import org.openjgrid.datatypes.inventory.InventoryFolderBase;
@@ -43,6 +45,12 @@ public class InventoryService_2 {
         client = ClientBuilder.newClient();
     }
 
+    @PreDestroy
+    private void close() {
+        log.info("close()");
+        client.close();     
+    }
+    
     public InventoryCollection getFolderContent( UUID userID, UUID folderID, String inventoryServerURL ) {
         log.debug("getFolderContent(userID:{}, folderID:{} )", userID, folderID);
         InventoryCollection invCollection = new InventoryCollection();

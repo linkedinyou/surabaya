@@ -3,6 +3,7 @@ package org.openjgrid.services.asset;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
@@ -37,10 +38,16 @@ public class AssetService_2 {
 	Client client = null;
 	
 	@PostConstruct
-	public void init() {
+	private void init() {
 		log.info("init()");
 		this.cache = this.container.getCache();
         client = ClientBuilder.newClient();		
+	}
+	
+	@PreDestroy
+	private void close() {
+        log.info("close()");
+        client.close();     
 	}
 	
 	public AssetBase getAsset(String assetID) {
