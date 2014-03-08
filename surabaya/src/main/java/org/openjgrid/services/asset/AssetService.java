@@ -22,6 +22,9 @@ import org.openjgrid.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.infinispan.manager.CacheContainer;
+import org.infinispan.Cache;
+
 /**
  * Session Bean implementation class AssetService
  */
@@ -31,8 +34,8 @@ public class AssetService {
 	private static final Logger log = LoggerFactory.getLogger(AssetService.class);
 
 	@Resource(lookup = "java:jboss/surabaya_cache")
-	private org.infinispan.manager.CacheContainer container;
-	private org.infinispan.Cache<String, String> cache;
+	private CacheContainer container;
+	private Cache<String, String> cache;
 
 	@EJB(mappedName = "java:module/ConfigurationService")
 	private ConfigurationService configuration;
