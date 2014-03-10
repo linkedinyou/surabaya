@@ -64,7 +64,7 @@ public class AssetService_2 {
 			} else {
 				log.debug("Cache Miss: {}", assetID);
 
-				WebTarget webTarget = client.target(configuration.getProperty("Grid", "asset_service") + "/assets" + assetID);
+				WebTarget webTarget = client.target(configuration.getProperty("Grid", "asset_service") + "/assets/" + assetID);
 				Builder builder = webTarget.request();
 				
 				long startTime = System.currentTimeMillis();
@@ -74,15 +74,16 @@ public class AssetService_2 {
 
 	    		if (response.getStatus() != Response.Status.OK.getStatusCode()) {
 	    			log.warn("getAsset(AssetID: "+assetID+") http Status: "+response.getStatus());
+	    			return(null);
 	    		}
-				
-	        	content = response.readEntity(String.class);
+                
+                content = response.readEntity(String.class);
 
 				log.debug("Content: {}", content);
 				if (!Util.isNullOrEmpty(content)) {
 					cache.put(assetID, content);
 				} else {
-					log.error("Asset with ID: {} requestet, rsult was null", assetID);
+					log.error("Asset with ID: {} requestet, result was null", assetID);
 				}
 			}
 
