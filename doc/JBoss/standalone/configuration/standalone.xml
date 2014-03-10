@@ -182,12 +182,15 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:ejb3:2.0">
             <session-bean>
+                <stateless>
+                    <bean-instance-pool-ref pool-name="slsb-strict-max-pool"/>
+                </stateless>
                 <stateful default-access-timeout="5000" cache-ref="simple" passivation-disabled-cache-ref="simple"/>
                 <singleton default-access-timeout="5000"/>
             </session-bean>
             <pools>
                 <bean-instance-pools>
-                    <strict-max-pool name="slsb-strict-max-pool" max-pool-size="20" instance-acquisition-timeout="5" instance-acquisition-timeout-unit="MINUTES"/>
+                    <strict-max-pool name="slsb-strict-max-pool" max-pool-size="50" instance-acquisition-timeout="5" instance-acquisition-timeout-unit="MINUTES"/>
                     <strict-max-pool name="mdb-strict-max-pool" max-pool-size="20" instance-acquisition-timeout="5" instance-acquisition-timeout-unit="MINUTES"/>
                 </bean-instance-pools>
             </pools>
@@ -207,7 +210,7 @@
             <remote connector-ref="http-remoting-connector" thread-pool-name="default"/>
             <thread-pools>
                 <thread-pool name="default">
-                    <max-threads count="10"/>
+                    <max-threads count="20"/>
                     <keepalive-time time="100" unit="milliseconds"/>
                 </thread-pool>
             </thread-pools>
@@ -251,12 +254,10 @@
                     <eviction strategy="NONE"/>
                 </local-cache>
             </cache-container>
-            <cache-container name="surabaya-store" default-cache="surabaya-file-store" jndi-name="surabaya_cache" start="EAGER">
+            <cache-container name="surabaya-store" default-cache="surabaya-file-store" eviction-executor="surabaya-eviction" jndi-name="surabaya_cache" start="EAGER">
                 <local-cache name="surabaya-file-store">
-                    <locking isolation="READ_UNCOMMITTED"/>
-                    <transaction mode="FULL_XA" locking="OPTIMISTIC"/>
-                    <eviction max-entries="256"/>
-                    <file-store shared="false" preload="false" passivation="true" purge="true" singleton="false" path="/opt/wildfly/standalone/tmp/SingleFileCacheStore"/>
+                    <eviction strategy="LIRS" max-entries="4096"/>
+                    <file-store preload="false" passivation="true" purge="false" singleton="false" path="/opt/wildfly/standalone/tmp/SingleFileCacheStore"/>
                 </local-cache>
             </cache-container>
         </subsystem>
@@ -329,7 +330,14 @@
                 </security-domain>
             </security-domains>
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:threads:1.1"/>
+        <subsystem xmlns="urn:jboss:domain:threads:1.1">
+            <thread-factory name="infinispan-eviction" priority="1"/>
+            <scheduled-thread-pool name="surabaya-eviction">
+                <max-threads count="2"/>
+                <keepalive-time time="60" unit="seconds"/>
+                <thread-factory name="infinispan-eviction"/>
+            </scheduled-thread-pool>
+        </subsystem>
         <subsystem xmlns="urn:jboss:domain:transactions:2.0">
             <core-environment>
                 <process-id>
