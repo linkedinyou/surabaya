@@ -12,11 +12,6 @@
 	</repositories>	
 	<dependencies>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.2.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.codehaus.jackson</groupId>
 			<artifactId>jackson-mapper-lgpl</artifactId>
 			<version>1.9.11</version>
@@ -81,6 +76,10 @@
         	<groupId>org.infinispan</groupId>
         	<artifactId>infinispan-core</artifactId>
         	<version>6.0.1.Final</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.httpcomponents</groupId>
+        	<artifactId>httpclient</artifactId>
         </dependency>
 	</dependencies>
 	<properties>

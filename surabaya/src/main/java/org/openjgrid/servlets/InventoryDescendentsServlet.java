@@ -157,7 +157,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 		try {
 			llsdRequestMap = (HashMap<String, Object>) LLSD.llsdDeserialize(requestString);
 		} catch (Exception ex) {
-			log.error("Fetch error: {} {}" + ex.getMessage(), ex.getStackTrace());
+			log.error("Fetch error: {} {}" + ex.getMessage(), ex);
 			log.error("Request {}: ", request);
 		}
 
@@ -173,7 +173,7 @@ public class InventoryDescendentsServlet extends HttpServlet {
 			try {
 				inventoryItemstr = LLSD.LLSDSerialize(inventoryReply);
 			} catch (Exception ex) {
-				log.error("LLSD serialize error: {} {}" + ex.getMessage(),ex.getStackTrace());
+				log.error("LLSD serialize error: {} {}" + ex.getMessage(),ex);
 				log.error("Request {}: ", request);
 			}
 

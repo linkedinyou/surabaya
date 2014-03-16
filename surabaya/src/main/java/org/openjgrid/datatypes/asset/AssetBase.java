@@ -29,7 +29,6 @@ import javax.xml.stream.XMLStreamReader;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.http.util.ByteArrayBuffer;
 import org.openjgrid.datatypes.Constants;
 import org.openjgrid.services.asset.AssetServiceException;
 import org.openjgrid.util.Util;
