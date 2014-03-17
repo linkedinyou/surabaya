@@ -56,30 +56,34 @@
         <!-- Import the Common Annotations API (JSR-250) -->
         <!-- Import the Servlet API -->
         <dependency>
-        	<groupId>org.slf4j</groupId>
-        	<artifactId>slf4j-simple</artifactId>
-        	<version>1.7.6</version>
-        </dependency>
-        <dependency>
         	<groupId>org.jboss.spec.javax.ejb</groupId>
         	<artifactId>jboss-ejb-api_3.2_spec</artifactId>
+        	<scope>provided</scope>
         </dependency>
         <dependency>
         	<groupId>org.jboss.spec.javax.servlet</groupId>
         	<artifactId>jboss-servlet-api_3.1_spec</artifactId>
+        	<scope>provided</scope>
         </dependency>
         <dependency>
         	<groupId>org.jboss.resteasy</groupId>
         	<artifactId>jaxrs-api</artifactId>
+        	<scope>provided</scope>
         </dependency>
         <dependency>
         	<groupId>org.infinispan</groupId>
         	<artifactId>infinispan-core</artifactId>
         	<version>6.0.1.Final</version>
+        	<scope>provided</scope>
         </dependency>
         <dependency>
         	<groupId>org.apache.httpcomponents</groupId>
         	<artifactId>httpclient</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>org.slf4j</groupId>
+        	<artifactId>slf4j-api</artifactId>
+        	<scope>provided</scope>
         </dependency>
 	</dependencies>
 	<properties>
@@ -107,15 +111,6 @@
 			<dependency>
 				<groupId>org.wildfly.bom</groupId>
 				<artifactId>jboss-javaee-7.0-with-all</artifactId>
-				<version>8.0.0.Final</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.wildfly.bom</groupId>
-				<artifactId>
-					jboss-javaee-7.0-with-infinispan
-				</artifactId>
 				<version>8.0.0.Final</version>
 				<type>pom</type>
 				<scope>import</scope>

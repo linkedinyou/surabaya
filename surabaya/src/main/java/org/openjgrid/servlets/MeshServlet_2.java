@@ -70,7 +70,7 @@ public class MeshServlet_2 extends HttpServlet {
 
 		try {
 			log.info("MeshServlet_2");
-			long startTime = System.currentTimeMillis();
+			final long startTime = System.currentTimeMillis();
 
 			assert (Util.dumpHttpRequest(request));
 
@@ -85,6 +85,8 @@ public class MeshServlet_2 extends HttpServlet {
 					public synchronized void onWritePossible() throws IOException {
 						outputStream.write(buffer);
 						context.complete();
+			            long endTime = System.currentTimeMillis();
+			            log.info("MeshServlet_2 took {} ms", endTime - startTime);
 					}
 
 					@Override
@@ -94,8 +96,6 @@ public class MeshServlet_2 extends HttpServlet {
 
 				});
 			}
-			long endTime = System.currentTimeMillis();
-			log.info("MeshServlet_2 took {} ms", endTime - startTime);
 		} catch (Exception ex) {
 			log.error("Exception {} occurred", ex.getClass().toString());
 		}
