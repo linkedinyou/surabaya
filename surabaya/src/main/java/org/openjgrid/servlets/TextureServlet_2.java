@@ -24,7 +24,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.ejb.EJB;
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -51,7 +54,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "TextureServlet_2", urlPatterns = { "/texture2/*" })
+@WebServlet(name = "TextureServlet_2", urlPatterns = { "/texture2/*" }, asyncSupported = true)
 public class TextureServlet_2 extends HttpServlet {
 	private static final long serialVersionUID = -7144097163138378596L;
 	private static final Logger log = LoggerFactory.getLogger(TextureServlet_2.class);
@@ -67,19 +70,37 @@ public class TextureServlet_2 extends HttpServlet {
 	// private AgentManagementService agentManagementService;
 	
 	private void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        final AsyncContext context = request.startAsync();
+        final ServletOutputStream outputStream = response.getOutputStream();
 
 		try {
 			log.debug("TextureServlet_2");
-			long startTime = System.currentTimeMillis();
+			final long startTime = System.currentTimeMillis();
 
 			assert(Util.dumpHttpRequest(request));
 
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
 			response.setContentType(request.getHeader("Accept"));
-			getTexture(request, response);
-			long endTime = System.currentTimeMillis();
-			log.info("TextureServlet_2 took {} ms", endTime - startTime);
+            final byte[] buffer = getTexture(request, response);
+            if (buffer != null) {
+                outputStream.setWriteListener(new WriteListener() {
+
+                    @Override
+                    public synchronized void onWritePossible() throws IOException {
+                        outputStream.write(buffer);
+                        context.complete();
+                        long endTime = System.currentTimeMillis();
+                        log.info("TextureServlet_2 took {} ms", endTime - startTime);
+                    }
+
+                    @Override
+                    public void onError(Throwable ex) {
+                        log.error("Exception during Write to Output: ", ex);
+                    }
+
+                });
+            }
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
 		}
@@ -91,7 +112,7 @@ public class TextureServlet_2 extends HttpServlet {
 	 * @throws IOException
 	 * @throws AssetServiceException 
 	 */
-	private void getTexture(HttpServletRequest request, HttpServletResponse response) throws IOException, AssetServiceException {
+	private byte[] getTexture(HttpServletRequest request, HttpServletResponse response) throws IOException, AssetServiceException {
 		log.debug("getTexture() called");
 		Map<String, String[]> parameterMap = request.getParameterMap();
 
@@ -122,23 +143,20 @@ public class TextureServlet_2 extends HttpServlet {
 				// formats =
 				// WebUtil.GetPreferredImageTypes(httpRequest.Headers.Get("Accept"));
 				// if (formats.Length == 0)
-				formatArray = new String[] { DEFAULT_FORMAT }; // default
+				return(fetchTexture( request, response, textureID, DEFAULT_FORMAT ));
 			} else {
-				formatArray = new String[] { formatString.toLowerCase() };
+                return(fetchTexture( request, response, textureID, formatString.toLowerCase() ));
 			}
 
-			for (int i = 0; i < formatArray.length; i++) {
-				if (fetchTexture(request, response, textureID, formatArray[i])) {
-					break;
-				}
-			}
 		} else {
 			log.error("Failed to parse texture ID");
 		}
+		
+		return(null);
 
 	}
 
-	private boolean fetchTexture(HttpServletRequest httpRequest, HttpServletResponse httpResponse, UUID textureID, String format) throws AssetServiceException, IOException {
+	private byte[] fetchTexture(HttpServletRequest httpRequest, HttpServletResponse httpResponse, UUID textureID, String format) throws AssetServiceException, IOException {
 		log.debug("fetchTexture() called ID: {}", textureID.toString());
 		AssetBase texture = null;
 		String fullID = textureID.toString();
@@ -154,11 +172,10 @@ public class TextureServlet_2 extends HttpServlet {
 			if (texture != null) {
 				if (texture.getType() != AssetType.Texture.getAssetType()) {
 					httpResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
-					return(true);
+					return(null);
 				}
 				if (format.equals(DEFAULT_FORMAT)) {
-					writeTextureData(httpRequest, httpResponse, texture, format);
-					return(true);
+					return(getTextureData(httpRequest, httpResponse, texture, format));
 				} else {
 					// TODO implement AssetBase newTexture = new
 					// AssetBase(texture.ID + "-" + format, texture.Name,
@@ -173,12 +190,12 @@ public class TextureServlet_2 extends HttpServlet {
 					// WriteTextureData(httpRequest, httpResponse, newTexture,
 					// format);
 					log.error("Format {} handling not yet implemented", format);
-					return(true);
+					return(null);
 				}
 			}
 		} 
 		
-		return (false);
+		return (null);
 	}
 
 	/**
@@ -189,7 +206,7 @@ public class TextureServlet_2 extends HttpServlet {
 	 * @throws AssetServiceException 
 	 * @throws IOException 
 	 */
-	private void writeTextureData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, AssetBase texture, String format) throws AssetServiceException, IOException {
+	private byte[] getTextureData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, AssetBase texture, String format) throws AssetServiceException, IOException {
 		log.debug("writeTextureData() called");
         String range = httpRequest.getHeader("Range");
         
@@ -252,17 +269,9 @@ public class TextureServlet_2 extends HttpServlet {
                     } 
                     httpResponse.setContentType(contentType);
                     httpResponse.addHeader("Content-Range", "bytes "+intRange.start+"-"+intRange.end+"/"+texture.getDataLength());
-
-                    OutputStream out = httpResponse.getOutputStream();
-
-                    log.debug("Data Size effective : {}", texture.getData().length);
-                    log.debug("Data Offset start   : {}", intRange.start);
-                    log.debug("Data Size calculated: {}", len);
                     
                     httpResponse.addHeader("Content-Range", "bytes "+intRange.start+"-"+intRange.end+"/"+texture.getDataLength());
-                    out.write(texture.getData(intRange.start, len+intRange.start));
-                    out.flush();
-                    // out.close();
+                    return(texture.getData(intRange.start, len+intRange.start));
                 }
             } else {
                 log.warn("Malformed Range header: " + range);
@@ -281,12 +290,11 @@ public class TextureServlet_2 extends HttpServlet {
             } else {
                 httpResponse.setContentType("image/" + format);
             }
-            OutputStream out = httpResponse.getOutputStream();
 
-            out.write(texture.getData());
-            out.flush();
-            // out.close();
+            return(texture.getData());
         }
+        
+        return(null);
 	}
 	
 	
