@@ -28,7 +28,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.ejb.EJB;
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -70,7 +73,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Author: Akira Sonoda
  */
-@WebServlet(name = "InventoryDescendentsServlet_2", urlPatterns = { "/inventorydescendents2/*" })
+@WebServlet(name = "InventoryDescendentsServlet_2", urlPatterns = { "/inventorydescendents2/*" }, asyncSupported = true)
 public class InventoryDescendentsServlet_2 extends HttpServlet {
 	private static final long serialVersionUID = -8627204223385024589L;
 	private static final Logger log = LoggerFactory.getLogger(InventoryDescendentsServlet_2.class);
@@ -85,9 +88,12 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 	private void processRequest(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 
+	    final AsyncContext context = request.startAsync();
+        final ServletOutputStream outputStream = response.getOutputStream();
+
 		try {
 			log.info("InventoryDescendentsServlet_2");
-			long startTime = System.currentTimeMillis();
+			final long startTime = System.currentTimeMillis();
 
 			assert(Util.dumpHttpRequest(request));
 
@@ -108,12 +114,25 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 			log.debug("InventoryServerURL: {}", inventoryServerURL);
 			
 			response.setContentType(request.getContentType());
-			String reply = fetchInventoryDescentdents(request, inventoryServerURL);
-			response.getWriter().write(reply);
-			response.getWriter().flush();
+			final String reply = fetchInventoryDescentdents(request, inventoryServerURL);
+            if (reply != null && !reply.isEmpty() ) {
+                outputStream.setWriteListener(new WriteListener() {
 
-			long endTime = System.currentTimeMillis();
-			log.info("InventoryDescendentsServlet_2 took {} ms", endTime - startTime);
+                    @Override
+                    public synchronized void onWritePossible() throws IOException {
+                        outputStream.write(reply.getBytes());
+                        context.complete();
+                        long endTime = System.currentTimeMillis();
+                        log.info("InventoryDescendentsServlet_2 took {} ms", endTime - startTime);
+                    }
+
+                    @Override
+                    public void onError(Throwable ex) {
+                        log.error("Exception during Write to Output: ", ex);
+                    }
+
+                });
+            }
 
 		} catch (Exception ex) {
 			log.debug("Exception {} occurred", ex.getClass().toString());
