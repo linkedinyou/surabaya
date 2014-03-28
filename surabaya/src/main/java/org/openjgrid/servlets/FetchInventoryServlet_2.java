@@ -119,6 +119,8 @@ public class FetchInventoryServlet_2 extends HttpServlet {
                     }
 
                 });
+            } else {
+                context.complete();
             }
 			
 		} catch (Exception ex) {

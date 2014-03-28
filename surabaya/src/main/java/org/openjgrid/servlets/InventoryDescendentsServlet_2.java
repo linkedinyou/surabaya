@@ -132,6 +132,8 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
                     }
 
                 });
+            } else {
+                context.complete();
             }
 
 		} catch (Exception ex) {

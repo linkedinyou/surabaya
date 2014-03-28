@@ -95,6 +95,8 @@ public class MeshServlet_2 extends HttpServlet {
 					}
 
 				});
+			} else {
+			    context.complete();
 			}
 		} catch (Exception ex) {
 			log.error("Exception {} occurred", ex.getClass().toString());
