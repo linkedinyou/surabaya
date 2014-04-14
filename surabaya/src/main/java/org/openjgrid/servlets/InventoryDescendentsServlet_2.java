@@ -129,6 +129,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
                     @Override
                     public void onError(Throwable ex) {
                         log.error("Exception during Write to Output: ", ex);
+                        context.complete();
                     }
 
                 });
