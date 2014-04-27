@@ -21,12 +21,16 @@ package org.openjgrid.util;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringWriter;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -190,6 +194,30 @@ public final class Util {
 
 	}
 
+	public static String requestGzipContent2String(HttpServletRequest request) throws IOException {
+		Reader reader = null;
+		StringWriter writer = null;
+		String charset = "UTF-8"; // You should determine it based on response header.
+
+		try {
+			InputStream gzippedRequest = request.getInputStream();
+		    InputStream ungzippedResponse = new GZIPInputStream(gzippedRequest);
+		    reader = new InputStreamReader(ungzippedResponse, charset);
+		    writer = new StringWriter();
+
+		    char[] buffer = new char[10240];
+		    for (int length = 0; (length = reader.read(buffer)) > 0;) {
+		        writer.write(buffer, 0, length);
+		    }
+		} finally {
+			writer.close();
+			reader.close();
+		}
+		
+		return( writer.toString() );
+	}
+		
+	
 	public static boolean parseUUID(String uuidString) {
 		Pattern p = Pattern.compile("[0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}");
 		Matcher m = p.matcher(uuidString);

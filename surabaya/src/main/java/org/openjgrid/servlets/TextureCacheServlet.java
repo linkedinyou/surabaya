@@ -68,9 +68,16 @@ public class TextureCacheServlet extends HttpServlet {
         Map<String, String> result = new HashMap<String, String>();
 		ObjectMapper objectMapper = new ObjectMapper();
 
+		Util.dumpHttpRequest(request);
+		
         try {
-        	if (request.getContentType().equalsIgnoreCase("application/json")) {
-        		String jsonString = Util.requestContent2String(request);
+        	if (request.getContentType().equalsIgnoreCase("application/json")) { 
+        		String jsonString = null;
+        		if(request.getHeader("X-Content-Encoding").equalsIgnoreCase("gzip")) {
+        			jsonString = Util.requestGzipContent2String(request);
+        		} else {
+        			jsonString = Util.requestContent2String(request);
+        		}
         		SerializedAssetCaps serializedAssetCaps = new SerializedAssetCaps();
         		serializedAssetCaps.capsMap = objectMapper.readValue(jsonString, serializedAssetCaps.capsMap.getClass());
         		String assetID =  serializedAssetCaps.capsMap.get("assetID");
