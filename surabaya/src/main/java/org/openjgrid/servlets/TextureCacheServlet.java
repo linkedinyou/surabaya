@@ -67,13 +67,12 @@ public class TextureCacheServlet extends HttpServlet {
         OutputStream out = response.getOutputStream();
         Map<String, String> result = new HashMap<String, String>();
 		ObjectMapper objectMapper = new ObjectMapper();
-
-		Util.dumpHttpRequest(request);
 		
         try {
         	if (request.getContentType().equalsIgnoreCase("application/json")) { 
         		String jsonString = null;
-        		if(request.getHeader("X-Content-Encoding").equalsIgnoreCase("gzip")) {
+        		String encoding = request.getHeader("X-Content-Encoding");
+        		if(encoding != null && encoding.equalsIgnoreCase("gzip")) {
         			jsonString = Util.requestGzipContent2String(request);
         		} else {
         			jsonString = Util.requestContent2String(request);
