@@ -106,6 +106,7 @@ public class TextureServlet_2 extends HttpServlet {
             }
 		} catch (Exception ex) {
 			log.error("Exception {} occurred", ex.getClass().toString());
+			context.complete();
 		}
 	}
 

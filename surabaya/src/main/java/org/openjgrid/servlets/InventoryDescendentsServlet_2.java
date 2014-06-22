@@ -138,7 +138,8 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
             }
 
 		} catch (Exception ex) {
-			log.debug("Exception {} occurred", ex.getClass().toString());
+			log.error("Exception {} occurred", ex.getClass().toString());
+			context.complete();
 		}
 	}
 
