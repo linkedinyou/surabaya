@@ -84,7 +84,6 @@ public class MeshServlet_2 extends HttpServlet {
 					@Override
 					public synchronized void onWritePossible() throws IOException {
 						outputStream.write(buffer);
-						context.complete();
 			            long endTime = System.currentTimeMillis();
 			            log.info("MeshServlet_2 took {} ms", endTime - startTime);
 					}
@@ -92,15 +91,14 @@ public class MeshServlet_2 extends HttpServlet {
 					@Override
 					public void onError(Throwable ex) {
 						log.error("Exception during Write to Output: ", ex);
-		                context.complete();
 					}
 
 				});
-			} else {
-			    context.complete();
-			}
+			} 
 		} catch (Exception ex) {
 			log.error("Exception {} occurred", ex.getClass().toString());
+		} finally {
+			context.complete();
 		}
 	}
 

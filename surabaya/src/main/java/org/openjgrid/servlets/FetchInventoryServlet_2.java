@@ -108,7 +108,6 @@ public class FetchInventoryServlet_2 extends HttpServlet {
                     @Override
                     public synchronized void onWritePossible() throws IOException {
                         outputStream.write(reply.getBytes());
-                        context.complete();
                         long endTime = System.currentTimeMillis();
                         log.info("FetchInventoryServlet_2 took {} ms", endTime - startTime);
                     }
@@ -116,16 +115,15 @@ public class FetchInventoryServlet_2 extends HttpServlet {
                     @Override
                     public void onError(Throwable ex) {
                         log.error("Exception during Write to Output: ", ex);
-                        context.complete();
                     }
 
                 });
-            } else {
-                context.complete();
-            }
+            } 
 			
 		} catch (Exception ex) {
-			log.debug("Exception {} occurred", ex.getClass().toString());
+			log.error("Exception {} occurred", ex.getClass().toString());
+		} finally {
+			context.complete();			
 		}
 	}
 
