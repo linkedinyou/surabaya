@@ -19,6 +19,7 @@
 package org.openjgrid.servlets;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.UUID;
 
@@ -88,6 +89,7 @@ public class TextureServlet_2 extends HttpServlet {
                     @Override
                     public synchronized void onWritePossible() throws IOException {
                         outputStream.write(buffer);
+                        context.complete();
                         long endTime = System.currentTimeMillis();
                         log.info("TextureServlet_2 took {} ms", endTime - startTime);
                     }
@@ -95,14 +97,15 @@ public class TextureServlet_2 extends HttpServlet {
                     @Override
                     public void onError(Throwable ex) {
                         log.error("Exception during Write to Output: ", ex);
+                        context.complete();
                     }
 
                 });
-            } 
+            } else {
+                context.complete();
+            }
 		} catch (Exception ex) {
 			log.error("Exception {} occurred", ex.getClass().toString());
-		} finally {
-			context.complete();
 		}
 	}
 
