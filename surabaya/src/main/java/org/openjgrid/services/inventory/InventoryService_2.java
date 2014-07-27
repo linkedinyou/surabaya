@@ -65,6 +65,9 @@ public class InventoryService_2 {
             StringBuilder sb = new StringBuilder("PRINCIPAL=").append(userID.toString());
             sb.append("&FOLDER=").append(folderID.toString());
             sb.append("&METHOD=GETFOLDERCONTENT");
+
+            log.info("geFolderContent({}) inventoryServerURL: {}", folderID.toString(), inventoryServerURL);            
+            
             long startTime = System.currentTimeMillis();
             response = builder.post(Entity.entity(sb.toString(), MediaType.APPLICATION_FORM_URLENCODED));
             long endTime = System.currentTimeMillis();
@@ -111,6 +114,9 @@ public class InventoryService_2 {
             sb.append("&ID=").append(containingFolder.getId().toString());
             sb.append("&METHOD=GETFOLDER");
 
+            log.info("geFolder({}) inventoryServerURL: {}", containingFolder.getId().toString(), inventoryServerURL);
+            
+            
             long startTime = System.currentTimeMillis();
             response = builder.post(Entity.entity(sb.toString(), MediaType.APPLICATION_FORM_URLENCODED));
             long endTime = System.currentTimeMillis();
