@@ -71,7 +71,7 @@ public class InventoryService_2 {
             long startTime = System.currentTimeMillis();
             response = builder.post(Entity.entity(sb.toString(), MediaType.APPLICATION_FORM_URLENCODED));
             long endTime = System.currentTimeMillis();
-            log.info("Call to {} took {} ms", inventoryServerURL, endTime - startTime);
+            log.info("getFolderContent() - Call to {} took {} ms", inventoryServerURL, endTime - startTime);
 
             if( response.getStatus() != Response.Status.OK.getStatusCode() ) {
                 log.warn("getFolderContent(userID: " + userID + ", folderID: " + folderID + ") http Status: " + response.getStatus());
@@ -120,7 +120,7 @@ public class InventoryService_2 {
             long startTime = System.currentTimeMillis();
             response = builder.post(Entity.entity(sb.toString(), MediaType.APPLICATION_FORM_URLENCODED));
             long endTime = System.currentTimeMillis();
-            log.info("Call to {} took {} ms", inventoryServerURL, endTime - startTime);
+            log.info("getFolder() - Call to {} took {} ms", inventoryServerURL, endTime - startTime);
 
             if( response.getStatus() != Response.Status.OK.getStatusCode() ) {
                 log.warn("getFolder(http Status: " + response.getStatus());
@@ -166,7 +166,7 @@ public class InventoryService_2 {
             long startTime = System.currentTimeMillis();
             response = builder.post(Entity.entity(sb.toString(), MediaType.APPLICATION_FORM_URLENCODED));
             long endTime = System.currentTimeMillis();
-            log.info("Call to {} took {} ms", inventoryServerURL, endTime - startTime);
+            log.info("getItem() - Call to {} took {} ms", inventoryServerURL, endTime - startTime);
 
             if( response.getStatus() != Response.Status.OK.getStatusCode() ) {
                 log.warn("getItem(http Status: " + response.getStatus());
