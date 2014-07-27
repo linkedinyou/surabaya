@@ -151,7 +151,7 @@ public class InventoryService_2 {
             WebTarget webTarget = client.target(inventoryServerURL + "/xinventory");
             Builder builder = webTarget.request();
 
-            log.debug("getItem({}) inventoryServerURL: {}", inventoryItemBase.getId().toString(), inventoryServerURL);
+            log.info("getItem({}) inventoryServerURL: {}", inventoryItemBase.getId().toString(), inventoryServerURL);
 
             StringBuilder sb = new StringBuilder();
             sb.append("&ID=").append(inventoryItemBase.getId().toString());
