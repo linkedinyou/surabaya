@@ -165,6 +165,9 @@ public final class Util {
 		log.warn("Method     : {}", request.getMethod());
 		log.warn("Request URI: {}", request.getRequestURI());
 		log.warn("Protocol   : {}", request.getProtocol());
+		log.warn("RemoteHost : {}", request.getRemoteHost());
+		log.warn("RemoteUser : {}", request.getRemoteUser());
+		log.warn("REmoteAddr : {}", request.getRemoteAddr());
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while (headerNames.hasMoreElements()) {
 			String headerName = headerNames.nextElement();

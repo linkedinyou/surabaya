@@ -103,6 +103,9 @@ public class MeshServlet_2 extends HttpServlet {
             }
         } catch (Exception ex) {
             log.error("Exception {} occurred", ex.getClass().toString());
+            log.warn("Dumping HTTPRequest Info");
+            Util.dumpUnexpectedHttpRequest(request);
+            Util.dumpUnexpectedParameterMap(request.getParameterMap());
             context.complete();
         }
     }
