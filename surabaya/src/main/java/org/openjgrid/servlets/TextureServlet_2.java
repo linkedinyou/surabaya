@@ -72,8 +72,10 @@ public class TextureServlet_2 extends HttpServlet {
         try {
             log.debug("TextureServlet_2");
             final long startTime = System.currentTimeMillis();
-
-            assert (Util.dumpHttpRequest(request));
+            
+            if(log.isDebugEnabled()) {
+            	Util.dumpHttpRequest(request);
+            }
 
             String uri = request.getRequestURI();
             log.debug("RequestURL: {}", uri);

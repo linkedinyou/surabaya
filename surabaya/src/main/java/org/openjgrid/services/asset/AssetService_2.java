@@ -79,7 +79,7 @@ public class AssetService_2 {
                 
                 content = response.readEntity(String.class);
 
-				log.debug("Content: {}", content);
+				log.debug("Content: {}", content.substring(0, 80) + " ....");
 				if (!Util.isNullOrEmpty(content)) {
 					cache.put(assetID, content);
 				} else {

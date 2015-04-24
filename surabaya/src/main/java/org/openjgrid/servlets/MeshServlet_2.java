@@ -67,8 +67,10 @@ public class MeshServlet_2 extends HttpServlet {
 			log.info("MeshServlet_2");
 			long startTime = System.currentTimeMillis();
 
-			assert(Util.dumpHttpRequest(request));
-
+			if(log.isDebugEnabled()) {
+				Util.dumpHttpRequest(request);
+			}
+			
 			String uri = request.getRequestURI();
 			log.debug("RequestURL: {}", uri);
 			response.setContentType(request.getHeader("Accept"));

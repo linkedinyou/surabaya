@@ -85,8 +85,10 @@ public class FetchInventoryServlet_2 extends HttpServlet {
             log.info("FetchInventoryServlet_2");
             final long startTime = System.currentTimeMillis();
 
-            assert (Util.dumpHttpRequest(request));
-
+            if(log.isDebugEnabled()) {
+            	Util.dumpHttpRequest(request);
+            }
+            
             String inventoryServerName = null;
             String inventoryServerPort = null;
 

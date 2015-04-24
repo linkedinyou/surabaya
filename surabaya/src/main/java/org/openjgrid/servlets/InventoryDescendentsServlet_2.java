@@ -90,8 +90,10 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
             log.info("InventoryDescendentsServlet_2");
             final long startTime = System.currentTimeMillis();
 
-            assert (Util.dumpHttpRequest(request));
-
+            if(log.isDebugEnabled()) {
+            	Util.dumpHttpRequest(request);
+            }
+            
             String uri = request.getRequestURI();
             String serverName = null;
             String serverPort = null;
