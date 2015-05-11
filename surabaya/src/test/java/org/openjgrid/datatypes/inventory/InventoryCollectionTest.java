@@ -2,10 +2,8 @@ package org.openjgrid.datatypes.inventory;
 
 import static org.junit.Assert.*;
 
-import javax.xml.stream.XMLStreamException;
-
 import org.junit.Test;
-import org.openjgrid.datatypes.inventory.InventoryCollection_2;
+import org.openjgrid.datatypes.inventory.InventoryCollection;
 
 public class InventoryCollectionTest {
 
@@ -13,10 +11,12 @@ public class InventoryCollectionTest {
 	
 	@Test
 	public void testFromXml() {
-		InventoryCollection_2 inventoryCollection = new InventoryCollection_2();
+		InventoryCollection inventoryCollection = new InventoryCollection();
 		try {
 			inventoryCollection.fromXml(xmlString);
-		} catch (XMLStreamException | InventoryException e) {
+			assertTrue(inventoryCollection.folderList.size() == 0);
+			assertTrue(inventoryCollection.itemList.size() == 18);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
