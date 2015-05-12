@@ -250,11 +250,11 @@ public class InventoryCollection_2 extends DefaultHandler {
 						// Handle the folders Stuff here
 						if (parentIDTag.equals("open")) {
 							inventoryFolderBase.setParentFolderId(UUID
-									.fromString(new String(ch, start, length)));
+									.fromString(new String(ch, start, length).trim()));
 						}
 						if (typeTag.equals("open")) {
 							inventoryFolderBase.setType(Integer
-									.parseInt(new String(ch, start, length)));
+									.parseInt(new String(ch, start, length).trim()));
 						}
 						if (nameTag.equals("open")) {
 							inventoryFolderBase.setName(new String(ch, start,
@@ -262,105 +262,105 @@ public class InventoryCollection_2 extends DefaultHandler {
 						}
 						if (folderVersionTag.equals("open")) {
 							inventoryFolderBase.setVersion(Integer
-									.parseInt(new String(ch, start, length)));
+									.parseInt(new String(ch, start, length).trim()));
 						}
 						if (ownerTag.equals("open")) {
 							inventoryFolderBase.setOwnerId(UUID
-									.fromString(new String(ch, start, length)));
+									.fromString(new String(ch, start, length).trim()));
 						}
 						if (iDTag.equals("open")) {
 							inventoryFolderBase.setId(UUID
-									.fromString(new String(ch, start, length)));
+									.fromString(new String(ch, start, length).trim()));
 						}
 
 						// Handle the items Stuff here
 						if (assetIDTag.equals("open")) {
 							inventoryItemBase.setAssetId(UUID
-									.fromString(new String(ch, start, length)));
+									.fromString(new String(ch, start, length).trim()));
 						}
 						if (assetTypeTag.equals("open")) {
 							inventoryItemBase.setAssetType(Integer
-									.parseInt(new String(ch, start, length)));
+									.parseInt(new String(ch, start, length).trim()));
 						}
 						if (basePermissionsTag.equals("open")) {
 							inventoryItemBase.setBasePermissions(Long
-									.parseLong(new String(ch, start, length)));
+									.parseLong(new String(ch, start, length).trim()));
 						}
 						if (creationDateTag.equals("open")) {
 							inventoryItemBase.setCreationDate(Long
-									.parseLong(new String(ch, start, length)));
+									.parseLong(new String(ch, start, length).trim()));
 						}
 						if (creatorDataTag.equals("open")) {
-							inventoryItemBase.setCreatorData(new String(ch,
-									start, length));
+							inventoryItemBase.setCreatorData(new String(ch,	start, length).trim());
 						}						
 						if (creatorIdTag.equals("open")) {
 							inventoryItemBase.setCreatorId(new String(ch,
-									start, length));
+									start, length).trim());
 						}
 						if (currentPermissionsTag.equals("open")) {
 							inventoryItemBase.setCurrentPermissions(Long
-									.parseLong(new String(ch, start, length)));
+									.parseLong(new String(ch, start, length).trim()));
 						}
 						if (descriptionTag.equals("open")) {
 							inventoryItemBase.setDescription(new String(ch,
-									start, length));
+									start, length).trim());
 						}
 						if (everyOnePermissionsTag.equals("open")) {
 							inventoryItemBase.setEveryOnePermissions(Long
-									.parseLong(new String(ch, start, length)));
+									.parseLong(new String(ch, start, length).trim()));
 						}
 						if (flagsTag.equals("open")) {
 							inventoryItemBase.setFlags(Long
-									.parseLong(new String(ch, start, length)));
+									.parseLong(new String(ch, start, length).trim()));
 						}
 						if (folderTag.equals("open")) {
 							inventoryItemBase.setParentFolderId(UUID
-									.fromString(new String(ch, start, length)));
+									.fromString(new String(ch, start, length).trim()));
 						}
 						if (groupIDTag.equals("open")) {
 							inventoryItemBase.setGroupId(UUID
-									.fromString(new String(ch, start, length)));
+									.fromString(new String(ch, start, length).trim()));
 						}
 						if (groupOwnedTag.equals("open")) {
 							inventoryItemBase
 									.isGroupOwned(Boolean
 											.parseBoolean(new String(ch, start,
-													length)));
+													length).trim()));
 						}
 						if (groupPermissionsTag.equals("open")) {
 							inventoryItemBase.setGroupPermissions(Long
-									.parseLong(new String(ch, start, length)));
+									.parseLong(new String(ch, start, length).trim()));
 						}
 						if (itemIDTag.equals("open")) {
 							inventoryItemBase.setId(UUID.fromString(new String(
-									ch, start, length)));
+									ch, start, length).trim()));
 						}
 						if (invTypeTag.equals("open")) {
 							inventoryItemBase.setInvType(Integer
-									.parseInt(new String(ch, start, length)));
+									.parseInt(new String(ch, start, length).trim()));
 						}
 						if (itemNameTag.equals("open")) {
 							inventoryItemBase.setName(new String(ch, start,
-									length));
+									length).trim());
 						}
 						if (nextPermissionsTag.equals("open")) {
 							inventoryItemBase.setNextPermissions(Long
-									.parseLong(new String(ch, start, length)));
+									.parseLong(new String(ch, start, length).trim()));
 						}
 						if (itemOwnerTag.equals("open")) {
 							inventoryItemBase.setOwnerId(UUID
-									.fromString(new String(ch, start, length)));
+									.fromString(new String(ch, start, length).trim()));
 						}
 						if (salePriceTag.equals("open")) {
 							inventoryItemBase.setSalePrice(Integer
-									.parseInt(new String(ch, start, length)));
+									.parseInt(new String(ch, start, length).trim()));
 						}
 						if (saleTypeTag.equals("open")) {
 							inventoryItemBase.setSalePrice(Integer
-									.parseInt(new String(ch, start, length)));
+									.parseInt(new String(ch, start, length).trim()));
 						}
 					} catch (Exception ex) {
+						log.error("Exception in characters()", ex);
 						throw new SAXException(ex);
 					}
 
@@ -501,6 +501,7 @@ public class InventoryCollection_2 extends DefaultHandler {
 			saxParser.parse(inputStream, defaultHandler);
 
 		} catch (Exception e) {
+			log.error("Exception in fromXML()", e);
 			e.printStackTrace();
 		}
 	}
