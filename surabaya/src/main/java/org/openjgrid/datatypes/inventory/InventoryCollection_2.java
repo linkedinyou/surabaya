@@ -18,17 +18,15 @@
  */
 package org.openjgrid.datatypes.inventory;
 
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
 import org.apache.commons.io.IOUtils;
 import org.openjgrid.datatypes.llsd.LLSDMapping;
 import org.slf4j.Logger;
@@ -40,11 +38,9 @@ import org.slf4j.LoggerFactory;
  * @author Akira Sonoda
  */
 @LLSDMapping(mapTo = "struct", mappedName = "")
-public class InventoryCollection_2 extends DefaultHandler {
+public class InventoryCollection_2 {
 
-	@SuppressWarnings("unused")
-	private static final Logger log = LoggerFactory
-			.getLogger(InventoryCollection_2.class);
+	private static final Logger log = LoggerFactory.getLogger(InventoryCollection_2.class);
 
 	@LLSDMapping(mapTo = "array", mappedName = "Folders")
 	public List<InventoryFolderBase> folderList;
@@ -56,453 +52,142 @@ public class InventoryCollection_2 extends DefaultHandler {
 	public InventoryCollection_2() {
 	}
 
-	public InventoryCollection_2(String xmlString) {
+	public InventoryCollection_2(String xmlString) throws XMLStreamException, InventoryException {
 		fromXml(xmlString);
 	}
 
-	public void fromXml(String xmlString) {
-		try {
-			InputStream inputStream = IOUtils.toInputStream(xmlString);
-			// obtain and configure a SAX based parser
-			SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
+	public void fromXml(String xmlString) throws XMLStreamException, InventoryException {
+		ArrayList<InventoryItemBase> tmpItemList = new ArrayList<InventoryItemBase>();
+		ArrayList<InventoryFolderBase> tmpFolderList = new ArrayList<InventoryFolderBase>();
+		String elementName = null;
 
-			// obtain object for SAX parser
-			SAXParser saxParser = saxParserFactory.newSAXParser();
-
-			DefaultHandler defaultHandler = new DefaultHandler() {
-
-				String fidTag = "close";
-				String versionTag = "close";
-
-				String foldersTag = "close";
-				String folder_Tag = "close";
-				String parentIDTag = "close";
-				String typeTag = "close";
-				String nameTag = "close";
-				String folderVersionTag = "close";
-				String ownerTag = "close";
-				String iDTag = "close";
-
-				String itemsTag = "close";
-				String item_Tag = "close";
-				String assetIDTag = "close";
-				String assetTypeTag = "close";
-				String basePermissionsTag = "close";
-				String creationDateTag = "close";
-				String creatorIdTag = "close";
-				String creatorDataTag = "close";
-				String currentPermissionsTag = "close";
-				String descriptionTag = "close";
-				String everyOnePermissionsTag = "close";
-				String flagsTag = "close";
-				String folderTag = "close";
-				String groupIDTag = "close";
-				String groupOwnedTag = "close";
-				String groupPermissionsTag = "close";
-				String itemIDTag = "close";
-				String invTypeTag = "close";
-				String itemNameTag = "close";
-				String nextPermissionsTag = "close";
-				String itemOwnerTag = "close";
-				String salePriceTag = "close";
-				String saleTypeTag = "close";
-
-				InventoryFolderBase inventoryFolderBase = null;
-				InventoryItemBase inventoryItemBase = null;
-
-				ArrayList<InventoryItemBase> tmpItemList = new ArrayList<InventoryItemBase>();
-				ArrayList<InventoryFolderBase> tmpFolderList = new ArrayList<InventoryFolderBase>();
-
-				// this method is called every time the parser gets an open tag
-				// '<'
-				// identifies which tag is being open at time by assigning an
-				// open flag
-				public void startElement(String uri, String localName,
-						String qName, Attributes attributes)
-						throws SAXException {
-
-					if (qName.equalsIgnoreCase("FID")) {
-						fidTag = "open";
-					}
-					if (qName.equalsIgnoreCase("VERSION")) {
-						// The Version Tag can be both in the Top Level Tags or
-						// inside the Folders Tags
-						if (foldersTag.equals("close")) {
-							versionTag = "open";
+		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
+		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
+		
+		boolean isFolder = false;
+		
+		InventoryFolderBase inventoryFolderBase = null;
+		InventoryItemBase inventoryItemBase = new InventoryItemBase();
+				
+		while (xmlStream.hasNext()) {
+			  int eventType = xmlStream.next();
+			  switch (eventType) {
+			    case XMLStreamReader.START_ELEMENT:
+			    	elementName = xmlStream.getLocalName();
+			    	// Handle the start of a new Group
+			    	if (elementName.startsWith("folder_")) {
+			    		inventoryFolderBase = new InventoryFolderBase();
+			    		isFolder = true;
+			    	} else if (elementName.startsWith("item_")) {
+			    		inventoryItemBase = new InventoryItemBase();
+			    		isFolder = false;
+			    	} 
+			    	
+					switch (elementName) {
+					case "ParentID":
+						inventoryFolderBase.setParentFolderId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "Type":
+						inventoryFolderBase.setType(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "Name":
+						if(isFolder) {
+							inventoryFolderBase.setName(xmlStream.getElementText().trim());
 						} else {
-							folderVersionTag = "open";
+							inventoryItemBase.setName(xmlStream.getElementText().trim());
 						}
-					}
-
-					// Handle the folders Tags
-					if (qName.equalsIgnoreCase("FOLDERS")) {
-						foldersTag = "open";
-					}
-					if (qName.startsWith("folder_")) {
-						inventoryFolderBase = new InventoryFolderBase();
-						folder_Tag = "open";
-					}
-					if (qName.equalsIgnoreCase("ParentID")) {
-						parentIDTag = "open";
-					}
-					if (qName.equalsIgnoreCase("Type")) {
-						typeTag = "open";
-					}
-					if (qName.equalsIgnoreCase("Name")) {
-						// The Name Tag can be both in the Folders Tags or
-						// inside the Items Tags
-						if (foldersTag.equals("close")) {
-							itemNameTag = "open";
+						break;
+					case "Version":
+						inventoryFolderBase.setVersion(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "Owner":
+						if(isFolder) {
+							inventoryFolderBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
 						} else {
-							nameTag = "open";
+							inventoryItemBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
 						}
-					}
-					if (qName.equalsIgnoreCase("Owner")) {
-						// The Owner Tag can be both in the Folders Tags or
-						// inside the Items Tags
-						if (foldersTag.equals("close")) {
-							itemOwnerTag = "open";
+						break;
+					case "ID":
+						if(isFolder) {
+							inventoryFolderBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
 						} else {
-							ownerTag = "open";
+							inventoryItemBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
 						}
+						break;
+					case "AssetID":
+						inventoryItemBase.setAssetId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "AssetType":
+						inventoryItemBase.setAssetType(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "BasePermissions":
+						inventoryItemBase.setBasePermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "CreationDate":
+						inventoryItemBase.setCreationDate(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "CreatorId":
+						inventoryItemBase.setCreatorId(xmlStream.getElementText().trim());
+						break;
+					case "CreatorData":
+						inventoryItemBase.setCreatorData(xmlStream.getElementText().trim());
+						break;
+					case "CurrentPermissions":
+						inventoryItemBase.setCurrentPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "Description":
+						inventoryItemBase.setDescription(xmlStream.getElementText().trim());
+						break;
+					case "EveryOnePermissions":
+						inventoryItemBase.setEveryOnePermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "Flags":
+						inventoryItemBase.setFlags(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "Folder":
+						inventoryItemBase.setParentFolderId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "GroupID":
+						inventoryItemBase.setGroupId(UUID.fromString(xmlStream.getElementText().trim()));
+						break;
+					case "GroupOwned":
+						inventoryItemBase.isGroupOwned(Boolean.parseBoolean(xmlStream.getElementText().trim()));
+						break;
+					case "GroupPermissions":
+						inventoryItemBase.setGroupPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "InvType":
+						inventoryItemBase.setInvType(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "NextPermissions":
+						inventoryItemBase.setNextPermissions(Long.parseLong(xmlStream.getElementText().trim()));
+						break;
+					case "SalePrice":
+						inventoryItemBase.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					case "SaleType":
+						inventoryItemBase.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
+						break;
+					default:
+						log.debug("Unknown Element with name: " + elementName);
 					}
-					if (qName.equalsIgnoreCase("ID")) {
-						// The ID Tag can be both in the Folders Tags or
-						// inside the Items Tags
-						if (foldersTag.equals("close")) {
-							itemIDTag = "open";
-						} else {
-							iDTag = "open";
-						}
-					}
-
-					// Handle the items Tags
-					if (qName.equalsIgnoreCase("items")) {
-						inventoryItemBase = new InventoryItemBase();
-						itemsTag = "open";
-					}
-					if (qName.startsWith("item_")) {
-						item_Tag = "open";
-					}
-					if (qName.equalsIgnoreCase("AssetID")) {
-						assetIDTag = "open";
-					}
-					if (qName.equalsIgnoreCase("AssetType")) {
-						assetTypeTag = "open";
-					}
-					if (qName.equalsIgnoreCase("BasePermissions")) {
-						basePermissionsTag = "open";
-					}
-					if (qName.equalsIgnoreCase("CreationDate")) {
-						creationDateTag = "open";
-					}
-					if (qName.equalsIgnoreCase("CreatorId")) {
-						creatorIdTag = "open";
-					}
-					if (qName.equalsIgnoreCase("CreatorData")) {
-						creatorDataTag = "open";
-					}
-					if (qName.equalsIgnoreCase("CurrentPermissions")) {
-						currentPermissionsTag = "open";
-					}
-					if (qName.equalsIgnoreCase("Description")) {
-						descriptionTag = "open";
-					}
-					if (qName.equalsIgnoreCase("EveryOnePermissions")) {
-						everyOnePermissionsTag = "open";
-					}
-					if (qName.equalsIgnoreCase("Flags")) {
-						flagsTag = "open";
-					}
-					if (qName.equalsIgnoreCase("Folder")) {
-						folderTag = "open";
-					}
-					if (qName.equalsIgnoreCase("GroupID")) {
-						groupIDTag = "open";
-					}
-					if (qName.equalsIgnoreCase("GroupOwned")) {
-						groupOwnedTag = "open";
-					}
-					if (qName.equalsIgnoreCase("GroupPermissions")) {
-						groupPermissionsTag = "open";
-					}
-					if (qName.equalsIgnoreCase("InvType")) {
-						invTypeTag = "open";
-					}
-					if (qName.equalsIgnoreCase("NextPermissions")) {
-						nextPermissionsTag = "open";
-					}
-					if (qName.equalsIgnoreCase("SalePrice")) {
-						salePriceTag = "open";
-					}
-					if (qName.equalsIgnoreCase("SaleType")) {
-						saleTypeTag = "open";
-					}
-
-				}
-
-				// prints data stored in between '<' and '>' tags
-				public void characters(char ch[], int start, int length)
-						throws SAXException {
-					try {
-						// TODO Handle the new fields here
-
-						// Handle the folders Stuff here
-						if (parentIDTag.equals("open")) {
-							inventoryFolderBase.setParentFolderId(UUID
-									.fromString(new String(ch, start, length).trim()));
-						}
-						if (typeTag.equals("open")) {
-							inventoryFolderBase.setType(Integer
-									.parseInt(new String(ch, start, length).trim()));
-						}
-						if (nameTag.equals("open")) {
-							inventoryFolderBase.setName(new String(ch, start,
-									length));
-						}
-						if (folderVersionTag.equals("open")) {
-							inventoryFolderBase.setVersion(Integer
-									.parseInt(new String(ch, start, length).trim()));
-						}
-						if (ownerTag.equals("open")) {
-							inventoryFolderBase.setOwnerId(UUID
-									.fromString(new String(ch, start, length).trim()));
-						}
-						if (iDTag.equals("open")) {
-							inventoryFolderBase.setId(UUID
-									.fromString(new String(ch, start, length).trim()));
-						}
-
-						// Handle the items Stuff here
-						if (assetIDTag.equals("open")) {
-							inventoryItemBase.setAssetId(UUID
-									.fromString(new String(ch, start, length).trim()));
-						}
-						if (assetTypeTag.equals("open")) {
-							inventoryItemBase.setAssetType(Integer
-									.parseInt(new String(ch, start, length).trim()));
-						}
-						if (basePermissionsTag.equals("open")) {
-							inventoryItemBase.setBasePermissions(Long
-									.parseLong(new String(ch, start, length).trim()));
-						}
-						if (creationDateTag.equals("open")) {
-							inventoryItemBase.setCreationDate(Long
-									.parseLong(new String(ch, start, length).trim()));
-						}
-						if (creatorDataTag.equals("open")) {
-							inventoryItemBase.setCreatorData(new String(ch,	start, length).trim());
-						}						
-						if (creatorIdTag.equals("open")) {
-							inventoryItemBase.setCreatorId(new String(ch,
-									start, length).trim());
-						}
-						if (currentPermissionsTag.equals("open")) {
-							inventoryItemBase.setCurrentPermissions(Long
-									.parseLong(new String(ch, start, length).trim()));
-						}
-						if (descriptionTag.equals("open")) {
-							inventoryItemBase.setDescription(new String(ch,
-									start, length).trim());
-						}
-						if (everyOnePermissionsTag.equals("open")) {
-							inventoryItemBase.setEveryOnePermissions(Long
-									.parseLong(new String(ch, start, length).trim()));
-						}
-						if (flagsTag.equals("open")) {
-							inventoryItemBase.setFlags(Long
-									.parseLong(new String(ch, start, length).trim()));
-						}
-						if (folderTag.equals("open")) {
-							inventoryItemBase.setParentFolderId(UUID
-									.fromString(new String(ch, start, length).trim()));
-						}
-						if (groupIDTag.equals("open")) {
-							inventoryItemBase.setGroupId(UUID
-									.fromString(new String(ch, start, length).trim()));
-						}
-						if (groupOwnedTag.equals("open")) {
-							inventoryItemBase
-									.isGroupOwned(Boolean
-											.parseBoolean(new String(ch, start,
-													length).trim()));
-						}
-						if (groupPermissionsTag.equals("open")) {
-							inventoryItemBase.setGroupPermissions(Long
-									.parseLong(new String(ch, start, length).trim()));
-						}
-						if (itemIDTag.equals("open")) {
-							inventoryItemBase.setId(UUID.fromString(new String(
-									ch, start, length).trim()));
-						}
-						if (invTypeTag.equals("open")) {
-							inventoryItemBase.setInvType(Integer
-									.parseInt(new String(ch, start, length).trim()));
-						}
-						if (itemNameTag.equals("open")) {
-							inventoryItemBase.setName(new String(ch, start,
-									length).trim());
-						}
-						if (nextPermissionsTag.equals("open")) {
-							inventoryItemBase.setNextPermissions(Long
-									.parseLong(new String(ch, start, length).trim()));
-						}
-						if (itemOwnerTag.equals("open")) {
-							inventoryItemBase.setOwnerId(UUID
-									.fromString(new String(ch, start, length).trim()));
-						}
-						if (salePriceTag.equals("open")) {
-							inventoryItemBase.setSalePrice(Integer
-									.parseInt(new String(ch, start, length).trim()));
-						}
-						if (saleTypeTag.equals("open")) {
-							inventoryItemBase.setSalePrice(Integer
-									.parseInt(new String(ch, start, length).trim()));
-						}
-					} catch (Exception ex) {
-						log.error("Exception in characters()", ex);
-						throw new SAXException(ex);
-					}
-
-				}
-
-				// calls by the parser whenever '>' end tag is found in xml
-				// makes tags flag to 'close'
-				public void endElement(String uri, String localName,
-						String qName) throws SAXException {
-					if (qName.equalsIgnoreCase("FID")) {
-						fidTag = "close";
-					}
-					if (qName.equalsIgnoreCase("VERSION")) {
-						// The Version Tag can be both in the Top Level Tags or
-						// inside the Folders Tags
-						if (foldersTag.equals("close")) {
-							versionTag = "close";
-						} else {
-							folderVersionTag = "close";
-						}
-					}
-
-					// Handle the folders Tags
-					if (qName.equalsIgnoreCase("FOLDERS")) {
-						folderList = tmpFolderList;
-						foldersTag = "close";
-					}
-					if (qName.startsWith("folder_")) {
-						tmpFolderList.add(inventoryFolderBase);
-						folder_Tag = "close";
-					}
-					if (qName.equalsIgnoreCase("ParentID")) {
-						parentIDTag = "close";
-					}
-					if (qName.equalsIgnoreCase("Type")) {
-						typeTag = "close";
-					}
-					if (qName.equalsIgnoreCase("Name")) {
-						// The Name Tag can be both in the Folders Tags or
-						// inside the Items Tags
-						if (foldersTag.equals("close")) {
-							itemNameTag = "close";
-						} else {
-							nameTag = "close";
-						}
-					}
-					if (qName.equalsIgnoreCase("Owner")) {
-						// The Owner Tag can be both in the Folders Tags or
-						// inside the Items Tags
-						if (foldersTag.equals("close")) {
-							itemOwnerTag = "close";
-						} else {
-							ownerTag = "close";
-						}
-					}
-					if (qName.equalsIgnoreCase("ID")) {
-						// The ID Tag can be both in the Folders Tags or
-						// inside the Items Tags
-						if (foldersTag.equals("close")) {
-							itemIDTag = "close";
-						} else {
-							iDTag = "close";
-						}
-					}
-
-					// Handle the items Tags
-					if (qName.equalsIgnoreCase("items")) {
-						itemList = tmpItemList;
-						itemsTag = "close";
-					}
-					if (qName.startsWith("item_")) {
-						tmpItemList.add(inventoryItemBase);
-						item_Tag = "close";
-					}
-					if (qName.equalsIgnoreCase("AssetID")) {
-						assetIDTag = "close";
-					}
-					if (qName.equalsIgnoreCase("AssetType")) {
-						assetTypeTag = "close";
-					}
-					if (qName.equalsIgnoreCase("BasePermissions")) {
-						basePermissionsTag = "close";
-					}
-					if (qName.equalsIgnoreCase("CreationDate")) {
-						creationDateTag = "close";
-					}
-					if (qName.equalsIgnoreCase("CreatorId")) {
-						creatorIdTag = "close";
-					}
-					if (qName.equalsIgnoreCase("CreatorData")) {
-						creatorDataTag = "close";
-					}
-					if (qName.equalsIgnoreCase("CurrentPermissions")) {
-						currentPermissionsTag = "close";
-					}
-					if (qName.equalsIgnoreCase("Description")) {
-						descriptionTag = "close";
-					}
-					if (qName.equalsIgnoreCase("EveryOnePermissions")) {
-						everyOnePermissionsTag = "close";
-					}
-					if (qName.equalsIgnoreCase("Flags")) {
-						flagsTag = "close";
-					}
-					if (qName.equalsIgnoreCase("Folder")) {
-						folderTag = "close";
-					}
-					if (qName.equalsIgnoreCase("GroupID")) {
-						groupIDTag = "close";
-					}
-					if (qName.equalsIgnoreCase("GroupOwned")) {
-						groupOwnedTag = "close";
-					}
-					if (qName.equalsIgnoreCase("GroupPermissions")) {
-						groupPermissionsTag = "close";
-					}
-					if (qName.equalsIgnoreCase("InvType")) {
-						invTypeTag = "close";
-					}
-					if (qName.equalsIgnoreCase("NextPermissions")) {
-						nextPermissionsTag = "close";
-					}
-					if (qName.equalsIgnoreCase("SalePrice")) {
-						salePriceTag = "close";
-					}
-					if (qName.equalsIgnoreCase("SaleType")) {
-						saleTypeTag = "close";
-					}
-
-				}
-
-			};
-
-			// parse the XML specified in the given path and uses supplied
-			// handler to parse the document
-			// this calls startElement(), endElement() and character() methods
-			// accordingly
-			saxParser.parse(inputStream, defaultHandler);
-
-		} catch (Exception e) {
-			log.error("Exception in fromXML()", e);
-			e.printStackTrace();
+			    	break;
+			    case XMLStreamReader.END_ELEMENT:
+			    	elementName = xmlStream.getLocalName();
+			    	if (elementName.startsWith("folder_")) {
+			    		tmpFolderList.add(inventoryFolderBase);
+			    		isFolder = false;
+			    	} else if (elementName.equalsIgnoreCase("folders")) {
+			    		this.folderList = tmpFolderList;
+			    	} else if (elementName.startsWith("item_")) {
+			    		tmpItemList.add(inventoryItemBase);
+			    		isFolder = false;
+			    	} else if (elementName.equalsIgnoreCase("items")) {
+			    		this.itemList = tmpItemList;
+			    	} 
+			    	break;
+			}
 		}
 	}
 }

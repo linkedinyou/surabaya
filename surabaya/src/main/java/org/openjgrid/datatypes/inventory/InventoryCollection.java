@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 @LLSDMapping(mapTo="struct", mappedName = "")
 public class InventoryCollection {
 	
-	@SuppressWarnings("unused")
 	private static final Logger log = LoggerFactory.getLogger(InventoryCollection.class);
 	
 	@LLSDMapping(mapTo="array", mappedName = "Folders")
@@ -61,29 +60,32 @@ public class InventoryCollection {
 	public void fromXml(String xmlString) throws XMLStreamException, InventoryException {
 		ArrayList<InventoryItemBase> tmpItemList = new ArrayList<InventoryItemBase>();
 		ArrayList<InventoryFolderBase> tmpFolderList = new ArrayList<InventoryFolderBase>();
-		String itemName = null;
+		String elementName = null;
 
 		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
-		xmlStream.next();
-		if (!xmlStream.isStartElement() || !xmlStream.getLocalName().equalsIgnoreCase("ServerResponse")) {
-			throw new XMLStreamException("Expected <ServerResponse>");
-		}
-		// First the Folders
-		xmlStream.next(); // Brings the Start of folder
-		if (xmlStream.isEndElement() && xmlStream.getLocalName().equalsIgnoreCase("ServerResponse")) {
-			return;
-		}
 		
-		while(!xmlStream.getLocalName().equalsIgnoreCase("ServerResponse") || !xmlStream.isEndElement()) {
-			xmlStream.next();
-			while(!xmlStream.getLocalName().equalsIgnoreCase("folders") || !xmlStream.isEndElement()) {
-				InventoryFolderBase inventoryFolderBase = new InventoryFolderBase();
-				xmlStream.next();
-				while(!xmlStream.getLocalName().startsWith("folder_") || !xmlStream.isEndElement()) {
-					itemName = xmlStream.getLocalName();
-					switch (itemName) {
+		boolean isFolder = false;
+		
+		InventoryFolderBase inventoryFolderBase = null;
+		InventoryItemBase inventoryItemBase = new InventoryItemBase();
+				
+		while (xmlStream.hasNext()) {
+			  int eventType = xmlStream.next();
+			  switch (eventType) {
+			    case XMLStreamReader.START_ELEMENT:
+			    	elementName = xmlStream.getLocalName();
+			    	// Handle the start of a new Group
+			    	if (elementName.startsWith("folder_")) {
+			    		inventoryFolderBase = new InventoryFolderBase();
+			    		isFolder = true;
+			    	} else if (elementName.startsWith("item_")) {
+			    		inventoryItemBase = new InventoryItemBase();
+			    		isFolder = false;
+			    	} 
+			    	
+					switch (elementName) {
 					case "ParentID":
 						inventoryFolderBase.setParentFolderId(UUID.fromString(xmlStream.getElementText().trim()));
 						break;
@@ -91,37 +93,29 @@ public class InventoryCollection {
 						inventoryFolderBase.setType(Integer.parseInt(xmlStream.getElementText().trim()));
 						break;
 					case "Name":
-						inventoryFolderBase.setName(xmlStream.getElementText().trim());
+						if(isFolder) {
+							inventoryFolderBase.setName(xmlStream.getElementText().trim());
+						} else {
+							inventoryItemBase.setName(xmlStream.getElementText().trim());
+						}
 						break;
 					case "Version":
 						inventoryFolderBase.setVersion(Integer.parseInt(xmlStream.getElementText().trim()));
 						break;
 					case "Owner":
-						inventoryFolderBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
+						if(isFolder) {
+							inventoryFolderBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
+						} else {
+							inventoryItemBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
+						}
 						break;
 					case "ID":
-						inventoryFolderBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
+						if(isFolder) {
+							inventoryFolderBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
+						} else {
+							inventoryItemBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
+						}
 						break;
-					default:
-						throw new XMLStreamException("Unable to assign item with name: " + itemName);
-					}
-					xmlStream.next();
-				}
-				tmpFolderList.add(inventoryFolderBase);
-				xmlStream.next();
-			}
-			if(xmlStream.getLocalName().equalsIgnoreCase("folders") && xmlStream.isEndElement()) {
-				this.folderList = tmpFolderList;
-				xmlStream.next();
-			}
-			xmlStream.next();
-
-			while(!xmlStream.getLocalName().equalsIgnoreCase("items") || !xmlStream.isEndElement()) {
-				InventoryItemBase inventoryItemBase = new InventoryItemBase();
-				xmlStream.next();
-				while(!xmlStream.getLocalName().startsWith("item_") || !xmlStream.isEndElement()) {
-					itemName = xmlStream.getLocalName();
-					switch(itemName) {
 					case "AssetID":
 						inventoryItemBase.setAssetId(UUID.fromString(xmlStream.getElementText().trim()));
 						break;
@@ -164,20 +158,11 @@ public class InventoryCollection {
 					case "GroupPermissions":
 						inventoryItemBase.setGroupPermissions(Long.parseLong(xmlStream.getElementText().trim()));
 						break;
-					case "ID":
-						inventoryItemBase.setId(UUID.fromString(xmlStream.getElementText().trim()));
-						break;
 					case "InvType":
 						inventoryItemBase.setInvType(Integer.parseInt(xmlStream.getElementText().trim()));
 						break;
-					case "Name":
-						inventoryItemBase.setName(xmlStream.getElementText().trim());
-						break;
 					case "NextPermissions":
 						inventoryItemBase.setNextPermissions(Long.parseLong(xmlStream.getElementText().trim()));
-						break;
-					case "Owner":
-						inventoryItemBase.setOwnerId(UUID.fromString(xmlStream.getElementText().trim()));
 						break;
 					case "SalePrice":
 						inventoryItemBase.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
@@ -186,16 +171,23 @@ public class InventoryCollection {
 						inventoryItemBase.setSalePrice(Integer.parseInt(xmlStream.getElementText().trim()));
 						break;
 					default:
-						throw new XMLStreamException("Unable to assign item with name: " + itemName);
-					} 				
-					xmlStream.next();
-				}
-				tmpItemList.add(inventoryItemBase);
-				xmlStream.next();
-			}
-			if(xmlStream.getLocalName().equalsIgnoreCase("items") && xmlStream.isEndElement()) {
-				this.itemList = tmpItemList;
-				xmlStream.next();
+						log.debug("Unknown Element with name: " + elementName);
+					}
+			    	break;
+			    case XMLStreamReader.END_ELEMENT:
+			    	elementName = xmlStream.getLocalName();
+			    	if (elementName.startsWith("folder_")) {
+			    		tmpFolderList.add(inventoryFolderBase);
+			    		isFolder = false;
+			    	} else if (elementName.equalsIgnoreCase("folders")) {
+			    		this.folderList = tmpFolderList;
+			    	} else if (elementName.startsWith("item_")) {
+			    		tmpItemList.add(inventoryItemBase);
+			    		isFolder = false;
+			    	} else if (elementName.equalsIgnoreCase("items")) {
+			    		this.itemList = tmpItemList;
+			    	} 
+			    	break;
 			}
 		}
 	}
