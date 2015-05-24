@@ -90,7 +90,9 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
             log.info("InventoryDescendentsServlet_2");
             final long startTime = System.currentTimeMillis();
 
-            assert (Util.dumpHttpRequest(request));
+            if(log.isDebugEnabled()) {
+            	Util.dumpHttpRequest(request);
+            }
 
             String uri = request.getRequestURI();
             String serverName = null;
@@ -149,6 +151,8 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
         log.debug("fetchInventoryDescentdents2() called");
         String requestString = Util.requestContent2String(request);
 
+        log.debug("incomingrequest: {}", requestString);
+        
         // nasty temporary hack here, the linden client falsely
         // identifies the uuid 00000000-0000-0000-0000-000000000000
         // as a string which breaks us
@@ -170,7 +174,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
                 "<key>fetch_folders</key><integer>1</integer>",
                 "<key>fetch_folders</key><boolean>1</boolean>");
 
-        log.debug("incomingrequest: {}", requestString);
+        log.debug("incomingrequest after fixes: {}", requestString);
 
         HashMap<String, Object> llsdRequestMap = null;
         try {
@@ -331,7 +335,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
 
                 result.version = containingFolder.getVersion();
 
-                if (fetch_items) {
+                if (fetch_items && (result.inventoryCollection.itemList != null) ) {
                     List<InventoryItemBase> itemsToReturn = result.inventoryCollection.itemList;
                     List<InventoryItemBase> originalItems = new ArrayList<InventoryItemBase>(itemsToReturn);
 
