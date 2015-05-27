@@ -89,7 +89,7 @@ public class InventoryService_2 {
             return (invCollection);
 
         } catch( Exception ex ) {
-            log.debug("Exception occurred in getFolderContent()", ex);
+            log.error("Exception occurred in getFolderContent()", ex.getLocalizedMessage(), ex);
             return (null);
         } finally {
             response.close();            
@@ -133,7 +133,7 @@ public class InventoryService_2 {
             containingFolder.fromXml(content);
 
         } catch( Exception ex ) {
-            log.debug("Exception occurred in getFolderContent()", ex);
+            log.error("Exception occurred in getFolderContent()", ex.getLocalizedMessage(), ex);
             return (null);
         } finally {
             response.close();

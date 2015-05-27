@@ -126,11 +126,11 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
                     @Override
                     public void onError(Throwable ex) {
                         try {
-                            log.error("Exception during Write to Output: ", ex);
+                            log.error("Exception during Write to Output: ", ex.getLocalizedMessage(), ex);
                             context.complete();
                             outputStream.close();
                         } catch (IOException ex1) {
-                            log.error("Exception during Close of the Output Stream", ex1);
+                            log.error("Exception during Close of the Output Stream", ex1.getLocalizedMessage(), ex1);
                         }
                     }
 
@@ -140,7 +140,7 @@ public class InventoryDescendentsServlet_2 extends HttpServlet {
             }
 
         } catch (Exception ex) {
-            log.error("Exception {} occurred", ex.getClass().toString());
+            log.error("Exception {} occurred", ex.getLocalizedMessage(), ex);
             context.complete();
         }
     }
