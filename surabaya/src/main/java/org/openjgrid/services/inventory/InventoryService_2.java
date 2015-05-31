@@ -79,8 +79,6 @@ public class InventoryService_2 {
 
             String content = response.readEntity(String.class);
 
-            log.debug("respstring: {}", content);
-
             if( Util.isNullOrEmpty(content) ) {
                 return (null);
             }

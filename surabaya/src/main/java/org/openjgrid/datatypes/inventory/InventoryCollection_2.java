@@ -24,6 +24,10 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.xml.stream.XMLInputFactory;
+
+import org.codehaus.stax2.XMLInputFactory2;
+import org.codehaus.stax2.XMLStreamReader2;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
@@ -31,6 +35,9 @@ import org.apache.commons.io.IOUtils;
 import org.openjgrid.datatypes.llsd.LLSDMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ctc.wstx.api.WstxInputProperties;
+
 
 /**
  * Used to serialize a whole inventory for transfer over the network.
@@ -57,13 +64,17 @@ public class InventoryCollection_2 {
 	}
 
 	public void fromXml(String xmlString) throws XMLStreamException, InventoryException {
+		String cleanXmlString = xmlString.replaceAll("&#x[0-9a-fA-F]{1,2};", "");
+		log.debug("Clean XMLString: {}", cleanXmlString);
+		
 		ArrayList<InventoryItemBase> tmpItemList = new ArrayList<InventoryItemBase>();
 		ArrayList<InventoryFolderBase> tmpFolderList = new ArrayList<InventoryFolderBase>();
 		String elementName = null;
 
-		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
+		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(cleanXmlString));
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
+		
 		
 		boolean isFolder = false;
 		

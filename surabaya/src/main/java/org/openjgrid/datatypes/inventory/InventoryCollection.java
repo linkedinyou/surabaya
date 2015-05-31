@@ -58,11 +58,14 @@ public class InventoryCollection {
 	}
 	
 	public void fromXml(String xmlString) throws XMLStreamException, InventoryException {
+		String cleanXmlString = xmlString.replaceAll("&#x[0-9a-fA-F]{1,2};", "");
+		log.debug("Clean XMLString: {}", cleanXmlString);
+		
 		ArrayList<InventoryItemBase> tmpItemList = new ArrayList<InventoryItemBase>();
 		ArrayList<InventoryFolderBase> tmpFolderList = new ArrayList<InventoryFolderBase>();
 		String elementName = null;
 
-		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(xmlString));
+		InputStreamReader inputStreamReader = new InputStreamReader(IOUtils.toInputStream(cleanXmlString));
 		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
 		XMLStreamReader xmlStream = xmlInputFactory.createXMLStreamReader(inputStreamReader);
 		
